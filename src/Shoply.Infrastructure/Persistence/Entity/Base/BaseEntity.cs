@@ -1,16 +1,16 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shoply.Infrastructure.Entity.Base;
 
-public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
-    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>, new()
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -24,6 +24,16 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TInputIden
     public virtual DateTime? ChangeDate { get; private set; }
     [NotMapped]
     public virtual long? ChangeUserId { get; private set; }
+
+
+    #region Virtual Properties
+    #region Internal
+    [NotMapped]
+    public virtual User? CreationUser { get; private set; }
+    [NotMapped]
+    public virtual User? ChangeUser { get; private set; }
+    #endregion
+    #endregion
 
     public TEntity SetInternalData(TInternalPropertiesDTO internalPropertiesDTO)
     {

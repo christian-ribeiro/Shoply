@@ -4,17 +4,18 @@ using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Infrastructure.Entity.Base;
+using System.Linq.Expressions;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
 public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TContext : DbContext
-    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
-    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>, new()
+    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -23,7 +24,126 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     protected readonly TContext _context = context;
     protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
+    #region Read
+    public async Task<TDTO> Get(long id)
+    {
+        return FromEntityToDTO(await _dbSet.FindAsync(id));
+    }
+
+    public async Task<List<TDTO>> GetListByListId(List<long> listId)
+    {
+        return FromEntityToDTO(await _dbSet.Where(x => listId.Contains(x.Id)).ToListAsync());
+    }
+
+    public async Task<List<TDTO>> GetAll()
+    {
+        return FromEntityToDTO(await _dbSet.ToListAsync());
+    }
+
+    public async Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier)
+    {
+        var result = await GetListByListIdentifier([inputIdentifier]);
+        return result.FirstOrDefault();
+    }
+
+    public async Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier)
+    {
+        if (listInputIdentifier == null || listInputIdentifier.Count == 0)
+            return new List<TDTO>();
+
+        Expression<Func<TEntity, bool>>? combinedExpression = null;
+
+        foreach (var inputIdentifier in listInputIdentifier)
+        {
+            Expression<Func<TEntity, bool>>? individualExpression = null;
+
+            foreach (var property in typeof(TInputIdentifier).GetProperties())
+            {
+                var propertyName = property.Name;
+                var propertyValue = property.GetValue(inputIdentifier);
+
+                if (propertyValue != null)
+                {
+                    var parameter = Expression.Parameter(typeof(TEntity), "x");
+                    var member = Expression.Property(parameter, propertyName);
+                    var constant = Expression.Constant(propertyValue, member.Type);
+
+                    var body = Expression.Equal(member, constant);
+                    var lambda = Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+
+                    individualExpression = individualExpression == null ? lambda : CombineExpressions(individualExpression, lambda);
+                }
+            }
+
+            combinedExpression = combinedExpression == null
+                ? individualExpression!
+                : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
+        }
+
+        IQueryable<TEntity> query = _dbSet.AsNoTracking().Where(combinedExpression!);
+
+        var entities = await query.ToListAsync();
+
+        return FromEntityToDTO(entities);
+    }
+    #endregion
+
+    #region Create
+    public async Task<List<TDTO?>> Create(List<TDTO> listDTO)
+    {
+        return default;
+    }
+    #endregion
+
+    #region Update
+    public async Task<List<TDTO?>> Update(List<TDTO> listDTO)
+    {
+        return default;
+    }
+    #endregion
+
+    #region Update
+    public async Task<bool> Delete(List<long> listId)
+    {
+        return default;
+    }
+
+    public async Task<bool> Delete(List<TDTO> listDTO)
+    {
+        return default;
+    }
+    #endregion
+
     #region Internal
+    private static Expression<Func<T, bool>> CombineExpressions<T>(
+    Expression<Func<T, bool>> expr1,
+    Expression<Func<T, bool>> expr2,
+    Func<Expression, Expression, BinaryExpression>? combiner = null)
+    {
+        combiner = combiner ?? Expression.AndAlso;
+
+        var parameter = Expression.Parameter(typeof(T), "x");
+
+        var leftVisitor = new ReplaceParameterVisitor(expr1.Parameters[0], parameter);
+        var left = leftVisitor.Visit(expr1.Body);
+
+        var rightVisitor = new ReplaceParameterVisitor(expr2.Parameters[0], parameter);
+        var right = rightVisitor.Visit(expr2.Body);
+
+        return Expression.Lambda<Func<T, bool>>(combiner(left, right), parameter);
+    }
+
+    private class ReplaceParameterVisitor(ParameterExpression oldParameter, ParameterExpression newParameter) : ExpressionVisitor
+    {
+        private readonly ParameterExpression _oldParameter = oldParameter;
+        private readonly ParameterExpression _newParameter = newParameter;
+
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return node == _oldParameter ? _newParameter : base.VisitParameter(node);
+        }
+    }
+
     public void SetGuid(Guid guidSessionDataRequest)
     {
         _guidSessionDataRequest = guidSessionDataRequest;
@@ -35,9 +155,9 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<TDTO, TEntity>(dto);
     }
 
-    internal static TDTO FromEntityToDTO(TEntity Entity)
+    internal static TDTO FromEntityToDTO(TEntity? entity)
     {
-        return SessionData.Mapper!.MapperEntityDTO.Map<TEntity, TDTO>(Entity);
+        return SessionData.Mapper!.MapperEntityDTO.Map<TEntity, TDTO>(entity!);
     }
 
     internal static List<TEntity> FromDTOToEntity(List<TDTO> listDTO)

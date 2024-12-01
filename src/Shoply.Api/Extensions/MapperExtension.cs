@@ -12,8 +12,7 @@ public static class MapperExtension
     {
         SessionData.SetMapper(new CustomMapper(
             new MapperConfiguration(config => { config.AddProfile(new MapperDTOOutput()); }).CreateMapper(),
-            new MapperConfiguration(config => { config.AddProfile(new MapperEntityDTO()); }).CreateMapper(),
-            new MapperConfiguration(config => { config.AddProfile(new MapperInputDTO()); }).CreateMapper()));
+            new MapperConfiguration(config => { config.AddProfile(new MapperEntityDTO()); }).CreateMapper()));
 
         return services;
     }

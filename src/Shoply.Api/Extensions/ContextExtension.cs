@@ -11,7 +11,7 @@ public static class ContextExtension
         {
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             string connectionString = configuration.GetConnectionString("DefaultConnection")!;
-            options.UseMySQL(connectionString);
+            options.UseSqlServer(connectionString);
         });
 
         return services;
