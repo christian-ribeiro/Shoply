@@ -7,11 +7,11 @@ public class BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropert
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
-    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
 {
-    public TInternalPropertiesDTO InternalPropertiesDTO { get; set; } = new();
-    public TExternalPropertiesDTO ExternalPropertiesDTO { get; set; } = new();
-    public TAuxiliaryPropertiesDTO AuxiliaryPropertiesDTO { get; set; } = new();
+    public TInternalPropertiesDTO? InternalPropertiesDTO { get; set; }
+    public TExternalPropertiesDTO? ExternalPropertiesDTO { get; set; }
+    public TAuxiliaryPropertiesDTO? AuxiliaryPropertiesDTO { get; set; }
 }

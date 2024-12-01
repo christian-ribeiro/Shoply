@@ -16,9 +16,9 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
     where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
-    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
-    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
 {
     protected Guid _guidSessionDataRequest;
     protected readonly TContext _context = context;

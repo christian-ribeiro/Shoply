@@ -3,7 +3,7 @@
 namespace Shoply.Domain.DTO.Base;
 
 public class BaseInternalPropertiesDTO<TInternalPropertiesDTO> : BaseSetProperty<TInternalPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
 {
     public virtual long Id { get; private set; }
     public virtual DateTime? CreationDate { get; private set; }

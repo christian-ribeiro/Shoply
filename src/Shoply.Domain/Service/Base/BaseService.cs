@@ -15,9 +15,9 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
         where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
         where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-        where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
-        where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
-        where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+        where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
+        where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
+        where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
 {
     public Guid _guidSessionDataRequest;
     protected readonly TRepository _repository = repository;
