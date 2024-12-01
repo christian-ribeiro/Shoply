@@ -18,7 +18,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
     where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
 {
-    protected Guid _guidSessionDataRequest;
+    protected readonly Guid _guidSessionDataRequest = SessionData.Initialize();
     protected readonly TService _service = service;
 
     public override void OnActionExecuting(ActionExecutingContext context)
@@ -43,13 +43,11 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     private void SetData()
     {
-        Guid guidSessionDataRequest = SessionData.Initialize();
-        SetGuid(guidSessionDataRequest);
+        SetGuid();
     }
 
-    private void SetGuid(Guid guidSessionDataRequest)
+    private void SetGuid()
     {
-        _guidSessionDataRequest = guidSessionDataRequest;
-        SessionHelper.SetGuidSessionDataRequest(this, guidSessionDataRequest);
+        SessionHelper.SetGuidSessionDataRequest(this, _guidSessionDataRequest);
     }
 }

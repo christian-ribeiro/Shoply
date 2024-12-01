@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Shoply.Arguments.Argument.General.Mapper;
+﻿using Shoply.Arguments.Argument.General.Mapper;
 using System.Collections.Concurrent;
 
 namespace Shoply.Arguments.Argument.General.Session;
