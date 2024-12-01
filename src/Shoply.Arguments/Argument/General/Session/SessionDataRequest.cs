@@ -4,8 +4,8 @@ public class SessionDataRequest
 {
     public Guid GuidSessionDataRequest { get; }
 
-    public SessionDataRequest(Guid guidSessionDataRequest)
+    public SessionDataRequest()
     {
-        GuidSessionDataRequest = guidSessionDataRequest;
+        GuidSessionDataRequest = Guid.NewGuid();
     }
 }
