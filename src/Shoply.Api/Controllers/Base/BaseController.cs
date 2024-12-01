@@ -132,7 +132,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     #endregion
 
     #region Update
-    [HttpPost("Update")]
+    [HttpPut("Update")]
     public virtual async Task<ActionResult<TOutput>> Update([FromBody] TInputIdentityUpdate inputIdentityUpdate)
     {
         try
@@ -146,7 +146,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         }
     }
 
-    [HttpPost("Update/Multiple")]
+    [HttpPut("Update/Multiple")]
     public virtual async Task<ActionResult<TOutput>> Update([FromBody] List<TInputIdentityUpdate> listInputIdentityUpdate)
     {
         try
@@ -162,7 +162,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     #endregion
 
     #region Delete
-    [HttpPost("Delete")]
+    [HttpDelete("Delete")]
     public virtual async Task<ActionResult<bool>> Delete([FromBody] TInputIdentityDelete inputIdentityDelete)
     {
         try
@@ -176,7 +176,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         }
     }
 
-    [HttpPost("Delete/Multiple")]
+    [HttpDelete("Delete/Multiple")]
     public virtual async Task<ActionResult<bool>> Delete([FromBody] List<TInputIdentityDelete> listInputIdentityDelete)
     {
         try
