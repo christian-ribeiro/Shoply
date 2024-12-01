@@ -6,7 +6,7 @@ using Shoply.Domain.Interface.Service.Base;
 
 namespace Shoply.Domain.Service.Base;
 
-public class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
+public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TRepository repository) : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
         where TRepository : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
         where TInputCreate : BaseInputCreate<TInputCreate>
         where TInputUpdate : BaseInputUpdate<TInputUpdate>
@@ -20,16 +20,25 @@ public class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifi
         where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     public Guid _guidSessionDataRequest;
-    protected readonly TRepository _repository;
+    protected readonly TRepository _repository = repository;
 
-    public BaseService(TRepository repository)
-    {
-        _repository = repository;
-    }
-
+    #region Internal
     public void SetGuid(Guid guidSessionDataRequest)
     {
         _guidSessionDataRequest = guidSessionDataRequest;
         SessionHelper.SetGuidSessionDataRequest(this, guidSessionDataRequest);
     }
+    #endregion
+
+    #region Custom
+    internal static TOutput FromDTOToOutput(TDTO dto)
+    {
+        return SessionData.Mapper!.MapperDTOOutput.Map<TDTO, TOutput>(dto);
+    }
+
+    internal static List<TOutput> FromDTOToOutput(List<TDTO> listDTO)
+    {
+        return SessionData.Mapper!.MapperDTOOutput.Map<List<TDTO>, List<TOutput>>(listDTO);
+    }
+    #endregion
 }

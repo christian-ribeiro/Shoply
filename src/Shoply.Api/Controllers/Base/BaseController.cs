@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.Interface.Service.Base;
-using Shoply.Infrastructure.Persistence.UnitOfWork;
+using Shoply.Domain.Interface.UnitOfWork;
 
 namespace Shoply.Api.Controllers.Base;
 
-public class BaseController<TService, TUnitOfWork, TContext, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork) : Controller
-    where TContext : DbContext
-    where TUnitOfWork : BaseUnitOfWork<TContext>
+public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork) : Controller
+    where TUnitOfWork : IBaseUnitOfWork
     where TService : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
     where TOutput : BaseOutput<TOutput>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>, new()
@@ -20,7 +18,7 @@ public class BaseController<TService, TUnitOfWork, TContext, TOutput, TInputIden
     where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
     where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
 {
-    public Guid _guidSessionDataRequest;
+    protected Guid _guidSessionDataRequest;
     protected readonly TService _service = service;
 
     public override void OnActionExecuting(ActionExecutingContext context)

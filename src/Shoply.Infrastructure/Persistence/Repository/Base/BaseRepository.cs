@@ -7,7 +7,7 @@ using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
-public class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TContext : DbContext
     where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
@@ -20,14 +20,8 @@ public class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInpu
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     protected Guid _guidSessionDataRequest;
-    protected readonly TContext _context;
-    protected DbSet<TEntity> _dbSet;
-
-    protected BaseRepository(TContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<TEntity>();
-    }
+    protected readonly TContext _context = context;
+    protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
     #region Internal
     public void SetGuid(Guid guidSessionDataRequest)
