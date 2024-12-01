@@ -10,4 +10,15 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0-rc.2.24474.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shoply.Application\Shoply.Application.csproj" />
+    <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
+    <ProjectReference Include="..\Shoply.Domain\Shoply.Domain.csproj" />
+    <ProjectReference Include="..\Shoply.Infrastructure\Shoply.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

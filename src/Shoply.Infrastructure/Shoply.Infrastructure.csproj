@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
+    <ProjectReference Include="..\Shoply.Domain\Shoply.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
