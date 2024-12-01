@@ -13,4 +13,6 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
-{ }
+{
+    void SetGuid(Guid guidSessionDataRequest);
+}

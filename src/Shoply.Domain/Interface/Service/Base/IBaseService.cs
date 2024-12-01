@@ -9,4 +9,6 @@ public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOut
         where TOutput : BaseOutput<TOutput>
         where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
         where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
-{ }
+{
+    void SetGuid(Guid guidSessionDataRequest);
+}
