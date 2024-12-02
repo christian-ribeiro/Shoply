@@ -2,6 +2,7 @@ using Shoply.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure(builder);
 builder.Services.ConfigureContext();
 builder.Services.ConfigureCors();
 builder.Services.ConfigureSwagger();
