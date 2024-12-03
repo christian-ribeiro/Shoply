@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Polly;
 using Shoply.Application.Integration.Argument.Service;
 using Shoply.Application.Integration.Interface.Service;
 using System.Net;
@@ -21,9 +22,17 @@ public class SendEmailService(IOptions<SmtpConfiguration> options) : ISendEmailS
             EnableSsl = smtpConfiguration.Ssl
         };
 
+        var retryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
         try
         {
-            await smtpClient.SendMailAsync(mailMessage);
+            await retryPolicy.ExecuteAsync(async () =>
+            {
+                await smtpClient.SendMailAsync(mailMessage);
+            });
+
             return true;
         }
         catch (Exception)
