@@ -2,7 +2,4 @@
 
 namespace Shoply.Domain.DTO.Module.Registration;
 
-public class AuxiliaryPropertiesUserDTO : BaseAuxiliaryPropertiesDTO<AuxiliaryPropertiesUserDTO>
-{
-    public AuxiliaryPropertiesUserDTO() { }
-}
+public class AuxiliaryPropertiesUserDTO : BaseAuxiliaryPropertiesDTO<AuxiliaryPropertiesUserDTO> { }

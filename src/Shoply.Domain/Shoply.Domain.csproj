@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
+    <ProjectReference Include="..\Shoply.Security\Shoply.Security.csproj" />
   </ItemGroup>
 
 </Project>

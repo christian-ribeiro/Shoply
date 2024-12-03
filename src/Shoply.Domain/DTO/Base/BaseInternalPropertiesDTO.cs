@@ -3,13 +3,13 @@
 namespace Shoply.Domain.DTO.Base;
 
 public class BaseInternalPropertiesDTO<TInternalPropertiesDTO> : BaseSetProperty<TInternalPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
 {
-    public virtual long Id { get; private set; }
-    public virtual DateTime? CreationDate { get; private set; }
-    public virtual long? CreationUserId { get; private set; }
-    public virtual DateTime? ChangeDate { get; private set; }
-    public virtual long? ChangeUserId { get; private set; }
+    public virtual long Id { get; set; }
+    public virtual DateTime? CreationDate { get; set; }
+    public virtual long? CreationUserId { get; set; }
+    public virtual DateTime? ChangeDate { get; set; }
+    public virtual long? ChangeUserId { get; set; }
 
     public TInternalPropertiesDTO SetInternalData(TInternalPropertiesDTO? internalPropertiesDTO)
     {

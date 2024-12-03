@@ -10,9 +10,9 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
     where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
-    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
-    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     void SetGuid(Guid guidSessionDataRequest);
     Task<TDTO> Get(long id);
@@ -20,8 +20,7 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     Task<List<TDTO>> GetAll();
     Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
-    Task<List<TDTO?>> Create(List<TDTO> listDTO);
-    Task<List<TDTO?>> Update(List<TDTO> listDTO);
+    Task<List<TDTO>> Create(List<TDTO> listDTO);
+    Task<List<TDTO>> Update(List<TDTO> listDTO);
     Task<bool> Delete(List<TDTO> listDTO);
-    Task<bool> Delete(List<long> listId);
 }

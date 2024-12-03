@@ -11,9 +11,9 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TOutput : BaseOutput<TOutput>
     where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
-    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
-    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     public long Id { get; private set; }
     [NotMapped]

@@ -16,9 +16,9 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
     where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>
-    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>
-    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     protected Guid _guidSessionDataRequest;
     protected readonly TContext _context = context;
@@ -80,7 +80,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        IQueryable<TEntity> query = _dbSet.AsNoTracking().Where(combinedExpression!);
+        IQueryable<TEntity> query = _dbSet.Where(combinedExpression!);
 
         var entities = await query.ToListAsync();
 
@@ -89,28 +89,42 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #endregion
 
     #region Create
-    public async Task<List<TDTO?>> Create(List<TDTO> listDTO)
+    public async Task<List<TDTO>> Create(List<TDTO> listDTO)
     {
-        return default;
+        List<TEntity> listEntity = FromDTOToEntity(SetCreationData(listDTO));
+        await _dbSet.AddRangeAsync(listEntity);
+        await _context.SaveChangesAsync();
+        return FromEntityToDTO(listEntity);
+    }
+
+    private static List<TDTO> SetCreationData(List<TDTO> listDTO)
+    {
+        _ = (from i in listDTO select i.InternalPropertiesDTO.SetProperty(nameof(i.InternalPropertiesDTO.CreationDate), DateTime.Now)).ToList();
+        return listDTO;
     }
     #endregion
 
     #region Update
-    public async Task<List<TDTO?>> Update(List<TDTO> listDTO)
+    public async Task<List<TDTO>> Update(List<TDTO> listDTO)
     {
-        return default;
+        _dbSet.UpdateRange(FromDTOToEntity(SetUpdateData(listDTO)));
+        await _context.SaveChangesAsync();
+        return listDTO;
+    }
+
+    private static List<TDTO> SetUpdateData(List<TDTO> listDTO)
+    {
+        _ = (from i in listDTO select i.InternalPropertiesDTO.SetProperty(nameof(i.InternalPropertiesDTO.ChangeDate), DateTime.Now)).ToList();
+        return listDTO;
     }
     #endregion
 
-    #region Update
-    public async Task<bool> Delete(List<long> listId)
-    {
-        return default;
-    }
-
+    #region Delete
     public async Task<bool> Delete(List<TDTO> listDTO)
     {
-        return default;
+        _dbSet.RemoveRange(FromDTOToEntity(listDTO));
+        await _context.SaveChangesAsync();
+        return true;
     }
     #endregion
 

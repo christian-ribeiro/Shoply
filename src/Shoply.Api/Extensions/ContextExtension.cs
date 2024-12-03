@@ -11,6 +11,7 @@ public static class ContextExtension
         {
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             string connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSqlServer(connectionString);
         });
 

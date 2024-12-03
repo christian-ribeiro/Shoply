@@ -1,6 +1,6 @@
 ﻿using BCrypt.Net;
 
-namespace Shoply.Security.Hashing;
+namespace Shoply.Security.Encryption;
 
 public static class EncryptService
 {
