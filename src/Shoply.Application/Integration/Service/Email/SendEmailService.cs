@@ -10,20 +10,11 @@ public class SendEmailService(IOptions<SmtpConfiguration> options) : ISendEmailS
 {
     public readonly SmtpConfiguration _smtpConfiguration = options.Value;
 
-    public async Task SendEmailAsync(string toEmail, string subject, string body, bool isBodyHtml, SmtpConfiguration? smtpConfiguration)
+    public async Task<bool> SendEmailAsync(string toEmail, string subject, string body, bool isBodyHtml, SmtpConfiguration? smtpConfiguration)
     {
-        _ = smtpConfiguration ??= _smtpConfiguration;
+        smtpConfiguration ??= _smtpConfiguration;
 
-        using var mailMessage = new MailMessage();
-        mailMessage.From = new MailAddress(smtpConfiguration!.From, smtpConfiguration!.DisplayName);
-        mailMessage.To.Add(new MailAddress(toEmail));
-        mailMessage.Subject = subject;
-        mailMessage.Body = body;
-        mailMessage.IsBodyHtml = isBodyHtml;
-
-        if (!string.IsNullOrEmpty(smtpConfiguration.EmailCopy))
-            mailMessage.CC.Add(new MailAddress(smtpConfiguration.EmailCopy));
-
+        using var mailMessage = CreateMailMessage(toEmail, subject, body, isBodyHtml, smtpConfiguration);
         using var smtpClient = new SmtpClient(smtpConfiguration.Server, smtpConfiguration.Port)
         {
             Credentials = new NetworkCredential(smtpConfiguration.Username, smtpConfiguration.Password),
@@ -33,10 +24,29 @@ public class SendEmailService(IOptions<SmtpConfiguration> options) : ISendEmailS
         try
         {
             await smtpClient.SendMailAsync(mailMessage);
+            return true;
         }
         catch (Exception)
         {
-            throw new InvalidOperationException();
+            return false;
         }
+    }
+
+    private static MailMessage CreateMailMessage(string toEmail, string subject, string body, bool isBodyHtml, SmtpConfiguration smtpConfiguration)
+    {
+        var mailMessage = new MailMessage
+        {
+            From = new MailAddress(smtpConfiguration.From, smtpConfiguration.DisplayName),
+            Subject = subject,
+            Body = body,
+            IsBodyHtml = isBodyHtml
+        };
+
+        mailMessage.To.Add(new MailAddress(toEmail));
+
+        if (!string.IsNullOrEmpty(smtpConfiguration.EmailCopy))
+            mailMessage.CC.Add(new MailAddress(smtpConfiguration.EmailCopy));
+
+        return mailMessage;
     }
 }
