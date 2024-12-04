@@ -2,7 +2,7 @@
 
 namespace Shoply.Application.Argument.Authentication
 {
-    public class InputJwtUser(long id, string email, string name, EnumLanguage language)
+    public class JwtUser(long id, string email, string name, EnumLanguage language)
     {
         public long Id { get; private set; } = id;
         public string Email { get; private set; } = email;

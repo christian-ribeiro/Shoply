@@ -35,7 +35,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
 
     public async Task<List<TOutput>> GetAll()
     {
-        return FromDTOToOutput(await _repository.GetAll());
+        return FromDTOToOutput(await _repository.GetAll())!;
     }
 
     public async Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier)
@@ -58,6 +58,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
 
     public virtual async Task<List<TOutput?>> Create(List<TInputCreate> listInputCreate)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
@@ -71,6 +72,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
 
     public virtual async Task<List<TOutput?>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
@@ -83,6 +85,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
 
     public virtual async Task<bool> Delete(List<TInputIdentityDelete> listInputIdentityDelete)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
@@ -101,7 +104,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         return SessionData.Mapper!.MapperDTOOutput.Map<TDTO, TOutput>(dto!);
     }
 
-    internal static List<TOutput?> FromDTOToOutput(List<TDTO> listDTO)
+    internal static List<TOutput> FromDTOToOutput(List<TDTO> listDTO)
     {
         return SessionData.Mapper!.MapperDTOOutput.Map<List<TDTO>, List<TOutput>>(listDTO)!;
     }

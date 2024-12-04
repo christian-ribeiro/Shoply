@@ -53,6 +53,6 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 
         await _repository.Update(userDTO);
 
-        return await jwtService.GenerateJwtToken(new InputJwtUser(userDTO.InternalPropertiesDTO.Id, userDTO.ExternalPropertiesDTO.Email, userDTO.ExternalPropertiesDTO.Name, userDTO.ExternalPropertiesDTO.Language));
+        return await jwtService.GenerateJwtToken(new JwtUser(userDTO.InternalPropertiesDTO.Id, userDTO.ExternalPropertiesDTO.Email, userDTO.ExternalPropertiesDTO.Name, userDTO.ExternalPropertiesDTO.Language));
     }
 }
