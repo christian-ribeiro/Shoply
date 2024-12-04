@@ -202,7 +202,6 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
         if (!allowAnonymous)
         {
-            Console.WriteLine("OnActionExecuting -> " + DateTime.Now.ToString());
             string email = User.FindFirst("user_email")!.Value;
             var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
             if (loggedUser != null)
