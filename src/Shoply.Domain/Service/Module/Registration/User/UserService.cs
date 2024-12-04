@@ -1,4 +1,7 @@
-﻿using Shoply.Arguments.Argument.Module.Registration;
+﻿using Shoply.Application.Argument.Authentication;
+using Shoply.Application.Interface.Service.Authentication;
+using Shoply.Arguments.Argument.General.Authenticate;
+using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
@@ -8,7 +11,7 @@ using Shoply.Security.Encryption;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository), IUserService
+public class UserService(IUserRepository repository, IJwtService jwtService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository), IUserService
 {
     public override async Task<List<OutputUser?>> Create(List<InputCreateUser> listInputCreate)
     {
@@ -34,5 +37,22 @@ public class UserService(IUserRepository repository) : BaseService<IUserReposito
     {
         List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityDelete select i.Id).ToList());
         return await _repository.Delete(listOriginalUserDTO);
+    }
+
+    public async Task<string> Authenticate(InputAuthenticateUser inputAuthenticateUser)
+    {
+        UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
+
+        if (userDTO == null || !inputAuthenticateUser.Password.CompareHash(userDTO.ExternalPropertiesDTO.Password))
+            return "Usuário ou senha inválidos";
+
+        string refreshToken = await jwtService.GenerateRefreshToken();
+
+        userDTO.InternalPropertiesDTO.SetProperty(nameof(userDTO.InternalPropertiesDTO.RefreshToken), refreshToken);
+        userDTO.InternalPropertiesDTO.SetProperty(nameof(userDTO.InternalPropertiesDTO.LoginKey), Guid.NewGuid());
+
+        await _repository.Update(userDTO);
+
+        return await jwtService.GenerateJwtToken(new InputJwtUser(userDTO.InternalPropertiesDTO.Id, userDTO.ExternalPropertiesDTO.Email, userDTO.ExternalPropertiesDTO.Name, userDTO.ExternalPropertiesDTO.Language));
     }
 }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Shoply.Application\Shoply.Application.csproj" />
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
     <ProjectReference Include="..\Shoply.Security\Shoply.Security.csproj" />
   </ItemGroup>

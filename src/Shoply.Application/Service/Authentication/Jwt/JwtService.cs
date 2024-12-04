@@ -13,9 +13,15 @@ namespace Shoply.Application.Service.Authentication
     {
         private readonly JwtConfiguration _jwtConfiguration = options.Value ?? throw new ArgumentNullException(nameof(JwtConfiguration));
 
-        public Task<string> GenerateJwtToken()
+        public Task<string> GenerateJwtToken(InputJwtUser inputJwtUser)
         {
-            List<Claim> claims = [];
+            List<Claim> claims =
+                [
+                    new Claim(JwtRegisteredClaimNames.Sub, inputJwtUser.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Name, inputJwtUser.Name),
+                    new Claim("user_email", inputJwtUser.Email),
+                    new Claim("language", ((int)inputJwtUser.Language).ToString()),
+                ];
             return GenerateJwtToken(claims);
         }
 

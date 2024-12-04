@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
+using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.Interface.Service.Base;
+using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
 
 namespace Shoply.Api.Controllers.Base;
@@ -11,7 +13,7 @@ namespace Shoply.Api.Controllers.Base;
 [Authorize]
 [ApiController]
 [Route("/api/v1/[controller]")]
-public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork) : Controller
+public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork, IUserService userService) : Controller
     where TUnitOfWork : IBaseUnitOfWork
     where TService : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
     where TOutput : BaseOutput<TOutput>
@@ -192,7 +194,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     }
     #endregion
 
-    public override void OnActionExecuting(ActionExecutingContext context)
+    public override async void OnActionExecuting(ActionExecutingContext context)
     {
         bool allowAnonymous = (from i in context.ActionDescriptor.EndpointMetadata
                                where i.GetType() == typeof(AllowAnonymousAttribute)
@@ -200,7 +202,13 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
         if (!allowAnonymous)
         {
-            SetData();
+            string email = User.FindFirst("user_email")!.Value;
+            var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
+            if (loggedUser != null)
+            {
+                SetData();
+                SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
+            }
         }
 
         base.OnActionExecuting(context);

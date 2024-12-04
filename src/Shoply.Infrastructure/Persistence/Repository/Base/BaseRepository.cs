@@ -89,6 +89,12 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #endregion
 
     #region Create
+    public async Task<TDTO?> Create(TDTO dto)
+    {
+        var result = await Create([dto]);
+        return result?.FirstOrDefault();
+    }
+
     public async Task<List<TDTO>> Create(List<TDTO> listDTO)
     {
         List<TEntity> listEntity = FromDTOToEntity(SetCreationData(listDTO));
@@ -97,14 +103,28 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return FromEntityToDTO(listEntity);
     }
 
-    private static List<TDTO> SetCreationData(List<TDTO> listDTO)
+    private List<TDTO> SetCreationData(List<TDTO> listDTO)
     {
-        _ = (from i in listDTO select i.InternalPropertiesDTO.SetProperty(nameof(i.InternalPropertiesDTO.CreationDate), DateTime.Now)).ToList();
+        DateTime creationDate = DateTime.UtcNow;
+        long? creationUserId = SessionData.GetLoggedUser(_guidSessionDataRequest)?.Id;
+
+        _ = (from i in listDTO
+             select i.InternalPropertiesDTO
+             .SetProperty(nameof(i.InternalPropertiesDTO.CreationDate), creationDate)
+             .SetProperty(nameof(i.InternalPropertiesDTO.CreationUserId), creationUserId)
+             ).ToList();
+
         return listDTO;
     }
     #endregion
 
     #region Update
+    public async Task<TDTO?> Update(TDTO dto)
+    {
+        var result = await Update([dto]);
+        return result?.FirstOrDefault();
+    }
+
     public async Task<List<TDTO>> Update(List<TDTO> listDTO)
     {
         _dbSet.UpdateRange(FromDTOToEntity(SetUpdateData(listDTO)));
@@ -112,14 +132,27 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return listDTO;
     }
 
-    private static List<TDTO> SetUpdateData(List<TDTO> listDTO)
+    private List<TDTO> SetUpdateData(List<TDTO> listDTO)
     {
-        _ = (from i in listDTO select i.InternalPropertiesDTO.SetProperty(nameof(i.InternalPropertiesDTO.ChangeDate), DateTime.Now)).ToList();
+        DateTime changeDate = DateTime.UtcNow;
+        long? changeUserId = SessionData.GetLoggedUser(_guidSessionDataRequest)?.Id;
+
+        _ = (from i in listDTO
+             select i.InternalPropertiesDTO
+             .SetProperty(nameof(i.InternalPropertiesDTO.ChangeDate), changeDate)
+             .SetProperty(nameof(i.InternalPropertiesDTO.ChangeUserId), changeUserId)
+             ).ToList();
+
         return listDTO;
     }
     #endregion
 
     #region Delete
+    public async Task<bool> Delete(TDTO dto)
+    {
+        return await Delete([dto]);
+    }
+
     public async Task<bool> Delete(List<TDTO> listDTO)
     {
         _dbSet.RemoveRange(FromDTOToEntity(listDTO));

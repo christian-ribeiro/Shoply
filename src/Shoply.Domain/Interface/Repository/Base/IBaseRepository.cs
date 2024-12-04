@@ -20,7 +20,10 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     Task<List<TDTO>> GetAll();
     Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
+    Task<TDTO?> Create(TDTO dto);
     Task<List<TDTO>> Create(List<TDTO> listDTO);
+    Task<TDTO?> Update(TDTO dto);
     Task<List<TDTO>> Update(List<TDTO> listDTO);
+    Task<bool> Delete(TDTO dto);
     Task<bool> Delete(List<TDTO> listDTO);
 }

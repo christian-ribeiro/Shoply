@@ -3,6 +3,7 @@
 public class SessionDataRequest
 {
     public Guid GuidSessionDataRequest { get; }
+    public LoggedUser? LoggedUser { get; set; }
 
     public SessionDataRequest()
     {

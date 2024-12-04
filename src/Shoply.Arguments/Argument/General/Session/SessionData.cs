@@ -23,4 +23,15 @@ public class SessionData
     {
         Mapper = mapper;
     }
+
+    public static void SetLoggedUser(Guid guidSessionDataRequest, LoggedUser loggedUser)
+    {
+        ListSessionDataRequest[guidSessionDataRequest].LoggedUser = loggedUser;
+    }
+
+    public static LoggedUser? GetLoggedUser(Guid guidSessionDataRequest)
+    {
+        ListSessionDataRequest.TryGetValue(guidSessionDataRequest, out SessionDataRequest? value);
+        return value?.LoggedUser;
+    }
 }
