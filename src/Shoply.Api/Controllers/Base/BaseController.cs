@@ -7,6 +7,8 @@ using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
+using System.ComponentModel.DataAnnotations;
+using System.Collections;
 
 namespace Shoply.Api.Controllers.Base;
 
@@ -202,12 +204,32 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
         if (!allowAnonymous)
         {
-            string email = User.FindFirst("user_email")!.Value;
-            var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
-            if (loggedUser != null)
+            var model = context.ActionArguments.Values.FirstOrDefault();
+            if (model != null)
             {
-                SetData();
-                SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
+                bool isValid = true;
+                if (model is IEnumerable enumerableModel)
+                {
+                    foreach (var item in enumerableModel)
+                    {
+                        bool itemIsValid = Validator.TryValidateObject(item, new ValidationContext(item), [], true);
+                        if (!itemIsValid)
+                            isValid = false;
+                    }
+                }
+                else
+                    isValid = Validator.TryValidateObject(model, new ValidationContext(model), [], true);
+
+                if (isValid)
+                {
+                    string email = User.FindFirst("user_email")!.Value;
+                    var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
+                    if (loggedUser != null)
+                    {
+                        SetData();
+                        SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
+                    }
+                }
             }
         }
 
