@@ -1,6 +1,6 @@
-﻿using Shoply.Application.Integration.Argument.Service;
+﻿using Shoply.Application.Argument.Integration;
 
-namespace Shoply.Application.Integration.Interface.Service;
+namespace Shoply.Application.Interface.Service.Integration;
 
 public interface ISendEmailService
 {

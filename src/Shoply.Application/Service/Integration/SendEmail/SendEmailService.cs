@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using Polly;
-using Shoply.Application.Integration.Argument.Service;
-using Shoply.Application.Integration.Interface.Service;
+using Shoply.Application.Argument.Integration;
+using Shoply.Application.Interface.Service.Integration;
 using System.Net;
 using System.Net.Mail;
 
-namespace Shoply.Application.Integration.Service;
+namespace Shoply.Application.Service.Integration;
 
 public class SendEmailService(IOptions<SmtpConfiguration> options) : ISendEmailService
 {

@@ -8,6 +8,7 @@ using Shoply.Domain.Interface.UnitOfWork;
 
 namespace Shoply.Api.Controllers.Base;
 
+[Authorize]
 [ApiController]
 [Route("/api/v1/[controller]")]
 public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork) : Controller

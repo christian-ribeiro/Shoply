@@ -1,4 +1,4 @@
-﻿namespace Shoply.Application.Integration.Argument.Service;
+﻿namespace Shoply.Application.Argument.Integration;
 
 public class SmtpConfiguration
 {
