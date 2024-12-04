@@ -7,8 +7,6 @@ using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
-using System.ComponentModel.DataAnnotations;
-using System.Collections;
 
 namespace Shoply.Api.Controllers.Base;
 
@@ -196,7 +194,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     }
     #endregion
 
-    public override async void OnActionExecuting(ActionExecutingContext context)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         bool allowAnonymous = (from i in context.ActionDescriptor.EndpointMetadata
                                where i.GetType() == typeof(AllowAnonymousAttribute)
@@ -204,36 +202,17 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
         if (!allowAnonymous)
         {
-            var model = context.ActionArguments.Values.FirstOrDefault();
-            if (model != null)
+            Console.WriteLine("OnActionExecuting -> " + DateTime.Now.ToString());
+            string email = User.FindFirst("user_email")!.Value;
+            var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
+            if (loggedUser != null)
             {
-                bool isValid = true;
-                if (model is IEnumerable enumerableModel)
-                {
-                    foreach (var item in enumerableModel)
-                    {
-                        bool itemIsValid = Validator.TryValidateObject(item, new ValidationContext(item), [], true);
-                        if (!itemIsValid)
-                            isValid = false;
-                    }
-                }
-                else
-                    isValid = Validator.TryValidateObject(model, new ValidationContext(model), [], true);
-
-                if (isValid)
-                {
-                    string email = User.FindFirst("user_email")!.Value;
-                    var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
-                    if (loggedUser != null)
-                    {
-                        SetData();
-                        SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
-                    }
-                }
+                SetData();
+                SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
             }
         }
 
-        base.OnActionExecuting(context);
+        await base.OnActionExecutionAsync(context, next);
     }
 
     public override async void OnActionExecuted(ActionExecutedContext context)
