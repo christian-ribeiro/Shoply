@@ -34,13 +34,13 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                                          where !validate.ContainsKey(i.Item.Email)
                                          select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Item.Name, EncryptService.Encrypt(i.Item.Password), i.Item.Email, EnumLanguage.Portuguese))).ToList();
 
-        var listDetailedError = (from i in validate select new DetailedError(0, i.Key, i.Value)).ToList();
+        var listDetailedError = (from i in validate select new DetailedNotification(i.Key, i.Value)).ToList();
         if (validate.Count == listInputCreate.Count)
             return BaseResult<List<OutputUser?>>.Failure().AddError(listDetailedError);
 
         List<UserDTO> listCreatedUserDTO = await _repository.Create(listCreatedUser);
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(listCreatedUserDTO)!)
-            .AddSuccess((from i in listCreatedUserDTO select new DetailedSuccess(i.InternalPropertiesDTO.Id, i.ExternalPropertiesDTO.Email, $"Usuário '{i.ExternalPropertiesDTO.Email}' cadastrado com sucesso")).ToList())
+            .AddSuccess((from i in listCreatedUserDTO select new DetailedNotification(i.InternalPropertiesDTO.Id, i.ExternalPropertiesDTO.Email, $"Usuário '{i.ExternalPropertiesDTO.Email}' cadastrado com sucesso")).ToList())
             .AddError(listDetailedError);
     }
 
@@ -77,7 +77,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         if (userDTO == null || !inputAuthenticateUser.Password.CompareHash(userDTO.ExternalPropertiesDTO.Password))
-            return BaseResult<OutputAuthenticateUser>.Failure(new DetailedError(inputAuthenticateUser.Email, "Usuário ou senha inválidos"));
+            return BaseResult<OutputAuthenticateUser>.Failure().AddError(new DetailedNotification(inputAuthenticateUser.Email, "Usuário ou senha inválidos"));
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 

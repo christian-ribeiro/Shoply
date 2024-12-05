@@ -240,14 +240,13 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     protected async Task<ActionResult> ResponseAsync<T>(BaseResult<T> result)
     {
         if (!result.IsSuccess)
-            return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<T> { ListError = result.ListDetailedError }));
+            return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<T> { ListNotification = result.ListNotification }));
 
 
         return await Task.FromResult(StatusCode((int)HttpStatusCode.OK, new BaseResponse<T>
         {
             Result = result.Value,
-            ListError = result.ListDetailedError?.Count > 0 ? result.ListDetailedError : null,
-            ListSuccess = result.ListDetailedSuccess?.Count > 0 ? result.ListDetailedSuccess : null,
+            ListNotification = result.ListNotification?.Count > 0 ? result.ListNotification : null
         }));
     }
 
@@ -258,6 +257,6 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     protected async Task<ActionResult> ResponseExceptionAsync(Exception ex)
     {
-        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListError = [new DetailedError("", ex.Message)] }));
+        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListNotification = [new DetailedNotification(ex.Message)] }));
     }
 }
