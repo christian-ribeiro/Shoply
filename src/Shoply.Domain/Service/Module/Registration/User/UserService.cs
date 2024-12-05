@@ -17,17 +17,22 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 {
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreate)
     {
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier((from i in listInputCreate select new InputIdentifierUser(i.Email)).ToList());
+
         Dictionary<string, List<string>> validate = [];
-        List<UserDTO> listCreatedUser = (from i in listInputCreate
-                                         let nonInformedEmail = string.IsNullOrEmpty(i.Email) && AddOnDictionary(validate, listInputCreate.IndexOf(i).ToString(), "E-mail não informado")
-                                         where !string.IsNullOrEmpty(i.Email)
-                                         let invalidEmail = i.Email.InvalidEmail() && AddOnDictionary(validate, i.Email, "E-mail inválido")
-                                         let nonInformedName = i.Name.InvalidLength(1, 150) && AddOnDictionary(validate, i.Email, "Nome não informado")
-                                         let nonInformedPassword = i.Password.InvalidLength(1, 150) && AddOnDictionary(validate, i.Email, "Senha não informada")
-                                         let invalidPasswordMatch = i.Password.InvalidStringMatch(i.ConfirmPassword) && AddOnDictionary(validate, i.Email, "Senhas não conferem")
-                                         where !validate.ContainsKey(i.Email)
-                                         let encryptedPassword = EncryptService.Encrypt(i.Password)
-                                         select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Name, encryptedPassword, i.Email, EnumLanguage.Portuguese))).ToList();
+        List<UserDTO> listCreatedUser = (from i in listInputCreate.Index()
+                                         let listRepeatedInputCreate = (from j in listInputCreate.Index() where j.Item.Email == i.Item.Email where j.Index != i.Index select j).Any() && AddOnDictionary(validate, i.Index.ToString(), $"{i.Item.Email} repetido")
+                                         where !listRepeatedInputCreate
+                                         let nonInformedEmail = string.IsNullOrEmpty(i.Item.Email) && AddOnDictionary(validate, i.Index.ToString(), "E-mail não informado")
+                                         where !nonInformedEmail
+                                         let originalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Item.Email select j).FirstOrDefault()
+                                         let alreadyExists = originalUserDTO != null && AddOnDictionary(validate, i.Item.Email, $"{i.Item.Email} já cadastrado")
+                                         let invalidEmail = i.Item.Email.InvalidEmail() && AddOnDictionary(validate, i.Item.Email, "E-mail inválido")
+                                         let nonInformedName = i.Item.Name.InvalidLength(1, 150) && AddOnDictionary(validate, i.Item.Email, "Nome não informado")
+                                         let nonInformedPassword = i.Item.Password.InvalidLength(1, 150) && AddOnDictionary(validate, i.Item.Email, "Senha não informada")
+                                         let invalidPasswordMatch = i.Item.Password.InvalidStringMatch(i.Item.ConfirmPassword) && AddOnDictionary(validate, i.Item.Email, "Senhas não conferem")
+                                         where !validate.ContainsKey(i.Item.Email)
+                                         select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Item.Name, EncryptService.Encrypt(i.Item.Password), i.Item.Email, EnumLanguage.Portuguese))).ToList();
 
         if (validate.Count > 0)
         {
