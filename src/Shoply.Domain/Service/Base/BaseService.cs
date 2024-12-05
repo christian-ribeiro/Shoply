@@ -53,7 +53,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     public async Task<BaseResult<TOutput?>> Create(TInputCreate inputCreate)
     {
         var result = await Create([inputCreate])!;
-        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ErrorMessage!);
+        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ListDetailedError?.FirstOrDefault()!);
     }
 
     public virtual async Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate)
@@ -67,7 +67,7 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     public async Task<BaseResult<TOutput?>> Update(TInputIdentityUpdate inputIdentityUpdate)
     {
         var result = await Update([inputIdentityUpdate]);
-        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ErrorMessage!);
+        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ListDetailedError?.FirstOrDefault()!);
     }
 
     public virtual async Task<BaseResult<List<TOutput?>>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)

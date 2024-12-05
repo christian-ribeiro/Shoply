@@ -116,7 +116,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value, HttpStatusCode.Created);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
@@ -135,7 +135,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value, HttpStatusCode.Created);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.ListDetailedError, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
@@ -156,7 +156,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
 
         }
         catch (Exception ex)
@@ -176,7 +176,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
@@ -197,7 +197,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
@@ -216,7 +216,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {

@@ -24,7 +24,7 @@ public class UserController(IUserService service, IShoplyUnitOfWork unitOfWork) 
             if (result.IsSuccess)
                 return await ResponseAsync(result.Value);
 
-            return await ResponseAsync(result.ErrorMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(result.DetailedError?.Message, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {

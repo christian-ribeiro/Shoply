@@ -16,11 +16,35 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 {
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreate)
     {
+        Dictionary<string, List<string>> validate = [];
         List<UserDTO> listCreatedUser = (from i in listInputCreate
+                                         let nonInformedEmail = string.IsNullOrEmpty(i.Email) && AddOnDictionary(validate, listInputCreate.IndexOf(i).ToString(), "E-mail não informado")
+                                         where !string.IsNullOrEmpty(i.Email)
+                                         let invalidEmail = string.IsNullOrEmpty(i.Email) && AddOnDictionary(validate, i.Email, "E-mail inválido")
+                                         let nonInformedName = string.IsNullOrEmpty(i.Name) && AddOnDictionary(validate, i.Email, "Nome não informado")
+                                         let nonInformedPassword = string.IsNullOrEmpty(i.Password) && AddOnDictionary(validate, i.Email, "Senha não informada")
+                                         let invalidPasswordMatch = i.Password != i.ConfirmPassword && AddOnDictionary(validate, i.Email, "Senhas não conferem")
+                                         where !validate.ContainsKey(i.Email)
                                          let encryptedPassword = EncryptService.Encrypt(i.Password)
                                          select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Name, encryptedPassword, i.Email, EnumLanguage.Portuguese))).ToList();
 
+        if (validate.Count > 0)
+        {
+            var listDetailedError = (from i in validate select new DetailedError(0, i.Key, i.Value)).ToList();
+            return BaseResult<List<OutputUser?>>.Failure(listDetailedError);
+        }
+
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreatedUser))!);
+    }
+
+    public static bool AddOnDictionary(Dictionary<string, List<string>> dictionary, string key, string value)
+    {
+        if (!dictionary.ContainsKey(key))
+            dictionary.Add(key, [value]);
+        else
+            dictionary[key].Add(value);
+
+        return true;
     }
 
     public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)
@@ -46,7 +70,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         if (userDTO == null || !inputAuthenticateUser.Password.CompareHash(userDTO.ExternalPropertiesDTO.Password))
-            return BaseResult<OutputAuthenticateUser>.Failure("Usuário ou senha inválidos");
+            return BaseResult<OutputAuthenticateUser>.Failure(new DetailedError(inputAuthenticateUser.Email, "Usuário ou senha inválidos"));
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 
