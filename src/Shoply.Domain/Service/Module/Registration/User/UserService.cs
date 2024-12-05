@@ -36,17 +36,20 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 
         var listDetailedError = (from i in validate select new DetailedError(0, i.Key, i.Value)).ToList();
         if (validate.Count == listInputCreate.Count)
-            return BaseResult<List<OutputUser?>>.Failure(listDetailedError);
+            return BaseResult<List<OutputUser?>>.Failure().AddError(listDetailedError);
 
-        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreatedUser))!, listDetailedError);
+        List<UserDTO> listCreatedUserDTO = await _repository.Create(listCreatedUser);
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(listCreatedUserDTO)!)
+            .AddSuccess((from i in listCreatedUserDTO select new DetailedSuccess(i.InternalPropertiesDTO.Id, i.ExternalPropertiesDTO.Email, $"Usuário '{i.ExternalPropertiesDTO.Email}' cadastrado com sucesso")).ToList())
+            .AddError(listDetailedError);
     }
 
-    public static bool AddOnDictionary(Dictionary<string, List<string>> dictionary, string key, string value)
+    public static bool AddOnDictionary(Dictionary<string, List<string>> dictionary, string key, string dictValue)
     {
         if (!dictionary.ContainsKey(key))
-            dictionary.Add(key, [value]);
+            dictionary.Add(key, [dictValue]);
         else
-            dictionary[key].Add(value);
+            dictionary[key].Add(dictValue);
 
         return true;
     }

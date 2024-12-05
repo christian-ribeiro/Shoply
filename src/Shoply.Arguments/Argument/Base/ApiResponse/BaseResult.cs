@@ -1,23 +1,40 @@
 ﻿namespace Shoply.Arguments.Argument.Base;
 
-public class BaseResult<T>
+public class BaseResult<T>(bool isSuccess, List<DetailedError> listDetailedError, List<DetailedSuccess> listDetailedSuccess, T? value)
 {
-    public bool IsSuccess { get; }
-    public DetailedError? DetailedError { get; }
-    public List<DetailedError>? ListDetailedError { get; }
-    public T? Value { get; }
+    public bool IsSuccess { get; private set; } = isSuccess;
+    public List<DetailedError> ListDetailedError { get; private set; } = listDetailedError;
+    public List<DetailedSuccess> ListDetailedSuccess { get; private set; } = listDetailedSuccess;
+    public T? Value { get; private set; } = value;
 
-    private BaseResult(bool isSuccess, T? value, DetailedError? detailedError, List<DetailedError>? listDetailedError)
+    public static BaseResult<T> Success(T value) => new(true, [], [], value);
+    public static BaseResult<T> Failure() => new(false, [], [], default);
+    public static BaseResult<T> Failure(DetailedError detailedError) => new(false, [detailedError], [], default);
+}
+
+public static class BaseResultExtension
+{
+    public static BaseResult<T> AddSuccess<T>(this BaseResult<T> baseResult, DetailedSuccess detailedSuccess)
     {
-        IsSuccess = isSuccess;
-        Value = value;
-        DetailedError = detailedError;
-        ListDetailedError = listDetailedError;
+        baseResult.ListDetailedSuccess.Add(detailedSuccess);
+        return baseResult;
     }
 
-    public static BaseResult<T> Success(T value) => new(true, value, null, null);
-    public static BaseResult<T> Success(T value, DetailedError detailedError) => new(true, value, detailedError, [detailedError]);
-    public static BaseResult<T> Success(T value, List<DetailedError> listDetailedError) => new(true, value, null, listDetailedError);
-    public static BaseResult<T> Failure(DetailedError detailedError) => new(false, default, detailedError, [detailedError]);
-    public static BaseResult<T> Failure(List<DetailedError> listDetailedError) => new(false, default, null, listDetailedError);
+    public static BaseResult<T> AddSuccess<T>(this BaseResult<T> baseResult, List<DetailedSuccess> listDetailedSuccess)
+    {
+        baseResult.ListDetailedSuccess.AddRange(listDetailedSuccess);
+        return baseResult;
+    }
+
+    public static BaseResult<T> AddError<T>(this BaseResult<T> baseResult, DetailedError detailedError)
+    {
+        baseResult.ListDetailedError.Add(detailedError);
+        return baseResult;
+    }
+
+    public static BaseResult<T> AddError<T>(this BaseResult<T> baseResult, List<DetailedError> listDetailedError)
+    {
+        baseResult.ListDetailedError.AddRange(listDetailedError);
+        return baseResult;
+    }
 }

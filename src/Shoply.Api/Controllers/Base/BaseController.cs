@@ -112,11 +112,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Create(inputCreate);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value, HttpStatusCode.Created);
-
-            return await ResponseAsync(result.DetailedError, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Create(inputCreate));
         }
         catch (Exception ex)
         {
@@ -131,11 +127,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Create(listInputCreate);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value, HttpStatusCode.Created);
-
-            return await ResponseAsync(result.ListDetailedError, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Create(listInputCreate));
         }
         catch (Exception ex)
         {
@@ -152,11 +144,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Update(inputIdentityUpdate);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value);
-
-            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Update(inputIdentityUpdate));
 
         }
         catch (Exception ex)
@@ -172,11 +160,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Update(listInputIdentityUpdate);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value);
-
-            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Update(listInputIdentityUpdate));
         }
         catch (Exception ex)
         {
@@ -193,11 +177,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Delete(inputIdentityDelete);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value);
-
-            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Delete(inputIdentityDelete));
         }
         catch (Exception ex)
         {
@@ -212,11 +192,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            var result = await _service!.Delete(listInputIdentityDelete);
-            if (result.IsSuccess)
-                return await ResponseAsync(result.Value);
-
-            return await ResponseAsync(result.DetailedError?.ListMessage, HttpStatusCode.BadRequest);
+            return await ResponseAsync(await _service!.Delete(listInputIdentityDelete));
         }
         catch (Exception ex)
         {
@@ -261,6 +237,20 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         SessionHelper.SetGuidSessionDataRequest(this, _guidSessionDataRequest);
     }
 
+    protected async Task<ActionResult> ResponseAsync<T>(BaseResult<T> result)
+    {
+        if (!result.IsSuccess)
+            return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<T> { ListError = result.ListDetailedError }));
+
+
+        return await Task.FromResult(StatusCode((int)HttpStatusCode.OK, new BaseResponse<T>
+        {
+            Result = result.Value,
+            ListError = result.ListDetailedError?.Count > 0 ? result.ListDetailedError : null,
+            ListSuccess = result.ListDetailedSuccess?.Count > 0 ? result.ListDetailedSuccess : null,
+        }));
+    }
+
     protected async Task<ActionResult> ResponseAsync<ResponseType>(ResponseType result, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         return await Task.FromResult(StatusCode((int)statusCode, new BaseResponse<ResponseType> { Result = result }));
@@ -268,6 +258,6 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     protected async Task<ActionResult> ResponseExceptionAsync(Exception ex)
     {
-        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponseError(ex.Message)));
+        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListError = [new DetailedError("", ex.Message)] }));
     }
 }
