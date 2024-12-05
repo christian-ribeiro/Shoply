@@ -34,13 +34,11 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                                          where !validate.ContainsKey(i.Item.Email)
                                          select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Item.Name, EncryptService.Encrypt(i.Item.Password), i.Item.Email, EnumLanguage.Portuguese))).ToList();
 
-        if (validate.Count > 0)
-        {
-            var listDetailedError = (from i in validate select new DetailedError(0, i.Key, i.Value)).ToList();
+        var listDetailedError = (from i in validate select new DetailedError(0, i.Key, i.Value)).ToList();
+        if (validate.Count == listInputCreate.Count)
             return BaseResult<List<OutputUser?>>.Failure(listDetailedError);
-        }
 
-        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreatedUser))!);
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreatedUser))!, listDetailedError);
     }
 
     public static bool AddOnDictionary(Dictionary<string, List<string>> dictionary, string key, string value)

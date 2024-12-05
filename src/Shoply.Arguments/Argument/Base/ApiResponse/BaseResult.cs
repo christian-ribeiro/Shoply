@@ -16,6 +16,8 @@ public class BaseResult<T>
     }
 
     public static BaseResult<T> Success(T value) => new(true, value, null, null);
+    public static BaseResult<T> Success(T value, DetailedError detailedError) => new(true, value, detailedError, [detailedError]);
+    public static BaseResult<T> Success(T value, List<DetailedError> listDetailedError) => new(true, value, null, listDetailedError);
     public static BaseResult<T> Failure(DetailedError detailedError) => new(false, default, detailedError, [detailedError]);
     public static BaseResult<T> Failure(List<DetailedError> listDetailedError) => new(false, default, null, listDetailedError);
 }
