@@ -1,7 +1,6 @@
-﻿namespace Shoply.Arguments.Argument.Base
+﻿namespace Shoply.Arguments.Argument.Base;
+
+public class BaseResponseError(string errorMessage)
 {
-    public class BaseResponseError(string errorMessage)
-    {
-        public string ErrorMessage { get; private set; } = errorMessage;
-    }
+    public string ErrorMessage { get; private set; } = errorMessage;
 }

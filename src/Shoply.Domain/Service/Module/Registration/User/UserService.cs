@@ -4,6 +4,7 @@ using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
+using Shoply.Arguments.Validate;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -20,10 +21,10 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         List<UserDTO> listCreatedUser = (from i in listInputCreate
                                          let nonInformedEmail = string.IsNullOrEmpty(i.Email) && AddOnDictionary(validate, listInputCreate.IndexOf(i).ToString(), "E-mail não informado")
                                          where !string.IsNullOrEmpty(i.Email)
-                                         let invalidEmail = string.IsNullOrEmpty(i.Email) && AddOnDictionary(validate, i.Email, "E-mail inválido")
-                                         let nonInformedName = string.IsNullOrEmpty(i.Name) && AddOnDictionary(validate, i.Email, "Nome não informado")
-                                         let nonInformedPassword = string.IsNullOrEmpty(i.Password) && AddOnDictionary(validate, i.Email, "Senha não informada")
-                                         let invalidPasswordMatch = i.Password != i.ConfirmPassword && AddOnDictionary(validate, i.Email, "Senhas não conferem")
+                                         let invalidEmail = i.Email.InvalidEmail() && AddOnDictionary(validate, i.Email, "E-mail inválido")
+                                         let nonInformedName = i.Name.InvalidLength(1, 150) && AddOnDictionary(validate, i.Email, "Nome não informado")
+                                         let nonInformedPassword = i.Password.InvalidLength(1, 150) && AddOnDictionary(validate, i.Email, "Senha não informada")
+                                         let invalidPasswordMatch = i.Password.InvalidStringMatch(i.ConfirmPassword) && AddOnDictionary(validate, i.Email, "Senhas não conferem")
                                          where !validate.ContainsKey(i.Email)
                                          let encryptedPassword = EncryptService.Encrypt(i.Password)
                                          select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Name, encryptedPassword, i.Email, EnumLanguage.Portuguese))).ToList();
