@@ -1,5 +1,6 @@
 ﻿using Shoply.Application.Argument.Authentication;
 using Shoply.Application.Interface.Service.Authentication;
+using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
@@ -13,15 +14,16 @@ namespace Shoply.Domain.Service.Module.Registration;
 
 public class UserService(IUserRepository repository, IJwtService jwtService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository), IUserService
 {
-    public override async Task<List<OutputUser?>> Create(List<InputCreateUser> listInputCreate)
+    public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreate)
     {
         List<UserDTO> listCreatedUser = (from i in listInputCreate
                                          let encryptedPassword = EncryptService.Encrypt(i.Password)
                                          select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Name, encryptedPassword, i.Email, EnumLanguage.Portuguese))).ToList();
-        return FromDTOToOutput(await _repository.Create(listCreatedUser));
+
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreatedUser))!);
     }
 
-    public override async Task<List<OutputUser?>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)
+    public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)
     {
         List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityUpdate select i.Id).ToList());
 
@@ -30,21 +32,21 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                                          where originalUserDTO != null
                                          select originalUserDTO.Update(i.InputUpdate!)).ToList();
 
-        return FromDTOToOutput(await _repository.Update(listUpdatedUser));
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Update(listUpdatedUser))!);
     }
 
-    public override async Task<bool> Delete(List<InputIdentityDeleteUser> listInputIdentityDelete)
+    public override async Task<BaseResult<bool>> Delete(List<InputIdentityDeleteUser> listInputIdentityDelete)
     {
         List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityDelete select i.Id).ToList());
-        return await _repository.Delete(listOriginalUserDTO);
+        return BaseResult<bool>.Success(await _repository.Delete(listOriginalUserDTO));
     }
 
-    public async Task<string> Authenticate(InputAuthenticateUser inputAuthenticateUser)
+    public async Task<BaseResult<OutputAuthenticateUser>> Authenticate(InputAuthenticateUser inputAuthenticateUser)
     {
         UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         if (userDTO == null || !inputAuthenticateUser.Password.CompareHash(userDTO.ExternalPropertiesDTO.Password))
-            return "Usuário ou senha inválidos";
+            return BaseResult<OutputAuthenticateUser>.Failure("Usuário ou senha inválidos");
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 
@@ -53,6 +55,8 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 
         await _repository.Update(userDTO);
 
-        return await jwtService.GenerateJwtToken(new JwtUser(userDTO.InternalPropertiesDTO.Id, userDTO.ExternalPropertiesDTO.Email, userDTO.ExternalPropertiesDTO.Name, userDTO.ExternalPropertiesDTO.Language));
+        string token = await jwtService.GenerateJwtToken(new JwtUser(userDTO.InternalPropertiesDTO.Id, userDTO.ExternalPropertiesDTO.Email, userDTO.ExternalPropertiesDTO.Name, userDTO.ExternalPropertiesDTO.Language));
+
+        return BaseResult<OutputAuthenticateUser>.Success(new OutputAuthenticateUser(userDTO.InternalPropertiesDTO.Id, token));
     }
 }

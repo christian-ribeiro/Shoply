@@ -16,10 +16,10 @@ public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOut
     Task<List<TOutput>> GetAll();
     Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TOutput>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
-    Task<TOutput?> Create(TInputCreate inputCreate);
-    Task<List<TOutput?>> Create(List<TInputCreate> listInputCreate);
-    Task<TOutput?> Update(TInputIdentityUpdate inputIdentityUpdate);
-    Task<List<TOutput?>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate);
-    Task<bool> Delete(TInputIdentityDelete inputIdentityDelete);
-    Task<bool> Delete(List<TInputIdentityDelete> listInputIdentityDelete);
+    Task<BaseResult<TOutput?>> Create(TInputCreate inputCreate);
+    Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate);
+    Task<BaseResult<TOutput?>> Update(TInputIdentityUpdate inputIdentityUpdate);
+    Task<BaseResult<List<TOutput?>>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate);
+    Task<BaseResult<bool>> Delete(TInputIdentityDelete inputIdentityDelete);
+    Task<BaseResult<bool>> Delete(List<TInputIdentityDelete> listInputIdentityDelete);
 }

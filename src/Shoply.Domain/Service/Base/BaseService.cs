@@ -15,9 +15,9 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
         where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
         where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-        where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new ()
-        where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new ()
-        where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new ()
+        where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+        where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+        where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     public Guid _guidSessionDataRequest;
     protected readonly TRepository _repository = repository;
@@ -50,13 +50,13 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     #endregion
 
     #region Create
-    public async Task<TOutput?> Create(TInputCreate inputCreate)
+    public async Task<BaseResult<TOutput?>> Create(TInputCreate inputCreate)
     {
         var result = await Create([inputCreate])!;
-        return result?.FirstOrDefault();
+        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ErrorMessage!);
     }
 
-    public virtual async Task<List<TOutput?>> Create(List<TInputCreate> listInputCreate)
+    public virtual async Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate)
     {
         await Task.CompletedTask;
         throw new NotImplementedException();
@@ -64,13 +64,13 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     #endregion
 
     #region Update
-    public async Task<TOutput?> Update(TInputIdentityUpdate inputIdentityUpdate)
+    public async Task<BaseResult<TOutput?>> Update(TInputIdentityUpdate inputIdentityUpdate)
     {
         var result = await Update([inputIdentityUpdate]);
-        return result?.FirstOrDefault();
+        return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault()) : BaseResult<TOutput?>.Failure(result.ErrorMessage!);
     }
 
-    public virtual async Task<List<TOutput?>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)
+    public virtual async Task<BaseResult<List<TOutput?>>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)
     {
         await Task.CompletedTask;
         throw new NotImplementedException();
@@ -78,12 +78,12 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     #endregion
 
     #region Delete
-    public async Task<bool> Delete(TInputIdentityDelete inputIdentityDelete)
+    public async Task<BaseResult<bool>> Delete(TInputIdentityDelete inputIdentityDelete)
     {
         return await Delete([inputIdentityDelete]);
     }
 
-    public virtual async Task<bool> Delete(List<TInputIdentityDelete> listInputIdentityDelete)
+    public virtual async Task<BaseResult<bool>> Delete(List<TInputIdentityDelete> listInputIdentityDelete)
     {
         await Task.CompletedTask;
         throw new NotImplementedException();
