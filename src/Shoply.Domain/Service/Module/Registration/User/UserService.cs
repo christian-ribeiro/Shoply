@@ -3,8 +3,8 @@ using Shoply.Application.Interface.Service.Authentication;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Module.Registration;
-using Shoply.Arguments.Validate;
+using Shoply.Arguments.Enum.Base;
+using Shoply.Arguments.Enum.Base.Validate;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -13,45 +13,112 @@ using Shoply.Security.Encryption;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository, IJwtService jwtService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository), IUserService
+public class UserService(IUserRepository repository, IJwtService jwtService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumProcessTypeGeneric>(repository), IUserService
 {
-    public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreate)
+    internal override void ValidateProcess(List<UserValidateDTO> listUserValidateDTO, EnumProcessTypeGeneric processType)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier((from i in listInputCreate select new InputIdentifierUser(i.Email)).ToList());
+        switch (processType)
+        {
+            case EnumProcessTypeGeneric.Create:
 
-        Dictionary<string, List<string>> validate = [];
-        List<UserDTO> listCreatedUser = (from i in listInputCreate.Index()
-                                         let listRepeatedInputCreate = (from j in listInputCreate.Index() where j.Item.Email == i.Item.Email where j.Index != i.Index select j).Any() && AddOnDictionary(validate, i.Index.ToString(), $"{i.Item.Email} repetido")
-                                         where !listRepeatedInputCreate
-                                         let nonInformedEmail = string.IsNullOrEmpty(i.Item.Email) && AddOnDictionary(validate, i.Index.ToString(), "E-mail não informado")
-                                         where !nonInformedEmail
-                                         let originalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Item.Email select j).FirstOrDefault()
-                                         let alreadyExists = originalUserDTO != null && AddOnDictionary(validate, i.Item.Email, $"{i.Item.Email} já cadastrado")
-                                         let invalidEmail = i.Item.Email.InvalidEmail() && AddOnDictionary(validate, i.Item.Email, "E-mail inválido")
-                                         let nonInformedName = i.Item.Name.InvalidLength(1, 150) && AddOnDictionary(validate, i.Item.Email, "Nome não informado")
-                                         let nonInformedPassword = i.Item.Password.InvalidLength(1, 150) && AddOnDictionary(validate, i.Item.Email, "Senha não informada")
-                                         let invalidPasswordMatch = i.Item.Password.InvalidStringMatch(i.Item.ConfirmPassword) && AddOnDictionary(validate, i.Item.Email, "Senhas não conferem")
-                                         where !validate.ContainsKey(i.Item.Email)
-                                         select new UserDTO().Create(new ExternalPropertiesUserDTO(i.Item.Name, EncryptService.Encrypt(i.Item.Password), i.Item.Email, EnumLanguage.Portuguese))).ToList();
+                //_ = (from i in RemoveIgnore(listUserValidateDTO)
+                //     where i.InputCreateUser == null
+                //     let setIgnore = i.SetIgnore()
+                //     select Invalid()).ToList();
 
-        var listDetailedError = (from i in validate select new DetailedNotification(i.Key, i.Value)).ToList();
-        if (validate.Count == listInputCreate.Count)
-            return BaseResult<List<OutputUser?>>.Failure().AddError(listDetailedError);
+                //_ = (from i in RemoveIgnore(listUserValidateDTO)
+                //     let resultInvalidEmail = InvalidEmail(i.InputCreateUser?.Email)
+                //     where resultInvalidEmail != EnumValidateType.Valid
+                //     let setIgnore = resultInvalidEmail == EnumValidateType.NonInformed ? i.SetIgnore() : default
+                //     let setInvalid = resultInvalidEmail == EnumValidateType.Invalid ? i.SetInvalid() : default
+                //     select InvalidEmail(i.InputCreateUser?.Email, resultInvalidEmail)).ToList();
 
-        List<UserDTO> listCreatedUserDTO = await _repository.Create(listCreatedUser);
-        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(listCreatedUserDTO)!)
-            .AddSuccess((from i in listCreatedUserDTO select new DetailedNotification(i.InternalPropertiesDTO.Id, i.ExternalPropertiesDTO.Email, $"Usuário '{i.ExternalPropertiesDTO.Email}' cadastrado com sucesso")).ToList())
-            .AddError(listDetailedError);
+                //_ = (from i in RemoveIgnore(listUserValidateDTO)
+                //     let resultInvalidLength = InvalidLength(i.InputCreateUser?.Name, 1, 150)
+                //     where resultInvalidLength != EnumValidateType.Valid
+                //     let setInvalid = i.SetInvalid()
+                //     select InvalidLength(i.InputCreateUser?.Name, 1, 150, resultInvalidLength)).ToList();
+
+                //_ = (from i in RemoveIgnore(listUserValidateDTO)
+                //     let resultInvalidLength = InvalidLength(i.InputCreateUser?.Password, 6, 150)
+                //     where resultInvalidLength != EnumValidateType.Valid
+                //     let setInvalid = i.SetInvalid()
+                //     select InvalidLength(i.InputCreateUser?.Password, 1, 150, resultInvalidLength)).ToList();
+
+                //_ = (from i in RemoveIgnore(listUserValidateDTO)
+                //     let resultInvalidMatch = InvalidMatch(i.InputCreateUser?.Password, i.InputCreateUser?.ConfirmPassword)
+                //     where resultInvalidMatch != EnumValidateType.Valid
+                //     let setInvalid = i.SetInvalid()
+                //     select InvalidMatch(resultInvalidMatch)).ToList();
+
+                foreach (var userValidateDTO in listUserValidateDTO)
+                {
+                    if (userValidateDTO.InputCreateUser == null)
+                    {
+                        userValidateDTO.SetIgnore();
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    var resultInvalidEmail = InvalidEmail(userValidateDTO.InputCreateUser.Email);
+                    if (resultInvalidEmail != EnumValidateType.Valid)
+                    {
+                        if (resultInvalidEmail == EnumValidateType.NonInformed)
+                            userValidateDTO.SetIgnore();
+                        else
+                            userValidateDTO.SetInvalid();
+                        InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, resultInvalidEmail);
+                    }
+
+                    var resultNameInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Name, 1, 150);
+                    if (resultNameInvalidLength != EnumValidateType.Valid)
+                    {
+                        userValidateDTO.SetInvalid();
+                        InvalidLength(userValidateDTO.InputCreateUser.Name, userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Name, 1, 150, resultNameInvalidLength);
+                    }
+
+                    var resultPasswordInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Password, 6, 150);
+                    if (resultPasswordInvalidLength != EnumValidateType.Valid)
+                    {
+                        userValidateDTO.SetInvalid();
+                        InvalidLength(userValidateDTO.InputCreateUser.Password, userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Password, 6, 150, resultNameInvalidLength);
+                    }
+
+                    var resultPasswordInvalidMatch = InvalidMatch(userValidateDTO.InputCreateUser.Password, userValidateDTO.InputCreateUser.ConfirmPassword);
+                    if (resultPasswordInvalidMatch != EnumValidateType.Valid)
+                    {
+                        userValidateDTO.SetInvalid();
+                        InvalidMatch(userValidateDTO.InputCreateUser.Email, resultPasswordInvalidMatch);
+                    }
+                }
+
+                break;
+            case EnumProcessTypeGeneric.Update:
+                break;
+            case EnumProcessTypeGeneric.Delete:
+                break;
+        }
     }
 
-    public static bool AddOnDictionary(Dictionary<string, List<string>> dictionary, string key, string dictValue)
+    public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreateUser)
     {
-        if (!dictionary.ContainsKey(key))
-            dictionary.Add(key, [dictValue]);
-        else
-            dictionary[key].Add(dictValue);
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier((from i in listInputCreateUser select new InputIdentifierUser(i.Email)).ToList());
 
-        return true;
+        var listCreate = (from i in listInputCreateUser.Index()
+                          select new
+                          {
+                              Index = i.Index,
+                              InputCreateUser = i.Item,
+                              ListRepeatedInputCreateUser = (from j in listInputCreateUser where listInputCreateUser.Count(x => x.Email == i.Item.Email) > 0 select j).ToList(),
+                              OriginalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Item.Email select j).FirstOrDefault(),
+                          }).ToList();
+
+        List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
+        ValidateProcess(listUserValidateDTO, EnumProcessTypeGeneric.Create);
+
+        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!)).ToList();
+
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!);
     }
 
     public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)

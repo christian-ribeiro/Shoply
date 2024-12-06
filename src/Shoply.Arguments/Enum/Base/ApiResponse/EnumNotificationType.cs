@@ -1,9 +1,8 @@
-﻿namespace Shoply.Arguments.Enum.Base
+﻿namespace Shoply.Arguments.Enum.Base;
+
+public enum EnumNotificationType
 {
-    public enum EnumNotificationType
-    {
-        Success,
-        Error,
-        Alert
-    }
+    Success,
+    Error,
+    Alert
 }
