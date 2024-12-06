@@ -20,37 +20,6 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         switch (processType)
         {
             case EnumProcessTypeGeneric.Create:
-
-                //_ = (from i in RemoveIgnore(listUserValidateDTO)
-                //     where i.InputCreateUser == null
-                //     let setIgnore = i.SetIgnore()
-                //     select Invalid()).ToList();
-
-                //_ = (from i in RemoveIgnore(listUserValidateDTO)
-                //     let resultInvalidEmail = InvalidEmail(i.InputCreateUser?.Email)
-                //     where resultInvalidEmail != EnumValidateType.Valid
-                //     let setIgnore = resultInvalidEmail == EnumValidateType.NonInformed ? i.SetIgnore() : default
-                //     let setInvalid = resultInvalidEmail == EnumValidateType.Invalid ? i.SetInvalid() : default
-                //     select InvalidEmail(i.InputCreateUser?.Email, resultInvalidEmail)).ToList();
-
-                //_ = (from i in RemoveIgnore(listUserValidateDTO)
-                //     let resultInvalidLength = InvalidLength(i.InputCreateUser?.Name, 1, 150)
-                //     where resultInvalidLength != EnumValidateType.Valid
-                //     let setInvalid = i.SetInvalid()
-                //     select InvalidLength(i.InputCreateUser?.Name, 1, 150, resultInvalidLength)).ToList();
-
-                //_ = (from i in RemoveIgnore(listUserValidateDTO)
-                //     let resultInvalidLength = InvalidLength(i.InputCreateUser?.Password, 6, 150)
-                //     where resultInvalidLength != EnumValidateType.Valid
-                //     let setInvalid = i.SetInvalid()
-                //     select InvalidLength(i.InputCreateUser?.Password, 1, 150, resultInvalidLength)).ToList();
-
-                //_ = (from i in RemoveIgnore(listUserValidateDTO)
-                //     let resultInvalidMatch = InvalidMatch(i.InputCreateUser?.Password, i.InputCreateUser?.ConfirmPassword)
-                //     where resultInvalidMatch != EnumValidateType.Valid
-                //     let setInvalid = i.SetInvalid()
-                //     select InvalidMatch(resultInvalidMatch)).ToList();
-
                 foreach (var userValidateDTO in listUserValidateDTO)
                 {
                     if (userValidateDTO.InputCreateUser == null)
