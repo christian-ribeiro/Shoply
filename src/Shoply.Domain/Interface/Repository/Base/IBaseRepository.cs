@@ -20,6 +20,7 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     Task<List<TDTO>> GetAll();
     Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
+    Task<List<TDTO>> GetDynamic(string[] fields);
     Task<TDTO?> Create(TDTO dto);
     Task<List<TDTO>> Create(List<TDTO> listDTO);
     Task<TDTO?> Update(TDTO dto);

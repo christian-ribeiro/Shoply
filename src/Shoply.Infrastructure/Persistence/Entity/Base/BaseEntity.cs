@@ -1,10 +1,12 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using Shoply.Infrastructure.DataAnnotation;
 using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shoply.Infrastructure.Entity.Base;
 
+[Entity]
 public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
@@ -15,23 +17,23 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
-    public long Id { get; private set; }
+    public long Id { get; set; }
     [NotMapped]
-    public virtual DateTime? CreationDate { get; private set; }
+    public virtual DateTime? CreationDate { get; set; }
     [NotMapped]
-    public virtual long? CreationUserId { get; private set; }
+    public virtual long? CreationUserId { get; set; }
     [NotMapped]
-    public virtual DateTime? ChangeDate { get; private set; }
+    public virtual DateTime? ChangeDate { get; set; }
     [NotMapped]
-    public virtual long? ChangeUserId { get; private set; }
+    public virtual long? ChangeUserId { get; set; }
 
 
     #region Virtual Properties
     #region Internal
     [NotMapped]
-    public virtual User? CreationUser { get; private set; }
+    public virtual User? CreationUser { get; set; }
     [NotMapped]
-    public virtual User? ChangeUser { get; private set; }
+    public virtual User? ChangeUser { get; set; }
     #endregion
     #endregion
 
