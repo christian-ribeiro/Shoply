@@ -33,4 +33,9 @@ public class UserPropertyValidateDTO : BaseValidateDTO
         return this;
     }
 
+    public UserPropertyValidateDTO ValidateAuthenticate(UserDTO? originalUserDTO)
+    {
+        OriginalUserDTO = originalUserDTO;
+        return this;
+    }
 }

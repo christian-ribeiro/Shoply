@@ -68,6 +68,11 @@ public class BaseValidate<TValidateDTO, TProcessType>
 
     private static ConcurrentDictionary<string, List<DetailedNotification>> validateMessages = [];
 
+    public static bool ManualNotification(string message, EnumValidateType enumValidateType)
+    {
+        return HandleValidation("", enumValidateType, message, string.Empty);
+    }
+
     public static bool Invalid(int index)
     {
         return HandleValidation(index.ToString(), EnumValidateType.Invalid, NotificationMessages.InvalidRecord, string.Empty);

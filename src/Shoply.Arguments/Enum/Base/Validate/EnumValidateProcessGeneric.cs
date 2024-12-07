@@ -1,6 +1,6 @@
 ﻿namespace Shoply.Arguments.Enum.Base;
 
-public enum EnumProcessTypeGeneric
+public enum EnumValidateProcessGeneric
 {
     Create,
     Update,
