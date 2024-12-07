@@ -19,6 +19,11 @@ public class SessionData
         return guidSessionDataRequest.GuidSessionDataRequest;
     }
 
+    public static void RemoveSessionDataRequest(Guid guidSessionDataRequest)
+    {
+        ListSessionDataRequest.TryRemove(guidSessionDataRequest, out _);
+    }
+
     public static void SetMapper(CustomMapper mapper)
     {
         Mapper = mapper;

@@ -11,7 +11,6 @@ public class BaseValidate<TValidateDTO, TProcessType>
 {
     #region Base
     internal virtual void ValidateProcess(List<TValidateDTO> listValidateDTO, TProcessType processType) => throw new NotImplementedException();
-    internal static List<TValidateDTO> RemoveIgnore(List<TValidateDTO> listValidateDTO) => (from i in listValidateDTO where !i.Ignore select i).ToList();
     internal static List<TValidateDTO> RemoveInvalid(List<TValidateDTO> listValidateDTO) => (from i in listValidateDTO where !i.Invalid select i).ToList();
     #endregion
 

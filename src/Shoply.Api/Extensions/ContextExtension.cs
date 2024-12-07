@@ -13,6 +13,9 @@ public static class ContextExtension
             string connectionString = configuration.GetConnectionString("DefaultConnection")!;
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSqlServer(connectionString);
+#if DEBUG
+            options.EnableSensitiveDataLogging(true);
+#endif
         });
 
         return services;

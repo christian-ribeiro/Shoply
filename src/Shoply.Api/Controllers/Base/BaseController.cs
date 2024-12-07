@@ -203,6 +203,8 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        await unitOfWork.BeginTransactionAsync();
+
         bool allowAnonymous = (from i in context.ActionDescriptor.EndpointMetadata
                                where i.GetType() == typeof(AllowAnonymousAttribute)
                                select i).Any();
@@ -223,8 +225,9 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     public override async void OnActionExecuted(ActionExecutedContext context)
     {
-        await unitOfWork.CommitAsync();
         base.OnActionExecuted(context);
+        SessionData.RemoveSessionDataRequest(_guidSessionDataRequest);
+        await unitOfWork.CommitAsync();
     }
 
     private void SetData()
