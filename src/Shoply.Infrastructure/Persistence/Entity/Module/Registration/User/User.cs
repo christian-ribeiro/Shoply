@@ -21,6 +21,10 @@ public class User(string name, string password, string email, EnumLanguage langu
     public virtual List<User>? ListCreationUserUser { get; private set; }
     public virtual List<User>? ListChangeUserUser { get; private set; }
     #endregion
+    #region Customer
+    public virtual List<Customer>? ListCreationUserCustomer { get; private set; }
+    public virtual List<Customer>? ListChangeUserCustomer { get; private set; }
+    #endregion
     #endregion
     #endregion
 }

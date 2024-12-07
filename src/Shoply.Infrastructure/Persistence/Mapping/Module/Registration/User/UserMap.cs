@@ -13,12 +13,13 @@ public class UserMap : IEntityTypeConfiguration<User>
 
         builder.ToTable("usuario");
 
-        builder.HasKey(x => x.Id).HasName("id");
+        builder.HasKey(x => x.Id).HasName("pk_usuario");
 
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.Id).IsRequired();
 
         builder.Property(x => x.CreationDate).HasColumnName("data_criacao");
+        builder.Property(x => x.CreationDate).IsRequired();
 
         builder.Property(x => x.CreationUserId).HasColumnName("id_usuario_criacao");
 

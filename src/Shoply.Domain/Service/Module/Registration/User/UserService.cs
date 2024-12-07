@@ -3,7 +3,6 @@ using Shoply.Application.Interface.Service.Authentication;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Base;
 using Shoply.Arguments.Enum.Base.Validate;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
@@ -158,14 +157,14 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                     if (userValidateDTO.InputAuthenticateUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification("Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification("Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
                         continue;
                     }
 
@@ -181,7 +180,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                         userValidateDTO.SetInvalid();
 
                     if (userValidateDTO.Invalid)
-                        ManualNotification("Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        ManualNotification(userValidateDTO.InputAuthenticateUser.Email, "Usuário ou senha inválidos", EnumValidateType.Invalid);
                 }
                 break;
         }

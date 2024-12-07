@@ -33,5 +33,31 @@ public class MapperDTOOutput : Profile
             .ConstructUsing(src => new AuxiliaryPropertiesUserDTO())
             .ReverseMap();
         #endregion
+
+        #region Customer
+        CreateMap<OutputCustomer, CustomerDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing(src => new CustomerDTO()
+            {
+                InternalPropertiesDTO = new InternalPropertiesCustomerDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesCustomerDTO(src.Code, src.FirstName, src.LastName, src.BirthDate, src.Document, src.PersonType),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerDTO()
+            })
+            .ReverseMap();
+
+        CreateMap<OutputCustomer, InternalPropertiesCustomerDTO>()
+            .ConstructUsing(src => new InternalPropertiesCustomerDTO())
+            .ReverseMap();
+
+        CreateMap<OutputCustomer, ExternalPropertiesCustomerDTO>()
+            .ConstructUsing(src => new ExternalPropertiesCustomerDTO(src.Code, src.FirstName, src.LastName, src.BirthDate, src.Document, src.PersonType))
+            .ReverseMap();
+
+        CreateMap<OutputCustomer, AuxiliaryPropertiesCustomerDTO>()
+            .ConstructUsing(src => new AuxiliaryPropertiesCustomerDTO())
+            .ReverseMap();
+        #endregion
     }
 }

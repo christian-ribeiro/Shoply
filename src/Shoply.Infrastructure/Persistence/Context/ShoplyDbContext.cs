@@ -6,7 +6,10 @@ namespace Shoply.Infrastructure.Persistence.Context;
 
 public class ShoplyDbContext(DbContextOptions<ShoplyDbContext> options) : DbContext(options)
 {
+    #region Registration
     public DbSet<User>? User { get; set; }
+    public DbSet<Customer>? Customer { get; set; }
+    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
