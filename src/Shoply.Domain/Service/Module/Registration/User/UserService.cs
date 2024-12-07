@@ -20,6 +20,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         switch (processType)
         {
             case EnumProcessTypeGeneric.Create:
+
                 foreach (var userValidateDTO in listUserValidateDTO)
                 {
                     if (userValidateDTO.InputCreateUser == null)
@@ -28,7 +29,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                         continue;
                     }
 
-                    var repeatedEmail = listUserValidateDTO.Count(x => x.InputCreateUser?.Email == userValidateDTO.InputCreateUser.Email) > 1;
+                    var repeatedEmail = userValidateDTO.ListRepeatedInputCreateUser?.Count > 0;
                     if (repeatedEmail)
                     {
                         Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
@@ -78,23 +79,87 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 
                 break;
             case EnumProcessTypeGeneric.Update:
+
+                foreach (var userValidateDTO in listUserValidateDTO)
+                {
+                    if (userValidateDTO.InputIdentityUpdateUser == null)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    if (userValidateDTO.InputIdentityUpdateUser.InputUpdate == null)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    if (userValidateDTO.OriginalUserDTO == null)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    var repeatedInputUpdate = userValidateDTO.ListRepeatedInputIdentityUpdateUser?.Count > 0;
+                    if (repeatedInputUpdate)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    var resultNameInvalidLength = InvalidLength(userValidateDTO.InputIdentityUpdateUser.InputUpdate.Name, 1, 150);
+                    if (resultNameInvalidLength != EnumValidateType.Valid)
+                    {
+                        userValidateDTO.SetInvalid();
+                        InvalidLength(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, userValidateDTO.InputIdentityUpdateUser.InputUpdate.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
+                    }
+
+                    if (!userValidateDTO.Invalid)
+                        AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário alterado com sucesso");
+                }
+
                 break;
             case EnumProcessTypeGeneric.Delete:
+
+                foreach (var userValidateDTO in listUserValidateDTO)
+                {
+                    if (userValidateDTO.InputIdentityDeleteUser == null)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    if (userValidateDTO.OriginalUserDTO == null)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    var repeatedInputDelete = userValidateDTO.ListRepeatedInputIdentityDeleteUser?.Count > 0;
+                    if (repeatedInputDelete)
+                    {
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    if (!userValidateDTO.Invalid)
+                        AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário excluído com sucesso");
+                }
                 break;
         }
     }
 
+    #region Create
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreateUser)
     {
         List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier((from i in listInputCreateUser select new InputIdentifierUser(i.Email)).ToList());
 
-        var listCreate = (from i in listInputCreateUser.Index()
+        var listCreate = (from i in listInputCreateUser
                           select new
                           {
-                              Index = i.Index,
-                              InputCreateUser = i.Item,
-                              ListRepeatedInputCreateUser = (from j in listInputCreateUser where listInputCreateUser.Count(x => x.Email == i.Item.Email) > 0 select j).ToList(),
-                              OriginalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Item.Email select j).FirstOrDefault(),
+                              InputCreateUser = i,
+                              ListRepeatedInputCreateUser = (from j in listInputCreateUser where listInputCreateUser.Count(x => x.Email == i.Email) > 1 select j).ToList(),
+                              OriginalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Email select j).FirstOrDefault(),
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
@@ -104,28 +169,62 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         if (errors.Count == listInputCreateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!)).ToList();
+        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!.SetProperty(nameof(i.InputCreateUser.Password), EncryptService.Encrypt(i.InputCreateUser.Password)))).ToList();
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!, [.. successes, .. errors]);
     }
+    #endregion
 
-    public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)
+    #region Update
+    public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdateUser)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityUpdate select i.Id).ToList());
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityUpdateUser select i.Id).ToList());
 
-        List<UserDTO> listUpdatedUser = (from i in listInputIdentityUpdate
-                                         let originalUserDTO = (from j in listOriginalUserDTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault()
-                                         where originalUserDTO != null
-                                         select originalUserDTO.Update(i.InputUpdate!)).ToList();
+        var listUpdate = (from i in listInputIdentityUpdateUser
+                          select new
+                          {
+                              InputIdentityUpdateUser = i,
+                              ListRepeatedInputIdentityUpdateUser = (from j in listInputIdentityUpdateUser where listInputIdentityUpdateUser.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              OriginalUserDTO = (from j in listOriginalUserDTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
+                          }).ToList();
 
-        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Update(listUpdatedUser))!);
+        List<UserValidateDTO> listUserValidateDTO = (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO)).ToList();
+        ValidateProcess(listUserValidateDTO, EnumProcessTypeGeneric.Update);
+
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputIdentityUpdateUser.Count)
+            return BaseResult<List<OutputUser?>>.Failure(errors);
+
+        List<UserDTO> listUpdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO!.Update(i.InputIdentityUpdateUser!.InputUpdate!)).ToList();
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateUserDTO))!, [.. successes, .. errors]);
     }
+    #endregion
 
-    public override async Task<BaseResult<bool>> Delete(List<InputIdentityDeleteUser> listInputIdentityDelete)
+    #region Delete
+    public override async Task<BaseResult<bool>> Delete(List<InputIdentityDeleteUser> listInputIdentityDeleteUser)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityDelete select i.Id).ToList());
-        return BaseResult<bool>.Success(await _repository.Delete(listOriginalUserDTO));
-    }
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityDeleteUser select i.Id).ToList());
 
+        var listDelete = (from i in listInputIdentityDeleteUser
+                          select new
+                          {
+                              InputIdentityDeleteUser = i,
+                              ListRepeatedInputIdentityDeleteUser = (from j in listInputIdentityDeleteUser where listInputIdentityDeleteUser.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              OriginalUserDTO = (from j in listOriginalUserDTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
+                          }).ToList();
+
+        List<UserValidateDTO> listUserValidateDTO = (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO)).ToList();
+        ValidateProcess(listUserValidateDTO, EnumProcessTypeGeneric.Delete);
+
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputIdentityDeleteUser.Count)
+            return BaseResult<bool>.Failure(errors);
+
+        List<UserDTO> listDeletepdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO).ToList();
+        return BaseResult<bool>.Success(await _repository.Delete(listDeletepdateUserDTO), [.. successes, .. errors]);
+    }
+    #endregion
+
+    #region Custom
     public async Task<BaseResult<OutputAuthenticateUser>> Authenticate(InputAuthenticateUser inputAuthenticateUser)
     {
         UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
@@ -144,4 +243,5 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
 
         return BaseResult<OutputAuthenticateUser>.Success(new OutputAuthenticateUser(userDTO.InternalPropertiesDTO.Id, token));
     }
+    #endregion
 }

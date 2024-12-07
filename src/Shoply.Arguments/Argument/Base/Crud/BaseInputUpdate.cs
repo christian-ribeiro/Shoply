@@ -1,5 +1,7 @@
-﻿namespace Shoply.Arguments.Argument.Base;
+﻿using Shoply.Arguments.Utils;
 
-public class BaseInputUpdate<TInputUpdate> where TInputUpdate : BaseInputUpdate<TInputUpdate> { }
+namespace Shoply.Arguments.Argument.Base;
+
+public class BaseInputUpdate<TInputUpdate> : BaseSetProperty<TInputUpdate> where TInputUpdate : BaseInputUpdate<TInputUpdate> { }
 
 public class BaseInputUpdate_0 : BaseInputUpdate<BaseInputUpdate_0> { }
