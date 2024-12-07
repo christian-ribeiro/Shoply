@@ -1,4 +1,6 @@
-﻿using Shoply.Arguments.Enum.Base.Validate;
+﻿using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Enum.Base;
+using Shoply.Arguments.Enum.Base.Validate;
 using Shoply.Domain.DTO.Base;
 using System.Collections.Concurrent;
 using System.Net.Mail;
@@ -9,6 +11,11 @@ public class BaseValidate<TValidateDTO, TProcessType>
     where TValidateDTO : BaseValidateDTO
     where TProcessType : Enum
 {
+    public BaseValidate()
+    {
+        validateMessages = [];
+    }
+
     #region Base
     internal virtual void ValidateProcess(List<TValidateDTO> listValidateDTO, TProcessType processType) => throw new NotImplementedException();
     internal static List<TValidateDTO> RemoveInvalid(List<TValidateDTO> listValidateDTO) => (from i in listValidateDTO where !i.Invalid select i).ToList();
@@ -47,56 +54,82 @@ public class BaseValidate<TValidateDTO, TProcessType>
     #endregion
 
     #region Notification
-    private static class NotificationMessages
+    private class NotificationMessages
     {
         public const string InvalidRecord = "Registro inválido";
         public const string InvalidEmail = "O e-mail '{0}' informado não é válido";
         public const string EmailNotProvided = "E-mail não informado";
-        public const string InvalidLength = "O tamanho do campo '{0}' deve ser entre {1} e {2}";
+        public const string InvalidLength = "O valor {0} é inválido, '{1}' deve ser entre {2} e {3}";
         public const string ValueNotProvided = "Valor não informado para '{0}'";
-        public const string RecordsDoNotMatch = "Os registros não coincidem";
+        public const string RecordsDoNotMatch = "Os registros '{0}' não coincidem";
         public const string NoRecordsProvided = "Nenhum registro informado";
+        public const string AlreadyExists = "O registro '{0}' já existe";
     }
 
-    internal static ConcurrentDictionary<string, List<string>> validate = [];
+    private static ConcurrentDictionary<string, List<DetailedNotification>> validateMessages = [];
 
     public static bool Invalid(int index)
     {
         return HandleValidation(index.ToString(), EnumValidateType.Invalid, NotificationMessages.InvalidRecord, string.Empty);
     }
 
-    public static bool InvalidEmail(int index, string? email, EnumValidateType validateType)
+    public static bool AlreadyExists(string key)
     {
-        string key = email ?? index.ToString();
+        return HandleValidation(key, EnumValidateType.Invalid, string.Format(NotificationMessages.AlreadyExists, key), string.Empty);
+    }
+
+    public static bool InvalidEmail(int? index, string? email, EnumValidateType validateType)
+    {
+        string key = validateType == EnumValidateType.NonInformed ? index?.ToString()! : email!;
         return HandleValidation(key, validateType, string.Format(NotificationMessages.InvalidEmail, email), NotificationMessages.EmailNotProvided);
     }
 
-    public static bool InvalidLength<TProperty>(TProperty property, string identifier, string? value, int minLength, int maxLength, EnumValidateType validateType)
+    public static bool InvalidLength(string identifier, string? value, int minLength, int maxLength, EnumValidateType validateType, string? propertyName)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidLength, typeof(TProperty).Name, minLength, maxLength), string.Format(NotificationMessages.ValueNotProvided, typeof(TProperty).Name));
+        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidLength, value, propertyName, minLength, maxLength), string.Format(NotificationMessages.ValueNotProvided, propertyName));
     }
 
-    public static bool InvalidMatch(string identifier, EnumValidateType validateType)
+    public static bool InvalidMatch(string identifier, EnumValidateType validateType, params string[] propertiesName)
     {
-        return HandleValidation(identifier, validateType, NotificationMessages.RecordsDoNotMatch, NotificationMessages.NoRecordsProvided);
+        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.RecordsDoNotMatch, string.Join(", ", propertiesName)), NotificationMessages.NoRecordsProvided);
     }
     #endregion
 
     #region Helpers
-    private static bool AddOnDictionary(string key, string value)
+    private static bool AddToDictionary(string key, DetailedNotification validationMessage)
     {
-        validate.GetOrAdd(key, _ => new List<string>()).Add(value);
+        var existingNotification = validateMessages.GetOrAdd(key, _ => [new(key, [], validationMessage.NotificationType)]);
+
+        var notification = existingNotification.FirstOrDefault();
+        if (notification != null)
+        {
+            notification.ListMessage ??= [];
+            notification.ListMessage.AddRange(validationMessage.ListMessage ?? []);
+        }
+
         return true;
+    }
+
+    public static bool AddSuccessMessage(string key, string message)
+    {
+        return AddToDictionary(key, new DetailedNotification(key, [message], EnumNotificationType.Success));
     }
 
     private static bool HandleValidation(string key, EnumValidateType validateType, string invalidMessage, string nonInformedMessage)
     {
         return validateType switch
         {
-            EnumValidateType.Invalid => AddOnDictionary(key, invalidMessage),
-            EnumValidateType.NonInformed => AddOnDictionary(key, nonInformedMessage),
+            EnumValidateType.Invalid => AddToDictionary(key, new DetailedNotification(key, [invalidMessage], EnumNotificationType.Error)),
+            EnumValidateType.NonInformed => AddToDictionary(key, new DetailedNotification(key, [nonInformedMessage], EnumNotificationType.Error)),
             _ => true,
         };
+    }
+
+    public static (List<DetailedNotification> Successes, List<DetailedNotification> Errors) GetValidationResults()
+    {
+        var successes = validateMessages.Values.SelectMany(v => v).Where(m => m.NotificationType == EnumNotificationType.Success).ToList();
+        var errors = validateMessages.Values.SelectMany(v => v).Where(m => m.NotificationType != EnumNotificationType.Success).ToList();
+        return (successes, errors);
     }
     #endregion
 }

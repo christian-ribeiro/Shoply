@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Arguments.Argument.Module.Registration;
+using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
@@ -260,6 +261,6 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
 
     protected async Task<ActionResult> ResponseExceptionAsync(Exception ex)
     {
-        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListNotification = [new DetailedNotification(ex.Message)] }));
+        return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListNotification = [new DetailedNotification("", [ex.Message], EnumNotificationType.Error)] }));
     }
 }

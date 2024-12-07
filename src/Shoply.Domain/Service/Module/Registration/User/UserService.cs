@@ -24,7 +24,13 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                 {
                     if (userValidateDTO.InputCreateUser == null)
                     {
-                        userValidateDTO.SetIgnore();
+                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        continue;
+                    }
+
+                    var repeatedEmail = listUserValidateDTO.Count(x => x.InputCreateUser?.Email == userValidateDTO.InputCreateUser.Email) > 1;
+                    if (repeatedEmail)
+                    {
                         Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
@@ -32,33 +38,42 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
                     var resultInvalidEmail = InvalidEmail(userValidateDTO.InputCreateUser.Email);
                     if (resultInvalidEmail != EnumValidateType.Valid)
                     {
-                        if (resultInvalidEmail == EnumValidateType.NonInformed)
-                            userValidateDTO.SetIgnore();
-                        else
-                            userValidateDTO.SetInvalid();
+                        userValidateDTO.SetInvalid();
                         InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, resultInvalidEmail);
+
+                        if (resultInvalidEmail == EnumValidateType.NonInformed)
+                            continue;
+                    }
+
+                    if (userValidateDTO.OriginalUserDTO != null)
+                    {
+                        userValidateDTO.SetInvalid();
+                        AlreadyExists(userValidateDTO.InputCreateUser.Email);
                     }
 
                     var resultNameInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Name, 1, 150);
                     if (resultNameInvalidLength != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidLength(userValidateDTO.InputCreateUser.Name, userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Name, 1, 150, resultNameInvalidLength);
+                        InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
                     }
 
                     var resultPasswordInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Password, 6, 150);
                     if (resultPasswordInvalidLength != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidLength(userValidateDTO.InputCreateUser.Password, userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Password, 6, 150, resultNameInvalidLength);
+                        InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Password, 6, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Password));
                     }
 
                     var resultPasswordInvalidMatch = InvalidMatch(userValidateDTO.InputCreateUser.Password, userValidateDTO.InputCreateUser.ConfirmPassword);
                     if (resultPasswordInvalidMatch != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidMatch(userValidateDTO.InputCreateUser.Email, resultPasswordInvalidMatch);
+                        InvalidMatch(userValidateDTO.InputCreateUser.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputCreateUser.Password), nameof(userValidateDTO.InputCreateUser.ConfirmPassword));
                     }
+
+                    if (!userValidateDTO.Invalid)
+                        AddSuccessMessage(userValidateDTO.InputCreateUser.Email, "Usuário cadastrado com sucesso");
                 }
 
                 break;
@@ -85,9 +100,12 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
         ValidateProcess(listUserValidateDTO, EnumProcessTypeGeneric.Create);
 
-        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!)).ToList();
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputCreateUser.Count)
+            return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!);
+        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!)).ToList();
+        return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!, [.. successes, .. errors]);
     }
 
     public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdate)
@@ -113,7 +131,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService) : B
         UserDTO? userDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         if (userDTO == null || !inputAuthenticateUser.Password.CompareHash(userDTO.ExternalPropertiesDTO.Password))
-            return BaseResult<OutputAuthenticateUser>.Failure().AddError(new DetailedNotification(inputAuthenticateUser.Email, "Usuário ou senha inválidos"));
+            return BaseResult<OutputAuthenticateUser>.Failure(new DetailedNotification(inputAuthenticateUser.Email, ["Usuário ou senha inválidos"], EnumNotificationType.Error));
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 
