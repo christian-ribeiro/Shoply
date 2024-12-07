@@ -8,8 +8,8 @@ public class UserMap : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasOne(x => x.CreationUser).WithMany(x => x.ListCreationUserUser).HasForeignKey(x => x.CreationUserId).HasConstraintName("fkey_usuario_id_usuario_criacao");
-        builder.HasOne(x => x.ChangeUser).WithMany(x => x.ListChangeUserUser).HasForeignKey(x => x.ChangeUserId).HasConstraintName("fkey_usuario_id_usuario_alteracao");
+        builder.HasOne(x => x.CreationUser).WithMany(x => x.ListCreationUserUser).HasForeignKey(x => x.CreationUserId).HasConstraintName("fkey_usuario_id_usuario_criacao").OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(x => x.ChangeUser).WithMany(x => x.ListChangeUserUser).HasForeignKey(x => x.ChangeUserId).HasConstraintName("fkey_usuario_id_usuario_alteracao").OnDelete(DeleteBehavior.NoAction);
 
         builder.ToTable("usuario");
 
@@ -31,13 +31,13 @@ public class UserMap : IEntityTypeConfiguration<User>
         builder.Property(x => x.Name).HasMaxLength(150);
         builder.Property(x => x.Name).IsRequired();
 
-        builder.Property(x => x.Password).HasColumnName("senha");
-        builder.Property(x => x.Password).HasMaxLength(150);
-        builder.Property(x => x.Password).IsRequired();
-
         builder.Property(x => x.Email).HasColumnName("email");
         builder.Property(x => x.Email).HasMaxLength(150);
         builder.Property(x => x.Email).IsRequired();
+
+        builder.Property(x => x.Password).HasColumnName("senha");
+        builder.Property(x => x.Password).HasMaxLength(150);
+        builder.Property(x => x.Password).IsRequired();
 
         builder.Property(x => x.Language).HasColumnName("idioma");
         builder.Property(x => x.Language).IsRequired();

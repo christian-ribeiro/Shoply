@@ -8,8 +8,8 @@ public class CustomerMap : IEntityTypeConfiguration<Customer>
 {
     public void Configure(EntityTypeBuilder<Customer> builder)
     {
-        builder.HasOne(x => x.CreationUser).WithMany(x => x.ListCreationUserCustomer).HasForeignKey(x => x.CreationUserId).HasConstraintName("fkey_cliente_id_usuario_criacao");
-        builder.HasOne(x => x.ChangeUser).WithMany(x => x.ListChangeUserCustomer).HasForeignKey(x => x.ChangeUserId).HasConstraintName("fkey_cliente_id_usuario_alteracao");
+        builder.HasOne(x => x.CreationUser).WithMany(x => x.ListCreationUserCustomer).HasForeignKey(x => x.CreationUserId).HasConstraintName("fkey_cliente_id_usuario_criacao").OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(x => x.ChangeUser).WithMany(x => x.ListChangeUserCustomer).HasForeignKey(x => x.ChangeUserId).HasConstraintName("fkey_cliente_id_usuario_alteracao").OnDelete(DeleteBehavior.NoAction);
 
         builder.ToTable("cliente");
 

@@ -1,4 +1,4 @@
-﻿using Shoply.Arguments.Argument.Module.Registration;
+﻿using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Base;
 
 namespace Shoply.Domain.DTO.Module.Registration;

@@ -2,6 +2,7 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Base;
 using Shoply.Arguments.Enum.Base.Validate;
+using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;

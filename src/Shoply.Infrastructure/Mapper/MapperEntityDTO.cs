@@ -39,11 +39,11 @@ public class MapperEntityDTO : Profile
             .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
             .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
             .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
-            .ConstructUsing(src => new CustomerDTO
+            .ConstructUsing((src, mapper) => new CustomerDTO
             {
                 InternalPropertiesDTO = new InternalPropertiesCustomerDTO(),
-                ExternalPropertiesDTO = new ExternalPropertiesCustomerDTO(),
-                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerDTO()
+                ExternalPropertiesDTO = new ExternalPropertiesCustomerDTO(src.Code, src.FirstName, src.LastName, src.BirthDate, src.Document, src.PersonType),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerDTO(src.ListCustomerAddress?.Select(address => mapper.Mapper.Map<CustomerAddressDTO>(address)).ToList())
             })
             .ReverseMap();
 
@@ -52,11 +52,37 @@ public class MapperEntityDTO : Profile
             .ReverseMap();
 
         CreateMap<Customer, ExternalPropertiesCustomerDTO>()
-            .ConstructUsing(src => new ExternalPropertiesCustomerDTO())
+            .ConstructUsing(src => new ExternalPropertiesCustomerDTO(src.Code, src.FirstName, src.LastName, src.BirthDate, src.Document, src.PersonType))
             .ReverseMap();
 
         CreateMap<Customer, AuxiliaryPropertiesCustomerDTO>()
-            .ConstructUsing(src => new AuxiliaryPropertiesCustomerDTO())
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesCustomerDTO(src.ListCustomerAddress?.Select(address => mapper.Mapper.Map<CustomerAddressDTO>(address)).ToList()))
+            .ReverseMap();
+        #endregion
+
+        #region CustomerAddress
+        CreateMap<CustomerAddress, CustomerAddressDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new CustomerAddressDTO
+            {
+                InternalPropertiesDTO = new InternalPropertiesCustomerAddressDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesCustomerAddressDTO(src.CustomerId, src.AddressType, src.PublicPlace, src.Number, src.Complement, src.Neighborhood, src.PostalCode, src.Reference, src.Observation),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerAddressDTO(mapper.Mapper.Map<CustomerDTO>(src.Customer))
+            })
+            .ReverseMap();
+
+        CreateMap<CustomerAddress, InternalPropertiesCustomerAddressDTO>()
+            .ConstructUsing(src => new InternalPropertiesCustomerAddressDTO())
+            .ReverseMap();
+
+        CreateMap<CustomerAddress, ExternalPropertiesCustomerAddressDTO>()
+            .ConstructUsing(src => new ExternalPropertiesCustomerAddressDTO(src.CustomerId, src.AddressType, src.PublicPlace, src.Number, src.Complement, src.Neighborhood, src.PostalCode, src.Reference, src.Observation))
+            .ReverseMap();
+
+        CreateMap<CustomerAddress, AuxiliaryPropertiesCustomerAddressDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesCustomerAddressDTO(mapper.Mapper.Map<CustomerDTO>(src.Customer)))
             .ReverseMap();
         #endregion
     }

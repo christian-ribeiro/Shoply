@@ -9,6 +9,7 @@ public class ShoplyDbContext(DbContextOptions<ShoplyDbContext> options) : DbCont
     #region Registration
     public DbSet<User>? User { get; set; }
     public DbSet<Customer>? Customer { get; set; }
+    public DbSet<CustomerAddress>? CustomerAddress { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,4 +1,5 @@
 ﻿using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Enum.Module.Registration;
 using System.Text.Json.Serialization;
 
 namespace Shoply.Arguments.Argument.Module.Registration;

@@ -5,15 +5,15 @@ using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 
-public class User(string name, string password, string email, EnumLanguage language, string? refreshToken, Guid? loginKey, string? passwordRecoveryCode) : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>
+public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>
 {
-    public string Name { get; private set; } = name;
-    public string Password { get; private set; } = password;
-    public string Email { get; private set; } = email;
-    public EnumLanguage Language { get; private set; } = language;
-    public string? RefreshToken { get; private set; } = refreshToken;
-    public Guid? LoginKey { get; private set; } = loginKey;
-    public string? PasswordRecoveryCode { get; private set; } = passwordRecoveryCode;
+    public string Name { get; private set; } = String.Empty;
+    public string Email { get; private set; } = String.Empty;
+    public string Password { get; private set; } = String.Empty;
+    public EnumLanguage Language { get; private set; }
+    public string? RefreshToken { get; private set; }
+    public Guid? LoginKey { get; private set; }
+    public string? PasswordRecoveryCode { get; private set; }
 
     #region Virtual Properties
     #region External
@@ -24,7 +24,24 @@ public class User(string name, string password, string email, EnumLanguage langu
     #region Customer
     public virtual List<Customer>? ListCreationUserCustomer { get; private set; }
     public virtual List<Customer>? ListChangeUserCustomer { get; private set; }
+    #endregion    
+    #region CustomerAddress
+    public virtual List<CustomerAddress>? ListCreationUserCustomerAddress { get; private set; }
+    public virtual List<CustomerAddress>? ListChangeUserCustomerAddress { get; private set; }
     #endregion
     #endregion
     #endregion
+
+    public User() { }
+
+    public User(string name, string email, string password, EnumLanguage language, string? refreshToken, Guid? loginKey, string? passwordRecoveryCode)
+    {
+        Name = name;
+        Email = email;
+        Password = password;
+        Language = language;
+        RefreshToken = refreshToken;
+        LoginKey = loginKey;
+        PasswordRecoveryCode = passwordRecoveryCode;
+    }
 }
