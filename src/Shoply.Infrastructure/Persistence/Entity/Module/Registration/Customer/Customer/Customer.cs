@@ -1,4 +1,5 @@
 ﻿using Shoply.Arguments.Argument.Module.Registration;
+using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Infrastructure.Entity.Base;
 
