@@ -1,16 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
 public class DynamicQueryBuilder<TEntity>
 {
-    public static async Task<List<TEntity>> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
+    public static IQueryable<TEntity> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
     {
         var parameter = Expression.Parameter(typeof(TEntity), "x");
         var selector = BuildSelector(parameter, typeof(TEntity), properties);
         var lambda = Expression.Lambda<Func<TEntity, TEntity>>(selector, parameter);
-        return await queryable.Select(lambda).ToListAsync();
+        return queryable.Select(lambda);
     }
 
     private static Expression BuildSelector(Expression parameter, Type entityType, List<string> properties)

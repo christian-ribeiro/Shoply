@@ -90,7 +90,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     public async Task<List<TDTO>> GetDynamic(string[] fields)
     {
         var query = _dbSet.AsQueryable();
-        var projectedQuery = await DynamicQueryBuilder<TEntity>.GetDynamic(query, [.. fields]);
+        var projectedQuery = await DynamicQueryBuilder<TEntity>.GetDynamic(query, [.. fields]).ToListAsync();
         return FromEntityToDTO(projectedQuery);
     }
     #endregion
