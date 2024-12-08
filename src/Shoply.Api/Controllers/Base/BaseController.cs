@@ -36,7 +36,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.Get(id));
+            return await ResponseAsync(PrepareReturn(await _service!.Get(id)));
         }
         catch (Exception ex)
         {
@@ -51,7 +51,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.GetListByListId(listId));
+            return await ResponseAsync(PrepareReturn(await _service!.GetListByListId(listId)));
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.GetAll());
+            return await ResponseAsync(PrepareReturn(await _service!.GetAll()));
         }
         catch (Exception ex)
         {
@@ -81,7 +81,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.GetByIdentifier(inputIdentifier));
+            return await ResponseAsync(PrepareReturn(await _service!.GetByIdentifier(inputIdentifier)));
         }
         catch (Exception ex)
         {
@@ -96,7 +96,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.GetListByListIdentifier(listInputIdentifier));
+            return await ResponseAsync(PrepareReturn(await _service!.GetListByListIdentifier(listInputIdentifier)));
         }
         catch (Exception ex)
         {
@@ -111,7 +111,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service.GetDynamic(fields));
+            return await ResponseAsync(PrepareReturn(await _service.GetDynamic(fields)));
         }
         catch (Exception ex)
         {
@@ -128,7 +128,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.Create(inputCreate));
+            return await ResponseAsync(PrepareReturn(await _service!.Create(inputCreate)));
         }
         catch (Exception ex)
         {
@@ -143,7 +143,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.Create(listInputCreate));
+            return await ResponseAsync(PrepareReturn(await _service!.Create(listInputCreate)));
         }
         catch (Exception ex)
         {
@@ -160,7 +160,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.Update(inputIdentityUpdate));
+            return await ResponseAsync(PrepareReturn(await _service!.Update(inputIdentityUpdate)));
 
         }
         catch (Exception ex)
@@ -176,7 +176,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     {
         try
         {
-            return await ResponseAsync(await _service!.Update(listInputIdentityUpdate));
+            return await ResponseAsync(PrepareReturn(await _service!.Update(listInputIdentityUpdate)));
         }
         catch (Exception ex)
         {
@@ -256,8 +256,11 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         SessionHelper.SetGuidSessionDataRequest(this, _guidSessionDataRequest);
     }
 
-    protected async Task<ActionResult> ResponseAsync<T>(BaseResult<T> result)
+    protected async Task<ActionResult> ResponseAsync<T>(BaseResult<T>? result)
     {
+        if (result == null)
+            return await Task.FromResult(StatusCode((int)HttpStatusCode.InternalServerError));
+
         if (!result.IsSuccess)
             return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<T> { ListNotification = result.ListNotification }));
 
@@ -274,8 +277,31 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         return await Task.FromResult(StatusCode((int)statusCode, new BaseResponse<ResponseType> { Result = result }));
     }
 
+    protected async Task<ActionResult> ResponseAsync(BaseResult<object> result, HttpStatusCode statusCode = HttpStatusCode.OK)
+    {
+        if (!result.IsSuccess)
+            return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<object> { ListNotification = result.ListNotification }));
+
+
+        return await Task.FromResult(StatusCode((int)HttpStatusCode.OK, new BaseResponse<object>
+        {
+            Result = result.Value,
+            ListNotification = result.ListNotification?.Count > 0 ? result.ListNotification : null
+        }));
+    }
+
     protected async Task<ActionResult> ResponseExceptionAsync(Exception ex)
     {
         return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListNotification = [new DetailedNotification("", [ex.Message], EnumNotificationType.Error)] }));
+    }
+
+    public static BaseResult<object>? PrepareReturn<T>(BaseResult<T>? input)
+    {
+        return PrepareResponse.PrepareReturn(input);
+    }
+
+    public static object? PrepareReturn<T>(T input)
+    {
+        return PrepareResponse.PrepareReturn(input);
     }
 }

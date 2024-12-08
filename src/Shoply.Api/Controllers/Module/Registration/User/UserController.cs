@@ -19,7 +19,7 @@ public class UserController(IUserService service, IShoplyUnitOfWork unitOfWork) 
     {
         try
         {
-            return await ResponseAsync(await _service.Authenticate(inputAuthenticateUser));
+            return await ResponseAsync(PrepareReturn(await _service.Authenticate(inputAuthenticateUser)));
         }
         catch (Exception ex)
         {
