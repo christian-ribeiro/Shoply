@@ -18,7 +18,6 @@ public class CustomerAddress : BaseEntity<CustomerAddress, InputCreateCustomerAd
     public string? Observation { get; private set; }
 
     public virtual Customer? Customer { get; private set; }
-    public virtual User? User { get; private set; }
 
     public CustomerAddress() { }
 
