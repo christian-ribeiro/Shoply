@@ -4,7 +4,9 @@ using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Infrastructure.Entity.Base;
+using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
@@ -23,6 +25,90 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     protected Guid _guidSessionDataRequest;
     protected readonly TContext _context = context;
     protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
+
+    public async Task<IEnumerable<TEntity>> GetDynamic(List<string> properties)
+    {
+        var parameter = Expression.Parameter(typeof(TEntity), "x");
+        var bindings = new List<MemberBinding>();
+
+        // Projeção para o objeto Customer
+        var customerBindings = new Dictionary<(string, Type), List<MemberBinding>>();
+
+        foreach (var property in properties)
+        {
+            var propertySplit = property.Split('.');
+            if (propertySplit.Count() > 1)
+            {
+                var customerProperty = property.Substring($"{propertySplit[0]}.".Length);
+                var customerPropertyExpression = BuildPropertyExpression(parameter, propertySplit[0]);
+                var customerPropertyBinding = BuildCustomerPropertyExpression(customerPropertyExpression, customerProperty);
+
+                if (!customerBindings.ContainsKey((propertySplit[0], customerPropertyExpression.Type)))
+                    customerBindings.Add((propertySplit[0], customerPropertyExpression.Type), []);
+
+                customerBindings[(propertySplit[0], customerPropertyExpression.Type)].Add(customerPropertyBinding);
+            }
+            else
+            {
+                // A propriedade é de CustomerAddress
+                var propertyExpression = BuildPropertyExpression(parameter, property);
+                if (propertyExpression != null)
+                {
+                    bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
+                }
+            }
+        }
+
+        // Se existirem propriedades do Customer, as agregamos em um novo objeto Customer
+        if (customerBindings.Any())
+        {
+            foreach (var customerBinding in customerBindings)
+            {
+                var customerExpression = Expression.New(customerBinding.Key.Item2);
+                var customerInit = Expression.MemberInit(customerExpression, customerBinding.Value);
+                bindings.Add(Expression.Bind(typeof(TEntity).GetProperty(customerBinding.Key.Item1), customerInit));
+            }
+        }
+
+        // Criamos a projeção final
+        var selector = Expression.Lambda<Func<TEntity, TEntity>>(
+            Expression.MemberInit(Expression.New(typeof(TEntity)), bindings),
+            parameter
+        );
+
+        return await _context.Set<TEntity>().Select(selector).ToListAsync();
+    }
+
+    private MemberExpression BuildPropertyExpression(Expression parameter, string propertyName)
+    {
+        var properties = propertyName.Split('.');
+        Expression propertyExpression = parameter;
+
+        // Navegar por cada parte da propriedade
+        foreach (var prop in properties)
+        {
+            // Tenta acessar a propriedade diretamente
+            var propInfo = propertyExpression.Type.GetProperty(prop);
+            if (propInfo != null)
+            {
+                // Se for uma propriedade de navegação, usamos Expression.Property
+                propertyExpression = Expression.Property(propertyExpression, propInfo);
+            }
+            else
+            {
+                throw new ArgumentException($"A propriedade '{prop}' não foi encontrada.");
+            }
+        }
+
+        return (MemberExpression)propertyExpression;
+    }
+
+    private MemberBinding BuildCustomerPropertyExpression(Expression customerExpression, string customerProperty)
+    {
+        // Aqui, fazemos a projeção específica para as propriedades de Customer
+        var customerPropertyExpression = BuildPropertyExpression(customerExpression, customerProperty);
+        return Expression.Bind(customerPropertyExpression.Member, customerPropertyExpression);
+    }
 
     #region Read
     public async Task<TDTO> Get(long id)
@@ -90,8 +176,8 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     public async Task<List<TDTO>> GetDynamic(string[] fields)
     {
         var query = _dbSet.AsQueryable();
-        var projectedQuery = DynamicQueryBuilder<TEntity>.BuildQuery(query, fields);
-        return FromEntityToDTO(await projectedQuery.ToListAsync());
+        var projectedQuery = await GetDynamic(fields.ToList());
+        return FromEntityToDTO(projectedQuery.ToList());
     }
     #endregion
 

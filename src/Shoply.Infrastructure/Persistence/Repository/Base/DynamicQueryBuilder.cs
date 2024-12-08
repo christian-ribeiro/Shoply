@@ -1,65 +1,90 @@
-﻿using Shoply.Infrastructure.DataAnnotation;
-using System.Dynamic;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base
 {
     public class DynamicQueryBuilder<T>
     {
-        public static IQueryable<TEntity> BuildQuery<TEntity>(IQueryable<TEntity> source, string[] fields)
+        public async Task<IQueryable<TEntity>> QueryWithDynamicProjectionAsync<TEntity>(
+    IQueryable<TEntity> query,
+    string[] properties)
+    where TEntity : class
         {
-            // Parâmetro da expressão (representa o "x" no "x => ...")
             var parameter = Expression.Parameter(typeof(TEntity), "x");
 
-            // Lista de bindings para configurar a projeção dinâmica
-            var bindings = new List<MemberAssignment>();
+            var bindings = new List<MemberBinding>();
 
-            // Percorre cada campo fornecido pelo usuário
-            foreach (var field in fields)
+            foreach (var property in properties)
             {
-                // Divide o caminho das propriedades para lidar com navegação
-                var parts = field.Split('.');
-                Expression currentExpression = parameter;
-                Type currentType = typeof(TEntity); // Mantemos o tipo original da entidade
+                var parts = property.Split('.'); // Divide por "." para identificar navegação
+                var memberExpression = GetMemberExpression(parameter, parts);
+                var memberExpressionType = GetMemberExpression(parameter, parts.Take(1).ToArray());
+                var propertyInfo = memberExpressionType.Member as PropertyInfo; // Garantir que é uma PropertyInfo
 
-                // Percorre o caminho completo das propriedades
-                foreach (var part in parts)
+                // Se a propriedade for do tipo de navegação, precisamos criar um novo objeto para a navegação.
+                if (parts.Length == 1)
                 {
-                    // Obtém a propriedade ou campo atual
-                    var property = currentType.GetProperty(part);
-                    if (property == null)
-                    {
-                        throw new InvalidOperationException($"Propriedade '{part}' não encontrada em {currentType.Name}.");
-                    }
-
-                    // Se a propriedade for de navegação, atualizamos o currentType
-                    if (property.PropertyType.IsDefined(typeof(EntityAttribute)))
-                    {
-                        currentType = property.PropertyType;  // Atualiza para o tipo da navegação
-                    }
-
-                    // Navega pela propriedade
-                    currentExpression = Expression.PropertyOrField(currentExpression, part);
+                    // Se for uma propriedade simples (não navegação), apenas adiciona a projeção direta
+                    bindings.Add(Expression.Bind(propertyInfo, memberExpression));
                 }
-
-                // A expressão final deve ser vinculada ao tipo correto
-                var finalProperty = currentType.GetProperty(parts.Last());
-                if (finalProperty != null)
+                else
                 {
-                    // Aqui vinculamos a expressão correta à propriedade final
-                    bindings.Add(Expression.Bind(finalProperty, currentExpression));
+                    // Se for uma propriedade de navegação, cria a projeção da navegação
+                    var navigationMemberInit = CreateNavigationMemberInit(parameter, propertyInfo, memberExpression, parts.Skip(1).ToArray());
+                    bindings.Add(Expression.Bind(propertyInfo, navigationMemberInit));
                 }
             }
 
-            // Cria a inicialização para a projeção
-            var initExpression = Expression.MemberInit(Expression.New(typeof(TEntity)), bindings);
+            var body = Expression.MemberInit(Expression.New(typeof(TEntity)), bindings);
+            var selector = Expression.Lambda<Func<TEntity, TEntity>>(body, parameter);
 
-            // Cria o Lambda para a projeção
-            var lambda = Expression.Lambda<Func<TEntity, TEntity>>(initExpression, parameter);
+            return query.Select(selector);
+        }
 
-            // Aplica a projeção no IQueryable
-            return source.Select(lambda);
+        private static MemberExpression GetMemberExpression(Expression parameter, string[] parts)
+        {
+            Expression currentExpression = parameter;
+
+            foreach (var part in parts)
+            {
+                var propertyInfo = currentExpression.Type.GetProperty(part);
+
+                if (propertyInfo == null)
+                {
+                    throw new InvalidOperationException($"Propriedade '{part}' não encontrada.");
+                }
+
+                currentExpression = Expression.Property(currentExpression, propertyInfo);
+            }
+
+            return (MemberExpression)currentExpression;
+        }
+
+        private static MemberInitExpression CreateNavigationMemberInit(Expression parameter, PropertyInfo propertyInfo, Expression navigationExpression, string[] remainingParts)
+        {
+            // Se a propriedade for uma navegação, fazemos uma verificação mais detalhada.
+            if (remainingParts.Length > 0)
+            {
+                // Se houver mais partes, significa que temos uma propriedade dentro do objeto de navegação.
+                var nextPart = remainingParts[0];
+                var nextPropertyInfo = propertyInfo.PropertyType.GetProperty(nextPart);
+
+                if (nextPropertyInfo == null)
+                {
+                    throw new InvalidOperationException($"Propriedade '{nextPart}' não encontrada dentro de '{propertyInfo.Name}'.");
+                }
+
+                var nextMemberExpression = Expression.Property(navigationExpression, nextPropertyInfo);
+                var nextRemainingParts = remainingParts.Skip(1).ToArray();
+
+                // Chama recursivamente para as próximas propriedades dentro da navegação
+                return CreateNavigationMemberInit(parameter, nextPropertyInfo, nextMemberExpression, nextRemainingParts);
+            }
+            else
+            {
+                // Caso contrário, estamos no final da navegação e podemos projetar a propriedade diretamente.
+                return Expression.MemberInit(Expression.New(propertyInfo.PropertyType));
+            }
         }
     }
 }

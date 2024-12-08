@@ -4,4 +4,7 @@ using Shoply.Domain.Interface.Repository.Base;
 
 namespace Shoply.Domain.Interface.Repository.Module.Registration;
 
-public interface ICustomerAddressRepository : IBaseRepository<InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO> { }
+public interface ICustomerAddressRepository : IBaseRepository<InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO>
+{
+    List<CustomerAddressDTO> Teste();
+}
