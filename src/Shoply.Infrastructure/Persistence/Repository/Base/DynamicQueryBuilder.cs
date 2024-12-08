@@ -12,7 +12,7 @@ public class DynamicQueryBuilder<TEntity>
         return queryable.Select(lambda);
     }
 
-    private static Expression BuildSelector(Expression parameter, Type entityType, List<string> properties)
+    private static MemberInitExpression BuildSelector(Expression parameter, Type entityType, List<string> properties)
     {
         var bindings = new List<MemberBinding>();
         var groupedProperties = properties.GroupBy(p => p.Split('.')[0]);
@@ -25,70 +25,50 @@ public class DynamicQueryBuilder<TEntity>
                 .Select(p => string.Join('.', p.Split('.').Skip(1)))
                 .ToList();
 
-            var propertyExpression = BuildPropertyExpression(parameter, propertyName);
+            var propertyInfo = entityType.GetProperty(propertyName);
+            if (propertyInfo == null) continue;
 
-            if (propertyExpression != null)
+            var propertyExpression = Expression.Property(parameter, propertyInfo);
+
+            if (IsCollection(propertyExpression.Type))
             {
-                if (IsCollection(propertyExpression.Type))
-                {
-                    var elementType = propertyExpression.Type.GetGenericArguments()[0];
-                    var collectionParameter = Expression.Parameter(elementType, "e");
-                    var collectionSelector = BuildSelector(collectionParameter, elementType, subProperties);
-                    var collectionLambda = Expression.Lambda(collectionSelector, collectionParameter);
+                var elementType = propertyExpression.Type.GetGenericArguments()[0];
+                var collectionParameter = Expression.Parameter(elementType, "e");
+                var collectionSelector = BuildSelector(collectionParameter, elementType, subProperties);
+                var collectionLambda = Expression.Lambda(collectionSelector, collectionParameter);
 
-                    var selectMethod = typeof(Enumerable)
-                        .GetMethods()
-                        .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
-                        .MakeGenericMethod(elementType, collectionSelector.Type);
+                var selectMethod = typeof(Enumerable)
+                    .GetMethods()
+                    .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
+                    .MakeGenericMethod(elementType, collectionSelector.Type);
 
-                    var selectCall = Expression.Call(selectMethod, propertyExpression, collectionLambda);
+                var selectCall = Expression.Call(selectMethod, propertyExpression, collectionLambda);
 
-                    var toListMethod = typeof(Enumerable)
-                        .GetMethod("ToList")!
-                        .MakeGenericMethod(elementType);
+                var toListMethod = typeof(Enumerable)
+                    .GetMethod("ToList")!
+                    .MakeGenericMethod(elementType);
 
-                    var toListCall = Expression.Call(toListMethod, selectCall);
-                    bindings.Add(Expression.Bind(propertyExpression.Member, toListCall));
-                }
-                else if (subProperties.Count > 0)
-                {
-                    var nestedSelector = BuildSelector(propertyExpression, propertyExpression.Type, subProperties);
-                    var newExpression = Expression.New(propertyExpression.Type);
-                    var memberInit = Expression.MemberInit(newExpression, ((MemberInitExpression)nestedSelector).Bindings);
-                    bindings.Add(Expression.Bind(propertyExpression.Member, memberInit));
-                }
-                else
-                {
-                    bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
-                }
+                var toListCall = Expression.Call(toListMethod, selectCall);
+                bindings.Add(Expression.Bind(propertyInfo, toListCall));
+            }
+            else if (subProperties.Count > 0)
+            {
+                var nestedSelector = BuildSelector(propertyExpression, propertyExpression.Type, subProperties);
+
+                var nullCheck = Expression.Equal(propertyExpression, Expression.Constant(null));
+                var defaultValue = Expression.Default(propertyExpression.Type);
+                var conditional = Expression.Condition(nullCheck, defaultValue, nestedSelector);
+
+                bindings.Add(Expression.Bind(propertyInfo, conditional));
+            }
+            else
+            {
+                bindings.Add(Expression.Bind(propertyInfo, propertyExpression));
             }
         }
 
         var newEntity = Expression.New(entityType);
         return Expression.MemberInit(newEntity, bindings);
-    }
-
-    private static MemberExpression? BuildPropertyExpression(Expression parameter, string propertyName)
-    {
-        var properties = propertyName.Split('.');
-        Expression propertyExpression = parameter;
-
-        foreach (var prop in properties)
-        {
-            if (IsCollection(propertyExpression.Type))
-            {
-                var elementType = propertyExpression.Type.GetGenericArguments()[0];
-                propertyExpression = Expression.Parameter(elementType);
-            }
-
-            var propInfo = propertyExpression.Type.GetProperty(prop);
-            if (propInfo != null)
-                propertyExpression = Expression.Property(propertyExpression, propInfo);
-            else
-                return null;
-        }
-
-        return (MemberExpression)propertyExpression;
     }
 
     private static bool IsCollection(Type type) => type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
