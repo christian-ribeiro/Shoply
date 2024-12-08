@@ -92,8 +92,5 @@ public class DynamicQueryBuilder<TEntity>
         return (MemberExpression)propertyExpression;
     }
 
-    private static bool IsCollection(Type type)
-    {
-        return type.IsGenericType && (typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) || typeof(ICollection<>).IsAssignableFrom(type.GetGenericTypeDefinition()) || typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition()));
-    }
+    private static bool IsCollection(Type type) => type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
 }
