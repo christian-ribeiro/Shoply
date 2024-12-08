@@ -7,14 +7,14 @@ namespace Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 
 public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCustomer, OutputCustomer, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO>
 {
-    public string Code { get; set; } = String.Empty;
-    public string FirstName { get; set; } = String.Empty;
-    public string LastName { get; set; } = String.Empty;
-    public DateTime? BirthDate { get; set; }
-    public string Document { get; set; } = String.Empty;
-    public EnumPersonType PersonType { get; set; }
+    public string Code { get; private set; } = String.Empty;
+    public string FirstName { get; private set; } = String.Empty;
+    public string LastName { get; private set; } = String.Empty;
+    public DateTime? BirthDate { get; private set; }
+    public string Document { get; private set; } = String.Empty;
+    public EnumPersonType PersonType { get; private set; }
 
-    public virtual List<CustomerAddress>? ListCustomerAddress { get; set; }
+    public virtual List<CustomerAddress>? ListCustomerAddress { get; private set; }
 
     public Customer() { }
 

@@ -7,13 +7,13 @@ namespace Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 
 public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>
 {
-    public string Name { get; set; } = String.Empty;
-    public string Email { get; set; } = String.Empty;
-    public string Password { get; set; } = String.Empty;
-    public EnumLanguage Language { get; set; }
-    public string? RefreshToken { get; set; }
-    public Guid? LoginKey { get; set; }
-    public string? PasswordRecoveryCode { get; set; }
+    public string Name { get; private set; } = String.Empty;
+    public string Email { get; private set; } = String.Empty;
+    public string Password { get; private set; } = String.Empty;
+    public EnumLanguage Language { get; private set; }
+    public string? RefreshToken { get; private set; }
+    public Guid? LoginKey { get; private set; }
+    public string? PasswordRecoveryCode { get; private set; }
 
     #region Virtual Properties
     #region External
