@@ -1,75 +1,96 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Shoply.Infrastructure.Persistence.Repository.Base
+namespace Shoply.Infrastructure.Persistence.Repository.Base;
+
+public class DynamicQueryBuilder<TEntity>
 {
-    public class DynamicQueryBuilder<TEntity>
+    public static async Task<List<TEntity>> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
     {
-        public static async Task<List<TEntity>> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
+        var parameter = Expression.Parameter(typeof(TEntity), "x");
+        var bindings = new List<MemberBinding>();
+        var collectionBindings = new Dictionary<string, LambdaExpression>();
+
+        foreach (var property in properties)
         {
-            var parameter = Expression.Parameter(typeof(TEntity), "x");
-            var bindings = new List<MemberBinding>();
-            var navigateBindings = new Dictionary<(string NavigatonProperty, Type Type), List<MemberBinding>>();
-
-            foreach (var property in properties)
+            var propertySplit = property.Split('.');
+            if (propertySplit.Length > 1)
             {
-                var propertySplit = property.Split('.');
-                if (propertySplit.Length > 1)
-                {
-                    var customerProperty = property[$"{propertySplit[0]}.".Length..];
-                    var customerPropertyExpression = BuildPropertyExpression(parameter, propertySplit[0]);
-                    var customerPropertyBinding = BuildCustomerPropertyExpression(customerPropertyExpression, customerProperty);
+                var collectionName = propertySplit[0];
+                var collectionProperty = string.Join('.', propertySplit.Skip(1));
 
-                    if (!navigateBindings.ContainsKey((propertySplit[0], customerPropertyExpression.Type)))
-                        navigateBindings.Add((propertySplit[0], customerPropertyExpression.Type), []);
-
-                    navigateBindings[(propertySplit[0], customerPropertyExpression.Type)].Add(customerPropertyBinding);
-                }
-                else
+                if (!collectionBindings.ContainsKey(collectionName))
                 {
-                    var propertyExpression = BuildPropertyExpression(parameter, property);
-                    if (propertyExpression != null)
-                    {
-                        bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
-                    }
+                    collectionBindings[collectionName] = BuildCollectionSelector(parameter, collectionName, properties.Where(p => p.StartsWith(collectionName + ".")).ToList());
                 }
             }
-
-            if (navigateBindings.Count > 0)
+            else
             {
-                foreach (var customerBinding in navigateBindings)
+                var propertyExpression = BuildPropertyExpression(parameter, property);
+                if (propertyExpression != null)
                 {
-                    var customerExpression = Expression.New(customerBinding.Key.Type);
-                    var customerInit = Expression.MemberInit(customerExpression, customerBinding.Value);
-                    bindings.Add(Expression.Bind(typeof(TEntity).GetProperty(customerBinding.Key.NavigatonProperty)!, customerInit));
+                    bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
                 }
             }
-
-            var selector = Expression.Lambda<Func<TEntity, TEntity>>(Expression.MemberInit(Expression.New(typeof(TEntity)), bindings), parameter);
-            return await queryable.Select(selector).ToListAsync();
         }
 
-        private static MemberExpression BuildPropertyExpression(Expression parameter, string propertyName)
+        foreach (var collectionBinding in collectionBindings)
         {
-            var properties = propertyName.Split('.');
-            Expression propertyExpression = parameter;
+            var collectionProperty = BuildPropertyExpression(parameter, collectionBinding.Key);
+            var selectMethod = typeof(Enumerable)
+                .GetMethods()
+                .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
+                .MakeGenericMethod(collectionProperty.Type.GetGenericArguments()[0], collectionBinding.Value.ReturnType);
 
-            foreach (var prop in properties)
-            {
-                var propInfo = propertyExpression.Type.GetProperty(prop);
-                if (propInfo != null)
-                    propertyExpression = Expression.Property(propertyExpression, propInfo);
-                else
-                    throw new ArgumentException($"A propriedade '{prop}' não foi encontrada.");
-            }
+            var selectCall = Expression.Call(selectMethod, collectionProperty, collectionBinding.Value);
+            var toListMethod = typeof(Enumerable)
+                .GetMethod("ToList")
+                .MakeGenericMethod(collectionBinding.Value.ReturnType);
 
-            return (MemberExpression)propertyExpression;
+            var toListCall = Expression.Call(toListMethod, selectCall);
+
+            bindings.Add(Expression.Bind(typeof(TEntity).GetProperty(collectionBinding.Key)!, toListCall));
         }
 
-        private static MemberAssignment BuildCustomerPropertyExpression(Expression customerExpression, string customerProperty)
+        var selector = Expression.Lambda<Func<TEntity, TEntity>>(
+            Expression.MemberInit(Expression.New(typeof(TEntity)), bindings), parameter);
+
+        return await queryable.Select(selector).ToListAsync();
+    }
+
+    private static MemberExpression BuildPropertyExpression(Expression parameter, string propertyName)
+    {
+        var properties = propertyName.Split('.');
+        Expression propertyExpression = parameter;
+
+        foreach (var prop in properties)
         {
-            var customerPropertyExpression = BuildPropertyExpression(customerExpression, customerProperty);
-            return Expression.Bind(customerPropertyExpression.Member, customerPropertyExpression);
+            var propInfo = propertyExpression.Type.GetProperty(prop);
+            if (propInfo != null)
+                propertyExpression = Expression.Property(propertyExpression, propInfo);
+            else
+                throw new ArgumentException($"A propriedade '{prop}' não foi encontrada.");
         }
+
+        return (MemberExpression)propertyExpression;
+    }
+
+    private static LambdaExpression BuildCollectionSelector(Expression parameter, string collectionName, List<string> collectionProperties)
+    {
+        var collectionProperty = BuildPropertyExpression(parameter, collectionName);
+        var elementType = collectionProperty.Type.GetGenericArguments()[0];
+
+        var elementParameter = Expression.Parameter(elementType, "e");
+        var bindings = new List<MemberBinding>();
+
+        foreach (var property in collectionProperties)
+        {
+            var subPropertyName = property.Substring(collectionName.Length + 1);
+            var propertyExpression = BuildPropertyExpression(elementParameter, subPropertyName);
+            bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
+        }
+
+        var body = Expression.MemberInit(Expression.New(elementType), bindings);
+        return Expression.Lambda(body, elementParameter);
     }
 }
