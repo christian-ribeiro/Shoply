@@ -1,90 +1,75 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base
 {
-    public class DynamicQueryBuilder<T>
+    public class DynamicQueryBuilder<TEntity>
     {
-        public async Task<IQueryable<TEntity>> QueryWithDynamicProjectionAsync<TEntity>(
-    IQueryable<TEntity> query,
-    string[] properties)
-    where TEntity : class
+        public static async Task<List<TEntity>> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
         {
             var parameter = Expression.Parameter(typeof(TEntity), "x");
-
             var bindings = new List<MemberBinding>();
+            var navigateBindings = new Dictionary<(string NavigatonProperty, Type Type), List<MemberBinding>>();
 
             foreach (var property in properties)
             {
-                var parts = property.Split('.'); // Divide por "." para identificar navegação
-                var memberExpression = GetMemberExpression(parameter, parts);
-                var memberExpressionType = GetMemberExpression(parameter, parts.Take(1).ToArray());
-                var propertyInfo = memberExpressionType.Member as PropertyInfo; // Garantir que é uma PropertyInfo
-
-                // Se a propriedade for do tipo de navegação, precisamos criar um novo objeto para a navegação.
-                if (parts.Length == 1)
+                var propertySplit = property.Split('.');
+                if (propertySplit.Count() > 1)
                 {
-                    // Se for uma propriedade simples (não navegação), apenas adiciona a projeção direta
-                    bindings.Add(Expression.Bind(propertyInfo, memberExpression));
+                    var customerProperty = property.Substring($"{propertySplit[0]}.".Length);
+                    var customerPropertyExpression = BuildPropertyExpression(parameter, propertySplit[0]);
+                    var customerPropertyBinding = BuildCustomerPropertyExpression(customerPropertyExpression, customerProperty);
+
+                    if (!navigateBindings.ContainsKey((propertySplit[0], customerPropertyExpression.Type)))
+                        navigateBindings.Add((propertySplit[0], customerPropertyExpression.Type), []);
+
+                    navigateBindings[(propertySplit[0], customerPropertyExpression.Type)].Add(customerPropertyBinding);
                 }
                 else
                 {
-                    // Se for uma propriedade de navegação, cria a projeção da navegação
-                    var navigationMemberInit = CreateNavigationMemberInit(parameter, propertyInfo, memberExpression, parts.Skip(1).ToArray());
-                    bindings.Add(Expression.Bind(propertyInfo, navigationMemberInit));
+                    var propertyExpression = BuildPropertyExpression(parameter, property);
+                    if (propertyExpression != null)
+                    {
+                        bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
+                    }
                 }
             }
 
-            var body = Expression.MemberInit(Expression.New(typeof(TEntity)), bindings);
-            var selector = Expression.Lambda<Func<TEntity, TEntity>>(body, parameter);
+            if (navigateBindings.Count > 0)
+            {
+                foreach (var customerBinding in navigateBindings)
+                {
+                    var customerExpression = Expression.New(customerBinding.Key.Type);
+                    var customerInit = Expression.MemberInit(customerExpression, customerBinding.Value);
+                    bindings.Add(Expression.Bind(typeof(TEntity).GetProperty(customerBinding.Key.NavigatonProperty)!, customerInit));
+                }
+            }
 
-            return query.Select(selector);
+            var selector = Expression.Lambda<Func<TEntity, TEntity>>(Expression.MemberInit(Expression.New(typeof(TEntity)), bindings), parameter);
+            return await queryable.Select(selector).ToListAsync();
         }
 
-        private static MemberExpression GetMemberExpression(Expression parameter, string[] parts)
+        private static MemberExpression BuildPropertyExpression(Expression parameter, string propertyName)
         {
-            Expression currentExpression = parameter;
+            var properties = propertyName.Split('.');
+            Expression propertyExpression = parameter;
 
-            foreach (var part in parts)
+            foreach (var prop in properties)
             {
-                var propertyInfo = currentExpression.Type.GetProperty(part);
-
-                if (propertyInfo == null)
-                {
-                    throw new InvalidOperationException($"Propriedade '{part}' não encontrada.");
-                }
-
-                currentExpression = Expression.Property(currentExpression, propertyInfo);
+                var propInfo = propertyExpression.Type.GetProperty(prop);
+                if (propInfo != null)
+                    propertyExpression = Expression.Property(propertyExpression, propInfo);
+                else
+                    throw new ArgumentException($"A propriedade '{prop}' não foi encontrada.");
             }
 
-            return (MemberExpression)currentExpression;
+            return (MemberExpression)propertyExpression;
         }
 
-        private static MemberInitExpression CreateNavigationMemberInit(Expression parameter, PropertyInfo propertyInfo, Expression navigationExpression, string[] remainingParts)
+        private static MemberBinding BuildCustomerPropertyExpression(Expression customerExpression, string customerProperty)
         {
-            // Se a propriedade for uma navegação, fazemos uma verificação mais detalhada.
-            if (remainingParts.Length > 0)
-            {
-                // Se houver mais partes, significa que temos uma propriedade dentro do objeto de navegação.
-                var nextPart = remainingParts[0];
-                var nextPropertyInfo = propertyInfo.PropertyType.GetProperty(nextPart);
-
-                if (nextPropertyInfo == null)
-                {
-                    throw new InvalidOperationException($"Propriedade '{nextPart}' não encontrada dentro de '{propertyInfo.Name}'.");
-                }
-
-                var nextMemberExpression = Expression.Property(navigationExpression, nextPropertyInfo);
-                var nextRemainingParts = remainingParts.Skip(1).ToArray();
-
-                // Chama recursivamente para as próximas propriedades dentro da navegação
-                return CreateNavigationMemberInit(parameter, nextPropertyInfo, nextMemberExpression, nextRemainingParts);
-            }
-            else
-            {
-                // Caso contrário, estamos no final da navegação e podemos projetar a propriedade diretamente.
-                return Expression.MemberInit(Expression.New(propertyInfo.PropertyType));
-            }
+            var customerPropertyExpression = BuildPropertyExpression(customerExpression, customerProperty);
+            return Expression.Bind(customerPropertyExpression.Member, customerPropertyExpression);
         }
     }
 }

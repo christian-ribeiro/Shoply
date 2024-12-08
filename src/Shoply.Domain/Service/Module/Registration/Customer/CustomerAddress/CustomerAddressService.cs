@@ -10,14 +10,9 @@ namespace Shoply.Domain.Service.Module.Registration;
 
 public class CustomerAddressService(ICustomerAddressRepository repository) : BaseService<ICustomerAddressRepository, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, CustomerAddressValidateDTO, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO, EnumValidateProcessGeneric>(repository), ICustomerAddressService
 {
-    public override async Task<BaseResult<List<OutputCustomerAddress?>>> Create(List<InputCreateCustomerAddress> listInputCreate)
+    public async Task<BaseResult<List<OutputCustomerAddress?>>> GetDynamic(string[] fields)
     {
-        var teste = _repository.Teste();
-        var teste2 = FromDTOToOutput(teste);
-        var result = await _repository.GetDynamic(
-            ["CustomerId", "PublicPlace", "Number", "Complement", "Neighborhood", "PostalCode", "Reference", "Observation", "Customer.Code",
-            "Customer.FirstName", "Customer.LastName", "Customer.BirthDate", "Customer.Document", "Customer.PersonType"            ]);
-
-        return default;
+        var result = await _repository.GetDynamic(fields);
+        return BaseResult<List<OutputCustomerAddress>>.Success(FromDTOToOutput(result))!;
     }
 }
