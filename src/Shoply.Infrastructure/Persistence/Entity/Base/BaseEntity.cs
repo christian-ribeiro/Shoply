@@ -1,12 +1,10 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
-using Shoply.Infrastructure.DataAnnotation;
 using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shoply.Infrastructure.Entity.Base;
 
-[Entity]
 public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
