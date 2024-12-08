@@ -103,6 +103,21 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             return await ResponseExceptionAsync(ex);
         }
     }
+
+    [HttpPost("GetDynamic")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<TOutput>>> GetDynamic([FromBody] string[] fields)
+    {
+        try
+        {
+            return await ResponseAsync(await _service.GetDynamic(fields));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
     #endregion
 
     #region Create

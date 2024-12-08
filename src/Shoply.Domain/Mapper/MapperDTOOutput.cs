@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
-using System.Net;
 
 namespace Shoply.Domain.Mapper;
 

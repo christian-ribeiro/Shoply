@@ -1,6 +1,4 @@
-﻿using Shoply.Arguments.Enum.Base;
-
-namespace Shoply.Arguments.Argument.Base;
+﻿namespace Shoply.Arguments.Argument.Base;
 
 public class BaseResult<T>(bool isSuccess, List<DetailedNotification> listNotification, T? value)
 {

@@ -16,6 +16,7 @@ public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOut
     Task<List<TOutput>> GetAll();
     Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TOutput>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
+    Task<BaseResult<List<TOutput>>> GetDynamic(string[] fields);
     Task<BaseResult<TOutput?>> Create(TInputCreate inputCreate);
     Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate);
     Task<BaseResult<TOutput?>> Update(TInputIdentityUpdate inputIdentityUpdate);

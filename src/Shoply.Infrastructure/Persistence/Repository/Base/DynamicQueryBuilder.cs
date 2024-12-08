@@ -14,9 +14,9 @@ namespace Shoply.Infrastructure.Persistence.Repository.Base
             foreach (var property in properties)
             {
                 var propertySplit = property.Split('.');
-                if (propertySplit.Count() > 1)
+                if (propertySplit.Length > 1)
                 {
-                    var customerProperty = property.Substring($"{propertySplit[0]}.".Length);
+                    var customerProperty = property[$"{propertySplit[0]}.".Length..];
                     var customerPropertyExpression = BuildPropertyExpression(parameter, propertySplit[0]);
                     var customerPropertyBinding = BuildCustomerPropertyExpression(customerPropertyExpression, customerProperty);
 
@@ -66,7 +66,7 @@ namespace Shoply.Infrastructure.Persistence.Repository.Base
             return (MemberExpression)propertyExpression;
         }
 
-        private static MemberBinding BuildCustomerPropertyExpression(Expression customerExpression, string customerProperty)
+        private static MemberAssignment BuildCustomerPropertyExpression(Expression customerExpression, string customerProperty)
         {
             var customerPropertyExpression = BuildPropertyExpression(customerExpression, customerProperty);
             return Expression.Bind(customerPropertyExpression.Member, customerPropertyExpression);

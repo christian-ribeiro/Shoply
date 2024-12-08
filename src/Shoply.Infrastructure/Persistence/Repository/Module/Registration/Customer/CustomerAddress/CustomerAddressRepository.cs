@@ -4,7 +4,6 @@ using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Infrastructure.Persistence.Context;
 using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using Shoply.Infrastructure.Persistence.Repository.Base;
-using System.Linq;
 
 namespace Shoply.Infrastructure.Persistence.Repository.Module.Registration;
 
