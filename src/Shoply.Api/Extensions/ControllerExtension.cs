@@ -1,4 +1,6 @@
-﻿namespace Shoply.Api.Extensions;
+﻿using System.Text.Json.Serialization;
+
+namespace Shoply.Api.Extensions;
 
 public static class ControllerExtension
 {
@@ -7,7 +9,8 @@ public static class ControllerExtension
         services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 });
 
         services.AddEndpointsApiExplorer();
