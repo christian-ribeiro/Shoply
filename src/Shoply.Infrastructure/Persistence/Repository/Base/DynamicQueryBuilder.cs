@@ -8,89 +8,92 @@ public class DynamicQueryBuilder<TEntity>
     public static async Task<List<TEntity>> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
     {
         var parameter = Expression.Parameter(typeof(TEntity), "x");
+        var selector = BuildSelector(parameter, typeof(TEntity), properties);
+        var lambda = Expression.Lambda<Func<TEntity, TEntity>>(selector, parameter);
+        return await queryable.Select(lambda).ToListAsync();
+    }
+
+    private static Expression BuildSelector(Expression parameter, Type entityType, List<string> properties)
+    {
         var bindings = new List<MemberBinding>();
-        var collectionBindings = new Dictionary<string, LambdaExpression>();
+        var groupedProperties = properties.GroupBy(p => p.Split('.')[0]);
 
-        foreach (var property in properties)
+        foreach (var group in groupedProperties)
         {
-            var propertySplit = property.Split('.');
-            if (propertySplit.Length > 1)
-            {
-                var collectionName = propertySplit[0];
-                var collectionProperty = string.Join('.', propertySplit.Skip(1));
+            var propertyName = group.Key;
+            var subProperties = group
+                .Where(p => p.Contains('.'))
+                .Select(p => string.Join('.', p.Split('.').Skip(1)))
+                .ToList();
 
-                if (!collectionBindings.ContainsKey(collectionName))
-                {
-                    collectionBindings[collectionName] = BuildCollectionSelector(parameter, collectionName, properties.Where(p => p.StartsWith(collectionName + ".")).ToList());
-                }
-            }
-            else
+            var propertyExpression = BuildPropertyExpression(parameter, propertyName);
+
+            if (propertyExpression != null)
             {
-                var propertyExpression = BuildPropertyExpression(parameter, property);
-                if (propertyExpression != null)
+                if (IsCollection(propertyExpression.Type))
+                {
+                    var elementType = propertyExpression.Type.GetGenericArguments()[0];
+                    var collectionParameter = Expression.Parameter(elementType, "e");
+                    var collectionSelector = BuildSelector(collectionParameter, elementType, subProperties);
+                    var collectionLambda = Expression.Lambda(collectionSelector, collectionParameter);
+
+                    var selectMethod = typeof(Enumerable)
+                        .GetMethods()
+                        .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
+                        .MakeGenericMethod(elementType, collectionSelector.Type);
+
+                    var selectCall = Expression.Call(selectMethod, propertyExpression, collectionLambda);
+
+                    var toListMethod = typeof(Enumerable)
+                        .GetMethod("ToList")!
+                        .MakeGenericMethod(elementType);
+
+                    var toListCall = Expression.Call(toListMethod, selectCall);
+                    bindings.Add(Expression.Bind(propertyExpression.Member, toListCall));
+                }
+                else if (subProperties.Count > 0)
+                {
+                    var nestedSelector = BuildSelector(propertyExpression, propertyExpression.Type, subProperties);
+                    var newExpression = Expression.New(propertyExpression.Type);
+                    var memberInit = Expression.MemberInit(newExpression, ((MemberInitExpression)nestedSelector).Bindings);
+                    bindings.Add(Expression.Bind(propertyExpression.Member, memberInit));
+                }
+                else
                 {
                     bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
                 }
             }
         }
 
-        foreach (var collectionBinding in collectionBindings)
-        {
-            var collectionProperty = BuildPropertyExpression(parameter, collectionBinding.Key);
-            var selectMethod = typeof(Enumerable)
-                .GetMethods()
-                .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
-                .MakeGenericMethod(collectionProperty.Type.GetGenericArguments()[0], collectionBinding.Value.ReturnType);
-
-            var selectCall = Expression.Call(selectMethod, collectionProperty, collectionBinding.Value);
-            var toListMethod = typeof(Enumerable)
-                .GetMethod("ToList")
-                .MakeGenericMethod(collectionBinding.Value.ReturnType);
-
-            var toListCall = Expression.Call(toListMethod, selectCall);
-
-            bindings.Add(Expression.Bind(typeof(TEntity).GetProperty(collectionBinding.Key)!, toListCall));
-        }
-
-        var selector = Expression.Lambda<Func<TEntity, TEntity>>(
-            Expression.MemberInit(Expression.New(typeof(TEntity)), bindings), parameter);
-
-        return await queryable.Select(selector).ToListAsync();
+        var newEntity = Expression.New(entityType);
+        return Expression.MemberInit(newEntity, bindings);
     }
 
-    private static MemberExpression BuildPropertyExpression(Expression parameter, string propertyName)
+    private static MemberExpression? BuildPropertyExpression(Expression parameter, string propertyName)
     {
         var properties = propertyName.Split('.');
         Expression propertyExpression = parameter;
 
         foreach (var prop in properties)
         {
+            if (IsCollection(propertyExpression.Type))
+            {
+                var elementType = propertyExpression.Type.GetGenericArguments()[0];
+                propertyExpression = Expression.Parameter(elementType);
+            }
+
             var propInfo = propertyExpression.Type.GetProperty(prop);
             if (propInfo != null)
                 propertyExpression = Expression.Property(propertyExpression, propInfo);
             else
-                throw new ArgumentException($"A propriedade '{prop}' não foi encontrada.");
+                return null;
         }
 
         return (MemberExpression)propertyExpression;
     }
 
-    private static LambdaExpression BuildCollectionSelector(Expression parameter, string collectionName, List<string> collectionProperties)
+    private static bool IsCollection(Type type)
     {
-        var collectionProperty = BuildPropertyExpression(parameter, collectionName);
-        var elementType = collectionProperty.Type.GetGenericArguments()[0];
-
-        var elementParameter = Expression.Parameter(elementType, "e");
-        var bindings = new List<MemberBinding>();
-
-        foreach (var property in collectionProperties)
-        {
-            var subPropertyName = property.Substring(collectionName.Length + 1);
-            var propertyExpression = BuildPropertyExpression(elementParameter, subPropertyName);
-            bindings.Add(Expression.Bind(propertyExpression.Member, propertyExpression));
-        }
-
-        var body = Expression.MemberInit(Expression.New(elementType), bindings);
-        return Expression.Lambda(body, elementParameter);
+        return type.IsGenericType && (typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) || typeof(ICollection<>).IsAssignableFrom(type.GetGenericTypeDefinition()) || typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition()));
     }
 }
