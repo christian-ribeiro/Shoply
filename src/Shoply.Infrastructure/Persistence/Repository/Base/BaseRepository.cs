@@ -27,19 +27,19 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #region Read
     public async Task<TDTO> Get(long id)
     {
-        var query = await GetDynamicQuery(nameof(Get), "");
+        var query = await GetDynamicQuery(nameof(Get), "", ["Id"]);
         return FromEntityToDTO(await query.Where(x => x.Id == id).FirstOrDefaultAsync());
     }
 
     public async Task<List<TDTO>> GetListByListId(List<long> listId)
     {
-        var query = await GetDynamicQuery(nameof(GetListByListId), "");
+        var query = await GetDynamicQuery(nameof(GetListByListId), "", ["Id"]);
         return FromEntityToDTO(await query.Where(x => listId.Contains(x.Id)).ToListAsync());
     }
 
     public async Task<List<TDTO>> GetAll()
     {
-        var query = await GetDynamicQuery(nameof(GetAll), "");
+        var query = await GetDynamicQuery(nameof(GetAll), "", []);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
@@ -83,7 +83,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        var query = await GetDynamicQuery(nameof(GetListByListIdentifier), "");
+        var query = await GetDynamicQuery(nameof(GetListByListIdentifier), "", (from i in typeof(TInputIdentifier).GetProperties() select i.Name).ToList());
         query = query.Where(combinedExpression!);
 
         var entities = await query.ToListAsync();
@@ -226,10 +226,10 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
     }
 
-    internal async Task<IQueryable<TEntity>> GetDynamicQuery(string? methodName, string callAlias)
+    internal async Task<IQueryable<TEntity>> GetDynamicQuery(string? methodName, string callAlias, List<string> requiredProperties)
     {
         var properties = new TEntity().GetProperties(methodName, callAlias);
-        return await Task.FromResult(_dbSet.AsQueryable().GetDynamic([.. properties]));
+        return await Task.FromResult(_dbSet.AsQueryable().GetDynamic([.. properties, .. requiredProperties]));
     }
     #endregion
 }
