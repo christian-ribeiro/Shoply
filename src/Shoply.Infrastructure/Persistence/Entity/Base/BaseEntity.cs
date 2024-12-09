@@ -1,7 +1,9 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using Shoply.Infrastructure.Persistence.Entity.Base;
 using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace Shoply.Infrastructure.Entity.Base;
 
@@ -16,15 +18,10 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     public long Id { get; set; }
-    [NotMapped]
     public virtual DateTime? CreationDate { get; set; }
-    [NotMapped]
     public virtual long? CreationUserId { get; set; }
-    [NotMapped]
     public virtual DateTime? ChangeDate { get; set; }
-    [NotMapped]
     public virtual long? ChangeUserId { get; set; }
-
 
     #region Virtual Properties
     #region Internal
@@ -35,23 +32,20 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
     #endregion
     #endregion
 
-    public TEntity SetInternalData(TInternalPropertiesDTO internalPropertiesDTO)
-    {
-        Id = internalPropertiesDTO.Id;
-        CreationDate = internalPropertiesDTO.CreationDate;
-        CreationUserId = internalPropertiesDTO.CreationUserId;
-        ChangeDate = internalPropertiesDTO.ChangeDate;
-        ChangeUserId = internalPropertiesDTO.ChangeUserId;
-        return (TEntity)this;
-    }
+    public virtual Dictionary<(string? MethodName, string? CallAlias), CustomReturnPropertyDictionary> MethodReturnPropertyDictionary => [];
 
-    public TEntity SetInternalData(long id, DateTime? creationDate, long? creationUserId, DateTime? changeDate, long? changeUserId)
+    public List<string> GetProperties(string? methodName, string? callAlias)
     {
-        Id = id;
-        CreationDate = creationDate;
-        ChangeDate = changeDate;
-        CreationUserId = creationUserId;
-        ChangeUserId = changeUserId;
-        return (TEntity)this;
+        MethodReturnPropertyDictionary.TryGetValue((methodName, callAlias), out CustomReturnPropertyDictionary? dictionary);
+        if (dictionary == null || dictionary.ListProperty.Count == 0)
+        {
+            return (from i in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    where !i.IsDefined(typeof(NotMappedAttribute)) &&
+                    (i.PropertyType.IsPrimitive || i.PropertyType.IsValueType || i.PropertyType == typeof(string))
+                    select i.Name).ToList();
+        }
+
+        return (from i in dictionary.ListProperty
+                select i.PropertyName).ToList(); ;
     }
 }

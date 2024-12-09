@@ -10,7 +10,7 @@ namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
 public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TContext : DbContext
-    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, new()
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
@@ -27,17 +27,20 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #region Read
     public async Task<TDTO> Get(long id)
     {
-        return FromEntityToDTO(await _dbSet.FindAsync(id));
+        var query = await GetDynamicQuery(nameof(Get), "");
+        return FromEntityToDTO(await query.Where(x => x.Id == id).FirstOrDefaultAsync());
     }
 
     public async Task<List<TDTO>> GetListByListId(List<long> listId)
     {
-        return FromEntityToDTO(await _dbSet.Where(x => listId.Contains(x.Id)).ToListAsync());
+        var query = await GetDynamicQuery(nameof(GetListByListId), "");
+        return FromEntityToDTO(await query.Where(x => listId.Contains(x.Id)).ToListAsync());
     }
 
     public async Task<List<TDTO>> GetAll()
     {
-        return FromEntityToDTO(await _dbSet.ToListAsync());
+        var query = await GetDynamicQuery(nameof(GetAll), "");
+        return FromEntityToDTO(await query.ToListAsync());
     }
 
     public async Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier)
@@ -80,7 +83,8 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        IQueryable<TEntity> query = _dbSet.Where(combinedExpression!);
+        var query = await GetDynamicQuery(nameof(GetListByListIdentifier), "");
+        query = query.Where(combinedExpression!);
 
         var entities = await query.ToListAsync();
 
@@ -89,9 +93,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
 
     public async Task<List<TDTO>> GetDynamic(string[] fields)
     {
-        var query = _dbSet.AsQueryable();
-        var projectedQuery = await DynamicQueryBuilder<TEntity>.GetDynamic(query, [.. fields]).ToListAsync();
-        return FromEntityToDTO(projectedQuery);
+        return FromEntityToDTO(await _dbSet.AsQueryable().GetDynamic([.. fields]).ToListAsync());
     }
     #endregion
 
@@ -222,6 +224,12 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     internal static List<TDTO> FromEntityToDTO(List<TEntity> listEntity)
     {
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
+    }
+
+    internal async Task<IQueryable<TEntity>> GetDynamicQuery(string? methodName, string callAlias)
+    {
+        var properties = new TEntity().GetProperties(methodName, callAlias);
+        return await Task.FromResult(_dbSet.AsQueryable().GetDynamic([.. properties]));
     }
     #endregion
 }

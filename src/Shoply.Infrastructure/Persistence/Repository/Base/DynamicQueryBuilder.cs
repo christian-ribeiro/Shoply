@@ -2,9 +2,9 @@
 
 namespace Shoply.Infrastructure.Persistence.Repository.Base;
 
-public class DynamicQueryBuilder<TEntity>
+public static class DynamicQueryBuilder
 {
-    public static IQueryable<TEntity> GetDynamic(IQueryable<TEntity> queryable, List<string> properties)
+    public static IQueryable<TEntity> GetDynamic<TEntity>(this IQueryable<TEntity> queryable, List<string> properties)
     {
         var parameter = Expression.Parameter(typeof(TEntity), "x");
         var selector = BuildSelector(parameter, typeof(TEntity), properties);
