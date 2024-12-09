@@ -27,19 +27,19 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #region Read
     public async Task<TDTO> Get(long id)
     {
-        var query = await GetDynamicQuery(nameof(Get), "", ["Id"]);
-        return FromEntityToDTO(await query.Where(x => x.Id == id).FirstOrDefaultAsync());
+        var query = await GetDynamicQuery(_dbSet.Where(x => x.Id == id), nameof(Get), "");
+        return FromEntityToDTO(await query.FirstOrDefaultAsync());
     }
 
     public async Task<List<TDTO>> GetListByListId(List<long> listId)
     {
-        var query = await GetDynamicQuery(nameof(GetListByListId), "", ["Id"]);
-        return FromEntityToDTO(await query.Where(x => listId.Contains(x.Id)).ToListAsync());
+        var query = await GetDynamicQuery(_dbSet.Where(x => listId.Contains(x.Id)), nameof(GetListByListId), "");
+        return FromEntityToDTO(await query.ToListAsync());
     }
 
     public async Task<List<TDTO>> GetAll()
     {
-        var query = await GetDynamicQuery(nameof(GetAll), "", []);
+        var query = await GetDynamicQuery(_dbSet.AsQueryable(), nameof(GetAll), "");
         return FromEntityToDTO(await query.ToListAsync());
     }
 
@@ -83,12 +83,8 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        var query = await GetDynamicQuery(nameof(GetListByListIdentifier), "", (from i in typeof(TInputIdentifier).GetProperties() select i.Name).ToList());
-        query = query.Where(combinedExpression!);
-
-        var entities = await query.ToListAsync();
-
-        return FromEntityToDTO(entities);
+        var query = await GetDynamicQuery(_dbSet.Where(combinedExpression!), nameof(GetListByListIdentifier), "");
+        return FromEntityToDTO(await query.ToListAsync());
     }
 
     public async Task<List<TDTO>> GetDynamic(string[] fields)
@@ -226,10 +222,10 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
     }
 
-    internal async Task<IQueryable<TEntity>> GetDynamicQuery(string? methodName, string callAlias, List<string> requiredProperties)
+    internal static async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string callAlias)
     {
         var properties = new TEntity().GetProperties(methodName, callAlias);
-        return await Task.FromResult(_dbSet.AsQueryable().GetDynamic([.. properties, .. requiredProperties]));
+        return await Task.FromResult(query.GetDynamic(properties));
     }
     #endregion
 }

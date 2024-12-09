@@ -6,8 +6,9 @@ public static class DynamicQueryBuilder
 {
     public static IQueryable<TEntity> GetDynamic<TEntity>(this IQueryable<TEntity> queryable, List<string> properties)
     {
+        var whereProperties = queryable.ExtractWhereProperties();
         var parameter = Expression.Parameter(typeof(TEntity), "x");
-        var selector = BuildSelector(parameter, typeof(TEntity), properties);
+        var selector = BuildSelector(parameter, typeof(TEntity), properties.Union(whereProperties).ToList());
         var lambda = Expression.Lambda<Func<TEntity, TEntity>>(selector, parameter);
         return queryable.Select(lambda);
     }
