@@ -106,21 +106,6 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             return await ResponseExceptionAsync(ex);
         }
     }
-
-    [HttpPost("GetDynamic")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<TOutput>>> GetDynamic([FromBody] string[] fields)
-    {
-        try
-        {
-            return await ResponseAsync(PrepareReturn(await _service.GetDynamic(fields)));
-        }
-        catch (Exception ex)
-        {
-            return await ResponseExceptionAsync(ex);
-        }
-    }
     #endregion
 
     #region Create
@@ -268,9 +253,13 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         string? returnProperty = Request.HttpContext.GetHeader<string>("RETURN-PROPERTY");
         if (!string.IsNullOrEmpty(returnProperty))
         {
-            using JsonDocument document = JsonDocument.Parse(returnProperty, new JsonDocumentOptions { AllowTrailingCommas = true });
-            if (document.RootElement.ValueKind == JsonValueKind.Array)
-                SessionData.SetReturnProperty(_guidSessionDataRequest, JsonSerializer.Deserialize<List<string>>(returnProperty));
+            try
+            {
+                using JsonDocument document = JsonDocument.Parse(returnProperty, new JsonDocumentOptions { AllowTrailingCommas = true });
+                if (document.RootElement.ValueKind == JsonValueKind.Array)
+                    SessionData.SetReturnProperty(_guidSessionDataRequest, JsonSerializer.Deserialize<List<string>>(returnProperty));
+            }
+            catch { }
         }
     }
 

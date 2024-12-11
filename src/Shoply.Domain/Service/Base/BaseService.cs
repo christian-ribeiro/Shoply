@@ -49,11 +49,6 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     {
         return FromDTOToOutput(await _repository.GetListByListIdentifier(listInputIdentifier, true));
     }
-
-    public async Task<BaseResult<List<TOutput>>> GetDynamic(string[] fields)
-    {
-        return BaseResult<List<TOutput>>.Success(FromDTOToOutput(await _repository.GetDynamic(fields, true)))!;
-    }
     #endregion
 
     #region Create
