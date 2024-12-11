@@ -25,31 +25,31 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
     #region Read
-    public async Task<TDTO> Get(long id)
+    public async Task<TDTO> Get(long id, bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.Where(x => x.Id == id), nameof(Get), "");
+        var query = await GetDynamicQuery(_dbSet.Where(x => x.Id == id), nameof(Get), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.FirstOrDefaultAsync());
     }
 
-    public async Task<List<TDTO>> GetListByListId(List<long> listId)
+    public async Task<List<TDTO>> GetListByListId(List<long> listId, bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.Where(x => listId.Contains(x.Id)), nameof(GetListByListId), "");
+        var query = await GetDynamicQuery(_dbSet.Where(x => listId.Contains(x.Id)), nameof(GetListByListId), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
-    public async Task<List<TDTO>> GetAll()
+    public async Task<List<TDTO>> GetAll(bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.AsQueryable(), nameof(GetAll), "");
+        var query = await GetDynamicQuery(_dbSet.AsQueryable(), nameof(GetAll), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
-    public async Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier)
+    public async Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier, bool useCustomReturnProperty = false)
     {
-        var result = await GetListByListIdentifier([inputIdentifier]);
+        var result = await GetListByListIdentifier([inputIdentifier], useCustomReturnProperty);
         return result.FirstOrDefault();
     }
 
-    public async Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier)
+    public async Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier, bool useCustomReturnProperty = false)
     {
         if (listInputIdentifier == null || listInputIdentifier.Count == 0)
             return new List<TDTO>();
@@ -83,11 +83,11 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        var query = await GetDynamicQuery(_dbSet.Where(combinedExpression!), nameof(GetListByListIdentifier), "");
+        var query = await GetDynamicQuery(_dbSet.Where(combinedExpression!), nameof(GetListByListIdentifier), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
-    public async Task<List<TDTO>> GetDynamic(string[] fields)
+    public async Task<List<TDTO>> GetDynamic(string[] fields, bool useCustomReturnProperty = false)
     {
         return FromEntityToDTO(await _dbSet.AsQueryable().GetDynamic([.. fields]).ToListAsync());
     }
@@ -222,9 +222,15 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
     }
 
-    internal static async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string callAlias)
+    internal async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string callAlias, bool useCustomReturnProperty)
     {
-        var properties = new TEntity().GetProperties(methodName, callAlias);
+        List<string> properties;
+        var returnProperty = useCustomReturnProperty ? SessionData.GetReturnProperty(_guidSessionDataRequest) : [];
+        if (returnProperty == null || returnProperty.Count == 0)
+            properties = new TEntity().GetProperties(methodName, callAlias);
+        else
+            properties = returnProperty;
+
         return await Task.FromResult(query.GetDynamic(properties));
     }
     #endregion

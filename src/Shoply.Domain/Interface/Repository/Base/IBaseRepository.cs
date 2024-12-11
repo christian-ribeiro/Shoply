@@ -15,12 +15,12 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
 {
     void SetGuid(Guid guidSessionDataRequest);
-    Task<TDTO> Get(long id);
-    Task<List<TDTO>> GetListByListId(List<long> listId);
-    Task<List<TDTO>> GetAll();
-    Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier);
-    Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
-    Task<List<TDTO>> GetDynamic(string[] fields);
+    Task<TDTO> Get(long id, bool useCustomReturnProperty = false);
+    Task<List<TDTO>> GetListByListId(List<long> listId, bool useCustomReturnProperty = false);
+    Task<List<TDTO>> GetAll(bool useCustomReturnProperty = false);
+    Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier, bool useCustomReturnProperty = false);
+    Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier, bool useCustomReturnProperty = false);
+    Task<List<TDTO>> GetDynamic(string[] fields, bool useCustomReturnProperty = false);
     Task<TDTO?> Create(TDTO dto);
     Task<List<TDTO>> Create(List<TDTO> listDTO);
     Task<TDTO?> Update(TDTO dto);

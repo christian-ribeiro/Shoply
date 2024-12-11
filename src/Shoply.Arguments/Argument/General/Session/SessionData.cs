@@ -34,9 +34,20 @@ public class SessionData
         ListSessionDataRequest[guidSessionDataRequest].LoggedUser = loggedUser;
     }
 
+    public static void SetReturnProperty(Guid guidSessionDataRequest, List<string>? returnProperty)
+    {
+        ListSessionDataRequest[guidSessionDataRequest].ReturnProperty = returnProperty;
+    }
+
     public static LoggedUser? GetLoggedUser(Guid guidSessionDataRequest)
     {
         ListSessionDataRequest.TryGetValue(guidSessionDataRequest, out SessionDataRequest? value);
         return value?.LoggedUser;
+    }
+
+    public static List<string>? GetReturnProperty(Guid guidSessionDataRequest)
+    {
+        ListSessionDataRequest.TryGetValue(guidSessionDataRequest, out SessionDataRequest? value);
+        return value?.ReturnProperty;
     }
 }

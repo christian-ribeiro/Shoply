@@ -1,19 +1,20 @@
-﻿using System.Dynamic;
+﻿using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Argument.General.Session;
 using System.Collections;
-using Shoply.Arguments.Argument.Base;
+using System.Dynamic;
 
 namespace Shoply.Api.Controllers.Base;
 
 public static class PrepareResponse
 {
-    public static BaseResult<object>? PrepareReturn<T>(BaseResult<T>? input)
+    public static BaseResult<object>? PrepareReturn<T>(Guid guidSessionDataRequest, BaseResult<T>? input)
     {
         if (input == null)
             return default;
 
         if (input.Value != null && input.IsSuccess)
         {
-            var response = PrepareReturn(input.Value!);
+            var response = PrepareReturn(guidSessionDataRequest, input.Value!);
             return BaseResult<object>
                 .Success(response!, input.ListNotification);
         }
@@ -24,10 +25,10 @@ public static class PrepareResponse
         return BaseResult<object>.Failure(input.ListNotification);
     }
 
-    public static object? PrepareReturn<T>(T input)
+    public static object? PrepareReturn<T>(Guid guidSessionDataRequest, T input)
     {
-        List<string> listProperties = [];
-        if (input == null || listProperties.Count == 0)
+        List<string>? listProperties = SessionData.GetReturnProperty(guidSessionDataRequest);
+        if (input == null || listProperties == null || listProperties.Count == 0)
             return input;
 
         Type currentType = input.GetType();

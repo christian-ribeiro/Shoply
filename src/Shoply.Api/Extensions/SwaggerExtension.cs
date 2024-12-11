@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
+using Shoply.Api.Swagger;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace Shoply.Api.Extensions
@@ -10,9 +11,9 @@ namespace Shoply.Api.Extensions
         {
             const string BearerScheme = "Bearer";
 
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "Shoply API",
                     Description = "API de demonstração de conceito",
@@ -24,14 +25,14 @@ namespace Shoply.Api.Extensions
                     }
                 });
 
-                c.AddSecurityDefinition(BearerScheme, new OpenApiSecurityScheme
+                options.AddSecurityDefinition(BearerScheme, new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme",
                     Type = SecuritySchemeType.Http,
                     Scheme = BearerScheme
                 });
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
@@ -46,15 +47,18 @@ namespace Shoply.Api.Extensions
                     }
                 });
 
-                c.TagActionsBy(api =>
+                options.TagActionsBy(api =>
                 {
                     var actionDescriptor = api.ActionDescriptor as ControllerActionDescriptor;
                     return [actionDescriptor!.ControllerName];
                 });
+
+                options.OperationFilter<HeaderParameterFilter>();
             });
 
             return services;
         }
+
         public static WebApplication ApplySwagger(this WebApplication app)
         {
             app.UseSwagger();

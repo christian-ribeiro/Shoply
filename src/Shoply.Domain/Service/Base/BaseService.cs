@@ -27,32 +27,32 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     #region Read
     public async Task<TOutput?> Get(long id)
     {
-        return FromDTOToOutput(await _repository.Get(id));
+        return FromDTOToOutput(await _repository.Get(id, true));
     }
 
     public async Task<List<TOutput>> GetListByListId(List<long> listId)
     {
-        return FromDTOToOutput(await _repository.GetListByListId(listId));
+        return FromDTOToOutput(await _repository.GetListByListId(listId, true));
     }
 
     public async Task<List<TOutput>> GetAll()
     {
-        return FromDTOToOutput(await _repository.GetAll())!;
+        return FromDTOToOutput(await _repository.GetAll(true))!;
     }
 
     public async Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier)
     {
-        return FromDTOToOutput(await _repository.GetByIdentifier(inputIdentifier));
+        return FromDTOToOutput(await _repository.GetByIdentifier(inputIdentifier, true));
     }
 
     public async Task<List<TOutput>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier)
     {
-        return FromDTOToOutput(await _repository.GetListByListIdentifier(listInputIdentifier));
+        return FromDTOToOutput(await _repository.GetListByListIdentifier(listInputIdentifier, true));
     }
 
     public async Task<BaseResult<List<TOutput>>> GetDynamic(string[] fields)
     {
-        return BaseResult<List<TOutput>>.Success(FromDTOToOutput(await _repository.GetDynamic(fields)))!;
+        return BaseResult<List<TOutput>>.Success(FromDTOToOutput(await _repository.GetDynamic(fields, true)))!;
     }
     #endregion
 

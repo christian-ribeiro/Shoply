@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Shoply.Application.Extensions;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Arguments.Argument.Module.Registration;
+using Shoply.Arguments.DataAnnotation;
 using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
 using System.Net;
+using System.Text.Json;
 
 namespace Shoply.Api.Controllers.Base;
 
@@ -186,6 +189,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     #endregion
 
     #region Delete
+    [HeaderIgnore]
     [HttpDelete("Delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
@@ -201,6 +205,7 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         }
     }
 
+    [HeaderIgnore]
     [HttpDelete("Delete/Multiple")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
@@ -236,6 +241,8 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
             }
         }
 
+        SetReturnProperty();
+
         await base.OnActionExecutionAsync(context, next);
     }
 
@@ -254,6 +261,17 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     private void SetGuid()
     {
         SessionHelper.SetGuidSessionDataRequest(this, _guidSessionDataRequest);
+    }
+
+    private void SetReturnProperty()
+    {
+        string? returnProperty = Request.HttpContext.GetHeader<string>("RETURN-PROPERTY");
+        if (!string.IsNullOrEmpty(returnProperty))
+        {
+            using JsonDocument document = JsonDocument.Parse(returnProperty, new JsonDocumentOptions { AllowTrailingCommas = true });
+            if (document.RootElement.ValueKind == JsonValueKind.Array)
+                SessionData.SetReturnProperty(_guidSessionDataRequest, JsonSerializer.Deserialize<List<string>>(returnProperty));
+        }
     }
 
     protected async Task<ActionResult> ResponseAsync<T>(BaseResult<T>? result)
@@ -295,13 +313,13 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         return await Task.FromResult(StatusCode((int)HttpStatusCode.BadRequest, new BaseResponse<string> { ListNotification = [new DetailedNotification("", [ex.Message], EnumNotificationType.Error)] }));
     }
 
-    public static BaseResult<object>? PrepareReturn<T>(BaseResult<T>? input)
+    public BaseResult<object>? PrepareReturn<T>(BaseResult<T>? input)
     {
-        return PrepareResponse.PrepareReturn(input);
+        return PrepareResponse.PrepareReturn(_guidSessionDataRequest, input);
     }
 
-    public static object? PrepareReturn<T>(T input)
+    public object? PrepareReturn<T>(T input)
     {
-        return PrepareResponse.PrepareReturn(input);
+        return PrepareResponse.PrepareReturn(_guidSessionDataRequest, input);
     }
 }
