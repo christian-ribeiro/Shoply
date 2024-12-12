@@ -10,7 +10,7 @@ public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCus
     public string Code { get; private set; } = String.Empty;
     public string FirstName { get; private set; } = String.Empty;
     public string LastName { get; private set; } = String.Empty;
-    public DateTime? BirthDate { get; private set; }
+    public DateOnly? BirthDate { get; private set; }
     public string Document { get; private set; } = String.Empty;
     public EnumPersonType PersonType { get; private set; }
 
@@ -18,7 +18,7 @@ public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCus
 
     public Customer() { }
 
-    public Customer(string code, string firstName, string lastName, DateTime? birthDate, string document, EnumPersonType personType, List<CustomerAddress>? listCustomerAddress)
+    public Customer(string code, string firstName, string lastName, DateOnly? birthDate, string document, EnumPersonType personType, List<CustomerAddress>? listCustomerAddress)
     {
         Code = code;
         FirstName = firstName;

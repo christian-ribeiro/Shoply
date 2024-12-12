@@ -124,18 +124,18 @@ public class BaseValidate<TValidateDTO, TProcessType>
         return allMatch ? EnumValidateType.Valid : EnumValidateType.Invalid;
     }
 
-    public static EnumValidateType InvalidBirthDate(DateTime? birthDate, int minAge, bool required)
+    public static EnumValidateType InvalidBirthDate(DateOnly? birthDate, int minAge, bool required)
     {
         if (!birthDate.HasValue)
             return required ? EnumValidateType.NonInformed : EnumValidateType.Valid;
 
-        if (birthDate > DateTime.Now)
+        if (birthDate > DateOnly.FromDateTime(DateTime.Today))
             return EnumValidateType.Invalid;
 
         DateTime today = DateTime.Today;
         int age = today.Year - birthDate.Value.Year;
 
-        if (birthDate.Value.Date > today.AddYears(-age)) age--;
+        if (birthDate.Value > DateOnly.FromDateTime(today.AddYears(-age))) age--;
 
         if (age < minAge)
             return EnumValidateType.Invalid;
