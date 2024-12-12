@@ -19,6 +19,7 @@ namespace Shoply.Application.Service.Authentication
                 [
                     new Claim(JwtRegisteredClaimNames.Sub, jwtUser.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Name, jwtUser.Name),
+                    new Claim("login_key", jwtUser.LoginKey.ToString()),
                     new Claim("user_email", jwtUser.Email),
                     new Claim("language", ((int)jwtUser.Language).ToString()),
                 ];
