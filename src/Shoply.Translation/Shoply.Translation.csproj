@@ -7,10 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shoply.Application\Shoply.Application.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.1.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.22" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
-    <ProjectReference Include="..\Shoply.Security\Shoply.Security.csproj" />
-    <ProjectReference Include="..\Shoply.Translation\Shoply.Translation.csproj" />
   </ItemGroup>
 
 </Project>

@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
     <ProjectReference Include="..\Shoply.Domain\Shoply.Domain.csproj" />
     <ProjectReference Include="..\Shoply.Infrastructure\Shoply.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shoply.Translation\Shoply.Translation.csproj" />
   </ItemGroup>
 
 </Project>

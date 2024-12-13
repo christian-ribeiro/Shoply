@@ -13,6 +13,8 @@ public static class DependencyInjectionExtension
                 scanner.Assembly("Shoply.Domain");
                 scanner.Assembly("Shoply.Infrastructure");
                 scanner.Assembly("Shoply.Application");
+                scanner.Assembly("Shoply.Translation");
+
                 scanner.WithDefaultConventions();
             });
         });

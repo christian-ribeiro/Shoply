@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shoply.Infrastructure.Persistence.Context;
+using Shoply.Infrastructure.Persistence.EFCore.Context;
+using Shoply.Translation.Persistence.Mongo.Context;
+using Shoply.Translation.Persistence.Redis.Context;
 
 namespace Shoply.Api.Extensions;
 
@@ -13,10 +15,11 @@ public static class ContextExtension
             string connectionString = configuration.GetConnectionString("DefaultConnection")!;
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSqlServer(connectionString);
-#if DEBUG
             options.EnableSensitiveDataLogging(true);
-#endif
         });
+
+        services.AddSingleton<TranslationMongoDBContext>();
+        services.AddSingleton<TranslationRedisContext>();
 
         return services;
     }

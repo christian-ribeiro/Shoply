@@ -5,7 +5,7 @@ using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
-using Shoply.Infrastructure.Persistence.UnitOfWork.Interface;
+using Shoply.Infrastructure.Persistence.EFCore.UnitOfWork.Interface;
 
 namespace Shoply.Api.Controllers.Module.Registration;
 

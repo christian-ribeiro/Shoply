@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Shoply.Domain.DTO.Module.Registration;
-using Shoply.Infrastructure.Persistence.Entity.Module.Registration;
+using Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
 namespace Shoply.Infrastructure.Mapper;
 

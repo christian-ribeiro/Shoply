@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35507.96 d17.13
+VisualStudioVersion = 17.13.35507.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shoply.Application", "src\Shoply.Application\Shoply.Application.csproj", "{CAA71297-C82D-4B0B-A7C1-9753E846383C}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shoply.Infrastructure", "src\Shoply.Infrastructure\Shoply.Infrastructure.csproj", "{16F99FC3-DB92-4DAB-ACDE-B36250D6B89C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shoply.Api", "src\Shoply.Api\Shoply.Api.csproj", "{24719D72-D2CE-417A-8767-1FFDB30F9390}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shoply.Translation", "src\Shoply.Translation\Shoply.Translation.csproj", "{269A60F3-2BCF-4B3B-AB33-64F70AC30FD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{24719D72-D2CE-417A-8767-1FFDB30F9390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24719D72-D2CE-417A-8767-1FFDB30F9390}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24719D72-D2CE-417A-8767-1FFDB30F9390}.Release|Any CPU.Build.0 = Release|Any CPU
+		{269A60F3-2BCF-4B3B-AB33-64F70AC30FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{269A60F3-2BCF-4B3B-AB33-64F70AC30FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{269A60F3-2BCF-4B3B-AB33-64F70AC30FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{269A60F3-2BCF-4B3B-AB33-64F70AC30FD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
