@@ -12,7 +12,6 @@ using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Service.Base;
 using Shoply.Security.Encryption;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -414,8 +413,8 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
 
     public async Task<BaseResult<OutputAuthenticateUser>> RefreshToken(InputRefreshTokenUser inputRefreshTokenUser)
     {
-        ClaimsPrincipal principal = await jwtService.GetPrincipalFromExpiredToken(inputRefreshTokenUser.Token);
-        _ = long.TryParse(principal.FindFirst("user_id")?.Value, out long userId);
+        BaseResult<ClaimsPrincipal> principal = await jwtService.GetPrincipalFromExpiredToken(inputRefreshTokenUser.Token);
+        _ = long.TryParse(principal?.Value?.FindFirst("user_id")?.Value, out long userId);
 
         UserDTO originalUserDTO = await _repository.Get(userId);
 
@@ -426,7 +425,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         if (errors.Count > 0)
             return BaseResult<OutputAuthenticateUser>.Failure(errors);
 
-        string token = await jwtService.GenerateJwtToken(principal.Claims.ToList());
+        string token = await jwtService.GenerateJwtToken(principal!.Value!.Claims.ToList());
         string refreshToken = await jwtService.GenerateRefreshToken();
 
         originalUserDTO.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.RefreshToken), refreshToken);

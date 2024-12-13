@@ -58,9 +58,8 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault(), result.ListNotification) : BaseResult<TOutput?>.Failure(result.ListNotification);
     }
 
-    public virtual async Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate)
+    public virtual Task<BaseResult<List<TOutput?>>> Create(List<TInputCreate> listInputCreate)
     {
-        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
@@ -72,9 +71,8 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         return result.IsSuccess ? BaseResult<TOutput?>.Success(result.Value?.FirstOrDefault(), result.ListNotification) : BaseResult<TOutput?>.Failure(result.ListNotification);
     }
 
-    public virtual async Task<BaseResult<List<TOutput?>>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)
+    public virtual Task<BaseResult<List<TOutput?>>> Update(List<TInputIdentityUpdate> listInputIdentityUpdate)
     {
-        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
@@ -85,9 +83,8 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
         return await Delete([inputIdentityDelete]);
     }
 
-    public virtual async Task<BaseResult<bool>> Delete(List<TInputIdentityDelete> listInputIdentityDelete)
+    public virtual Task<BaseResult<bool>> Delete(List<TInputIdentityDelete> listInputIdentityDelete)
     {
-        await Task.CompletedTask;
         throw new NotImplementedException();
     }
     #endregion
