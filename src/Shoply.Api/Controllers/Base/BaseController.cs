@@ -215,22 +215,15 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
                                where i.GetType() == typeof(AllowAnonymousAttribute)
                                select i).Any();
 
+        SetGuid();
+
         if (!allowAnonymous)
         {
-            string email = User.FindFirst("user_email")!.Value;
-            Guid loginKey = Guid.Parse(User.FindFirst("login_key")!.Value);
-
-            var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
-            if (loggedUser != null)
+            var response = await SetData();
+            if (response.Redirect)
             {
-                if (loginKey != loggedUser.LoginKey)
-                {
-                    context.Result = Unauthorized(new BaseResponse<string> { ListNotification = [new(loggedUser.Email, ["Tem alguém te deslogando pra te zoar, dá um tiro nele"], EnumNotificationType.Error)] });
-                    return;
-                }
-
-                SetData();
-                SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
+                context.Result = response.Action;
+                return;
             }
         }
 
@@ -246,9 +239,24 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
         await unitOfWork.CommitAsync();
     }
 
-    private void SetData()
+    private async Task<(bool Redirect, ActionResult? Action)> SetData()
     {
-        SetGuid();
+        string email = User.FindFirst("user_email")!.Value;
+        Guid loginKey = Guid.Parse(User.FindFirst("login_key")!.Value);
+
+        var loggedUser = await userService.GetByIdentifier(new InputIdentifierUser(email));
+        if (loggedUser != null)
+        {
+            if (loginKey != loggedUser.LoginKey)
+            {
+                var action = Unauthorized(new BaseResponse<string> { ListNotification = [new(loggedUser.Email, ["Tem alguém te deslogando pra te zoar, dá um tiro nele"], EnumNotificationType.Error)] });
+                return (true, action);
+            }
+
+            SessionData.SetLoggedUser(_guidSessionDataRequest, new LoggedUser(loggedUser.Id, loggedUser.Name, loggedUser.Email, loggedUser.Language));
+        }
+
+        return (false, default);
     }
 
     private void SetGuid()
