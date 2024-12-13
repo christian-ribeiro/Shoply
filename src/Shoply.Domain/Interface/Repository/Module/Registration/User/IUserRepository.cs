@@ -4,4 +4,7 @@ using Shoply.Domain.Interface.Repository.Base;
 
 namespace Shoply.Domain.Interface.Repository.Module.Registration;
 
-public interface IUserRepository : IBaseRepository<InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO> { }
+public interface IUserRepository : IBaseRepository<InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>
+{
+    Task<UserDTO?> GetByPasswordRecoveryCode(string passwordRecoveryCode);
+}

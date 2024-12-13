@@ -26,4 +26,67 @@ public class UserController(IUserService service, IShoplyUnitOfWork unitOfWork) 
             return await ResponseExceptionAsync(ex);
         }
     }
+
+    [AllowAnonymous]
+    [HttpPost("RefreshToken")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OutputAuthenticateUser>> RefreshToken([FromBody] InputRefreshTokenUser inputRefreshTokenUser)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service.RefreshToken(inputRefreshTokenUser)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPost("SendEmailForgotPassword")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OutputAuthenticateUser>> SendEmailForgotPassword([FromBody] InputSendEmailForgotPasswordUser inputSendEmailForgotPasswordUser)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service.SendEmailForgotPassword(inputSendEmailForgotPasswordUser)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPut("RedefinePasswordForgotPassword")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OutputAuthenticateUser>> RedefinePasswordForgotPassword([FromBody] InputRedefinePasswordForgotPasswordUser inputRedefinePasswordForgotPasswordUser)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service.RedefinePasswordForgotPassword(inputRedefinePasswordForgotPasswordUser)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [HttpPut("RedefinePassword")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OutputAuthenticateUser>> RedefinePassword([FromBody] InputRedefinePasswordUser inputRedefinePasswordUser)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service.RedefinePassword(inputRedefinePasswordUser)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
 }

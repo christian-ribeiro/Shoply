@@ -5,5 +5,9 @@ public enum EnumValidateProcessUser
     Create,
     Update,
     Delete,
-    Authenticate
+    Authenticate,
+    RefreshToken,
+    SendEmailForgotPassword,
+    RedefinePasswordForgotPassword,
+    RedefinePassword
 }

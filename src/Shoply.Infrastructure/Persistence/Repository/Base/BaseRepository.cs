@@ -222,7 +222,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
     }
 
-    internal async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string callAlias, bool useCustomReturnProperty)
+    protected async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string? callAlias, bool useCustomReturnProperty)
     {
         List<string> properties;
         var returnProperty = useCustomReturnProperty ? SessionData.GetReturnProperty(_guidSessionDataRequest) : [];

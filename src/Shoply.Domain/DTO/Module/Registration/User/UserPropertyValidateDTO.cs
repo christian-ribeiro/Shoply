@@ -37,4 +37,28 @@ public class UserPropertyValidateDTO : BaseValidateDTO
         OriginalUserDTO = originalUserDTO;
         return this;
     }
+
+    public UserPropertyValidateDTO ValidateRefreshToken(UserDTO? originalUserDTO)
+    {
+        OriginalUserDTO = originalUserDTO;
+        return this;
+    }
+
+    public UserPropertyValidateDTO ValidateSendEmailForgotPassword(UserDTO? originalUserDTO)
+    {
+        OriginalUserDTO = originalUserDTO;
+        return this;
+    }
+
+    public UserPropertyValidateDTO ValidateRedefinePasswordForgotPassword(UserDTO? originalUserDTO)
+    {
+        OriginalUserDTO = originalUserDTO;
+        return this;
+    }
+
+    public UserPropertyValidateDTO ValidateRedefinePassword(UserDTO? originalUserDTO)
+    {
+        OriginalUserDTO = originalUserDTO;
+        return this;
+    }
 }

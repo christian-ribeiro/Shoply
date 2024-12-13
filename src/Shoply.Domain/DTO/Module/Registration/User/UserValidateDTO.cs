@@ -9,6 +9,10 @@ public class UserValidateDTO : UserPropertyValidateDTO
     public InputIdentityUpdateUser? InputIdentityUpdateUser { get; private set; }
     public InputIdentityDeleteUser? InputIdentityDeleteUser { get; private set; }
     public InputAuthenticateUser? InputAuthenticateUser { get; private set; }
+    public InputRefreshTokenUser? InputRefreshTokenUser { get; private set; }
+    public InputSendEmailForgotPasswordUser? InputSendEmailForgotPasswordUser { get; private set; }
+    public InputRedefinePasswordForgotPasswordUser? InputRedefinePasswordForgotPasswordUser { get; private set; }
+    public InputRedefinePasswordUser? InputRedefinePasswordUser { get; private set; }
 
     public UserValidateDTO ValidateCreate(InputCreateUser? inputCreateUser, List<InputCreateUser>? listRepeatedInputCreateUser, UserDTO originalUserDTO)
     {
@@ -35,6 +39,34 @@ public class UserValidateDTO : UserPropertyValidateDTO
     {
         InputAuthenticateUser = inputAuthenticateUser;
         ValidateAuthenticate(originalUserDTO);
+        return this;
+    }
+
+    public UserValidateDTO ValidateRefreshToken(InputRefreshTokenUser? inputRefreshTokenUser, UserDTO? originalUserDTO)
+    {
+        InputRefreshTokenUser = inputRefreshTokenUser;
+        ValidateRefreshToken(originalUserDTO);
+        return this;
+    }
+
+    public UserValidateDTO ValidateSendEmailForgotPassword(InputSendEmailForgotPasswordUser? inputSendEmailForgotPasswordUser, UserDTO? originalUserDTO)
+    {
+        InputSendEmailForgotPasswordUser = inputSendEmailForgotPasswordUser;
+        ValidateSendEmailForgotPassword(originalUserDTO);
+        return this;
+    }
+
+    public UserValidateDTO ValidateRedefinePasswordForgotPassword(InputRedefinePasswordForgotPasswordUser? inputRedefinePasswordForgotPasswordUser, UserDTO? originalUserDTO)
+    {
+        InputRedefinePasswordForgotPasswordUser = inputRedefinePasswordForgotPasswordUser;
+        ValidateRedefinePasswordForgotPassword(originalUserDTO);
+        return this;
+    }
+
+    public UserValidateDTO ValidateRedefinePassword(InputRedefinePasswordUser? inputRedefinePasswordUser, UserDTO? originalUserDTO)
+    {
+        InputRedefinePasswordUser = inputRedefinePasswordUser;
+        ValidateRedefinePassword(originalUserDTO);
         return this;
     }
 }
