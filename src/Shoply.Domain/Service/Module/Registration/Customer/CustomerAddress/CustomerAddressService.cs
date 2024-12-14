@@ -26,13 +26,11 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                         continue;
                     }
 
-                    if (customerAddressValidateDTO.RelatedCustomerDTO == null)
+                    var resultInvalidRelatedProperty = await InvalidRelatedProperty(customerAddressValidateDTO.InputCreateCustomerAddress.CustomerId, customerAddressValidateDTO.RelatedCustomerDTO);
+                    if (resultInvalidRelatedProperty != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        if (customerAddressValidateDTO.InputCreateCustomerAddress.CustomerId != 0)
-                            await ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Cliente informado não encontrado", EnumValidateType.Invalid);
-                        else
-                            await ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Informe um cliente", EnumValidateType.NonInformed);
+                        await InvalidRelatedProperty(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.CustomerId, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.CustomerId), resultInvalidRelatedProperty);
                     }
 
                     var resultFirstNameInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, 1, 100);
@@ -85,7 +83,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        await AddSuccessMessage(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Endereço do cliente cadastrado com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, await GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Endereço do Cliente"));
                 }
                 break;
             case EnumValidateProcessGeneric.Update:
@@ -170,7 +168,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente alterado com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, await GetMessage(NotificationMessages.SuccessfullyUpdatedKey, "Endereço do Cliente"));
                 }
                 break;
             case EnumValidateProcessGeneric.Delete:
@@ -199,7 +197,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente excluído com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, await GetMessage(NotificationMessages.SuccessfullyDeletedKey, "Endereço do Cliente"));
                 }
                 break;
         }

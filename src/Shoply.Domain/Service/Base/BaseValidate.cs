@@ -139,24 +139,30 @@ public class BaseValidate<TValidateDTO, TProcessType>(ITranslationService transl
 
         return EnumValidateType.Valid;
     }
+
+    public async Task<EnumValidateType> InvalidRelatedProperty(object? value, object? relatedProperty)
+    {
+        if (value == null)
+            return await Task.FromResult(EnumValidateType.Valid);
+
+        return await Task.FromResult(value.Equals(0) ? EnumValidateType.NonInformed : !value.Equals(0) && relatedProperty == null ? EnumValidateType.Invalid : EnumValidateType.Valid);
+    }
     #endregion
 
     #region Notification
-    private class NotificationMessages
+    internal static class NotificationMessages
     {
-        public const string InvalidRecordKey = "InvalidRecord";
-        public const string InvalidEmailKey = "InvalidEmail";
-        public const string EmailNotProvidedKey = "EmailNotProvided";
         public const string InvalidLengthKey = "InvalidLength";
-        public const string ValueNotProvidedKey = "ValueNotProvided";
         public const string RecordsDoNotMatchKey = "RecordsDoNotMatch";
-        public const string NoRecordsProvidedKey = "NoRecordsProvided";
         public const string AlreadyExistsKey = "AlreadyExists";
-        public const string InvalidCPFKey = "InvalidCPF";
-        public const string InvalidCNPJKey = "InvalidCNPJ";
-        public const string CPFNonInformedKey = "CPFNonInformed";
-        public const string CNPJNonInformedKey = "CNPJNonInformed";
         public const string InvalidBirthDateKey = "InvalidBirthDate";
+        public const string SuccessfullyRegisteredKey = "SuccessfullyRegistered";
+        public const string SuccessfullyUpdatedKey = "SuccessfullyUpdated";
+        public const string SuccessfullyDeletedKey = "SuccessfullyDeleted";
+        public const string InvalidUserPasswordKey = "InvalidUserPassword";
+        public const string InvalidRecordKey = "InvalidRecord";
+        public const string GenericInvalidValueKey = "GenericInvalidValue";
+        public const string GenericNotProvideKey = "GenericNotProvide";
     }
 
     private readonly ConcurrentDictionary<string, List<DetailedNotification>> validateMessages = [];
@@ -176,35 +182,37 @@ public class BaseValidate<TValidateDTO, TProcessType>(ITranslationService transl
         return HandleValidation(key, EnumValidateType.Invalid, await GetMessage(NotificationMessages.AlreadyExistsKey, key), string.Empty);
     }
 
-    public async Task<bool> InvalidEmail(int? index, string? email, EnumValidateType validateType)
+    public async Task<bool> InvalidGeneric(int? index, object? value, string propertyName, EnumValidateType validateType)
     {
-        string key = validateType == EnumValidateType.NonInformed ? index?.ToString()! : email!;
-        return HandleValidation(key, validateType, await GetMessage(NotificationMessages.InvalidEmailKey, email), await GetMessage(NotificationMessages.EmailNotProvidedKey));
+        string key = validateType == EnumValidateType.NonInformed ? index?.ToString()! : value?.ToString() ?? "";
+        return HandleValidation(key, validateType, await GetMessage(NotificationMessages.GenericInvalidValueKey, propertyName, value!), await GetMessage(NotificationMessages.GenericNotProvideKey, propertyName));
+    }
+
+    public async Task<bool> InvalidGeneric(string identifier, object? value, string propertyName, EnumValidateType validateType)
+    {
+        var teste1 = await GetMessage(NotificationMessages.GenericInvalidValueKey, propertyName, value!);
+        var teste2 = await GetMessage(NotificationMessages.GenericNotProvideKey, propertyName);
+        return HandleValidation(identifier, validateType, teste1, teste2);
     }
 
     public async Task<bool> InvalidLength(string identifier, string? value, int minLength, int maxLength, EnumValidateType validateType, string propertyName)
     {
-        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidLengthKey, value, propertyName, minLength, maxLength), await GetMessage(NotificationMessages.ValueNotProvidedKey, propertyName));
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidLengthKey, value!, propertyName, minLength, maxLength), await GetMessage(NotificationMessages.GenericNotProvideKey, propertyName));
     }
 
     public async Task<bool> InvalidMatch(string identifier, EnumValidateType validateType, params string[] propertiesName)
     {
-        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.RecordsDoNotMatchKey, string.Join(", ", propertiesName)), await GetMessage(NotificationMessages.NoRecordsProvidedKey));
-    }
-
-    public async Task<bool> InvalidCPF(string identifier, string? value, EnumValidateType validateType)
-    {
-        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidCPFKey, value!), await GetMessage(NotificationMessages.CPFNonInformedKey));
-    }
-
-    public async Task<bool> InvalidCNPJ(string identifier, string? value, EnumValidateType validateType)
-    {
-        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidCNPJKey, value!), await GetMessage(NotificationMessages.CNPJNonInformedKey));
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.RecordsDoNotMatchKey, string.Join(", ", propertiesName)), await GetMessage(NotificationMessages.GenericNotProvideKey));
     }
 
     public async Task<bool> InvalidBirthDate(string identifier, int minAge, EnumValidateType validateType, string propertyName)
     {
-        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidBirthDateKey, minAge), await GetMessage(NotificationMessages.ValueNotProvidedKey, propertyName));
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidBirthDateKey, minAge), await GetMessage(NotificationMessages.GenericNotProvideKey, propertyName));
+    }
+
+    public async Task<bool> InvalidRelatedProperty(string identifier, object? value, string propertyName, EnumValidateType enumValidateType)
+    {
+        return HandleValidation(identifier, enumValidateType, await GetMessage(NotificationMessages.GenericInvalidValueKey, propertyName, value!), await GetMessage(NotificationMessages.GenericNotProvideKey, propertyName));
     }
     #endregion
 
@@ -246,7 +254,7 @@ public class BaseValidate<TValidateDTO, TProcessType>(ITranslationService transl
     }
     #endregion
 
-    private async Task<string> GetMessage(string key, params object[] args)
+    internal async Task<string> GetMessage(string key, params object[] args)
     {
         return await translationService.TranslateAsync(key, EnumLanguage.Portuguese, args);
     }

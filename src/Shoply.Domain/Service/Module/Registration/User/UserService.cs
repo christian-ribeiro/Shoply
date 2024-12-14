@@ -47,7 +47,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     if (resultInvalidEmail != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        await InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, resultInvalidEmail);
+                        await InvalidGeneric(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, nameof(userValidateDTO.InputCreateUser.Email), resultInvalidEmail);
 
                         if (resultInvalidEmail == EnumValidateType.NonInformed)
                             continue;
@@ -81,7 +81,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     }
 
                     if (!userValidateDTO.Invalid)
-                        await AddSuccessMessage(userValidateDTO.InputCreateUser.Email, "Usuário cadastrado com sucesso");
+                        await AddSuccessMessage(userValidateDTO.InputCreateUser.Email, await GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Usuário"));
                 }
                 break;
             case EnumValidateProcessUser.Update:
@@ -124,7 +124,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     }
 
                     if (!userValidateDTO.Invalid)
-                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário alterado com sucesso");
+                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, await GetMessage(NotificationMessages.SuccessfullyUpdatedKey, "Usuário"));
                 }
                 break;
             case EnumValidateProcessUser.Delete:
@@ -153,7 +153,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     }
 
                     if (!userValidateDTO.Invalid)
-                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário excluído com sucesso");
+                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, await GetMessage(NotificationMessages.SuccessfullyDeletedKey, "Usuário"));
                 }
                 break;
             case EnumValidateProcessUser.Authenticate:
@@ -162,14 +162,14 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     if (userValidateDTO.InputAuthenticateUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), await GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), await GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
                         continue;
                     }
 
@@ -185,7 +185,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                         userValidateDTO.SetInvalid();
 
                     if (userValidateDTO.Invalid)
-                        await ManualNotification(userValidateDTO.InputAuthenticateUser.Email, "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(userValidateDTO.InputAuthenticateUser.Email, await GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
                 }
                 break;
             case EnumValidateProcessUser.RefreshToken:
@@ -205,17 +205,12 @@ public class UserService(IUserRepository repository, ITranslationService transla
                         continue;
                     }
 
-                    if (string.IsNullOrEmpty(userValidateDTO.InputRefreshTokenUser.RefreshToken))
-                    {
-                        userValidateDTO.SetInvalid();
-                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação não informado", EnumValidateType.NonInformed);
-                        continue;
-                    }
 
-                    if (userValidateDTO.InputRefreshTokenUser.RefreshToken != userValidateDTO.OriginalUserDTO.InternalPropertiesDTO.RefreshToken)
+                    var resultRefreshToken = string.IsNullOrEmpty(userValidateDTO.InputRefreshTokenUser.RefreshToken) ? EnumValidateType.NonInformed : userValidateDTO.InputRefreshTokenUser.RefreshToken != userValidateDTO.OriginalUserDTO.InternalPropertiesDTO.RefreshToken ? EnumValidateType.Invalid : EnumValidateType.Valid;
+                    if (resultRefreshToken != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação inválido", EnumValidateType.Invalid);
+                        await InvalidGeneric(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, userValidateDTO.InputRefreshTokenUser.RefreshToken, nameof(userValidateDTO.InputRefreshTokenUser.RefreshToken), resultRefreshToken);
                         continue;
                     }
                 }
@@ -234,7 +229,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                     if (resultInvalidEmail != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        await InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputSendEmailForgotPasswordUser.Email, resultInvalidEmail);
+                        await InvalidGeneric(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputSendEmailForgotPasswordUser.Email, nameof(userValidateDTO.InputSendEmailForgotPasswordUser.Email), resultInvalidEmail);
 
                         if (resultInvalidEmail == EnumValidateType.NonInformed)
                             continue;
@@ -290,16 +285,12 @@ public class UserService(IUserRepository repository, ITranslationService transla
                         continue;
                     }
 
-                    if (string.IsNullOrEmpty(userValidateDTO.InputRedefinePasswordUser.CurrentPassword))
-                    {
-                        userValidateDTO.SetInvalid();
-                        await ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha não informada", EnumValidateType.NonInformed);
-                    }
 
-                    if (userValidateDTO.InputRedefinePasswordUser.CurrentPassword != null && !userValidateDTO.InputRedefinePasswordUser.CurrentPassword.CompareHash(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Password))
+                    var resultPassword = string.IsNullOrEmpty(userValidateDTO.InputRedefinePasswordUser.CurrentPassword) ? EnumValidateType.NonInformed : userValidateDTO.InputRedefinePasswordUser.CurrentPassword != null && !userValidateDTO.InputRedefinePasswordUser.CurrentPassword.CompareHash(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Password) ? EnumValidateType.Invalid : EnumValidateType.Valid;
+                    if (resultPassword != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        await ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha inválida", EnumValidateType.NonInformed);
+                        await InvalidGeneric(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, userValidateDTO.InputRedefinePasswordUser.CurrentPassword, nameof(userValidateDTO.InputRedefinePasswordUser.CurrentPassword), resultPassword);
                     }
 
                     var resultPasswordInvalidMatch = InvalidMatch(userValidateDTO.InputRedefinePasswordUser.NewPassword, userValidateDTO.InputRedefinePasswordUser.ConfirmNewPassword);

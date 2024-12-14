@@ -16,7 +16,7 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
     public async Task<string> TranslateAsync(string key, EnumLanguage language, params object[] args)
     {
         var redis = _redisContext.GetDatabase();
-        string redisKey = $"translations:{key}:{language.GetMemberValue()}";
+        string redisKey = $"translations:{language.GetMemberValue()}:{key}";
 
         string? translation = await redis.StringGetAsync(redisKey);
         if (!string.IsNullOrEmpty(translation))
@@ -26,9 +26,9 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
         var filter = Builders<OutputTranslation>.Filter.Eq("Key", key);
         var document = await collection.Find(filter).FirstOrDefaultAsync();
 
-        if (document != null && document.TranslationLanguage.ContainsKey(language.GetMemberValue()))
+        if (document != null && document.Translation.ContainsKey(language.GetMemberValue()))
         {
-            string template = document.TranslationLanguage[language.GetMemberValue()];
+            string template = document.Translation[language.GetMemberValue()];
             await redis.StringSetAsync(redisKey, template, TimeSpan.FromHours(6));
             return args.Length > 0 ? string.Format(template, args) : template;
         }
@@ -43,13 +43,19 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
         var filter = Builders<OutputTranslation>.Filter.Eq(t => t.Key, key);
 
         var update = Builders<OutputTranslation>.Update
-            .Set(t => t.TranslationLanguage[language.GetMemberValue()], newTranslation)
+            .Set(t => t.Translation[language.GetMemberValue()], newTranslation)
             .Set(t => t.ChangeDate, DateTime.UtcNow);
 
         await collection.UpdateOneAsync(filter, update);
 
         var redis = _redisContext.GetDatabase();
-        string redisKey = $"translations:{key}:{language.GetMemberValue()}";
+        string redisKey = $"translations:{language.GetMemberValue()}:{key}";
         await redis.StringSetAsync(redisKey, newTranslation, TimeSpan.FromHours(6));
+    }
+
+    public async Task InsertTranslationAsync(List<OutputTranslation> listTranslation)
+    {
+        var collection = _mongoContext.GetCollection("translations");
+        await collection.InsertManyAsync(listTranslation);
     }
 }

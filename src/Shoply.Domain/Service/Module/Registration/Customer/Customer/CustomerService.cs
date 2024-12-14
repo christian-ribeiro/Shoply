@@ -62,14 +62,14 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                             if (resultInvalidCFP != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                await InvalidCPF(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCFP);
+                                await InvalidGeneric(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, "CPF", resultInvalidCFP);
                             }
 
                             var resultInvalidBirthDate = InvalidBirthDate(customerValidateDTO.InputCreateCustomer.BirthDate, 18, false);
                             if (resultInvalidBirthDate != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                await InvalidBirthDate(customerValidateDTO.InputCreateCustomer.Code, 1, resultInvalidBirthDate, nameof(customerValidateDTO.InputCreateCustomer.BirthDate));
+                                await InvalidBirthDate(customerValidateDTO.InputCreateCustomer.Code, 18, resultInvalidBirthDate, nameof(customerValidateDTO.InputCreateCustomer.BirthDate));
                             }
                             break;
                         case EnumPersonType.Legal:
@@ -77,7 +77,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                             if (resultInvalidCNPJ != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                await InvalidCNPJ(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCNPJ);
+                                await InvalidGeneric(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, "CNPJ", resultInvalidCNPJ);
                             }
 
                             if (customerValidateDTO.InputCreateCustomer.BirthDate != null)
@@ -88,12 +88,12 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                             break;
                         default:
                             customerValidateDTO.SetInvalid();
-                            await ManualNotification(customerValidateDTO.InputCreateCustomer.Code, "Tipo de pessoa inválido", EnumValidateType.Invalid);
+                            await InvalidGeneric(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.PersonType, nameof(customerValidateDTO.InputCreateCustomer.PersonType), EnumValidateType.Invalid);
                             break;
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        await AddSuccessMessage(customerValidateDTO.InputCreateCustomer.Code, "Cliente cadastrado com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.InputCreateCustomer.Code, await GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Cliente"));
                 }
                 break;
             case EnumValidateProcessGeneric.Update:
@@ -143,7 +143,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente alterado com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, await GetMessage(NotificationMessages.SuccessfullyUpdatedKey, "Cliente"));
                 }
                 break;
             case EnumValidateProcessGeneric.Delete:
@@ -172,7 +172,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente excluído com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, await GetMessage(NotificationMessages.SuccessfullyDeletedKey, "Cliente"));
                 }
                 break;
         }
