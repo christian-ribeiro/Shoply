@@ -6,12 +6,13 @@ using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Service.Base;
+using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class CustomerAddressService(ICustomerAddressRepository repository, ICustomerRepository customerRepository) : BaseService<ICustomerAddressRepository, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, CustomerAddressValidateDTO, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO, EnumValidateProcessGeneric>(repository), ICustomerAddressService
+public class CustomerAddressService(ICustomerAddressRepository repository, ITranslationService translationService, ICustomerRepository customerRepository) : BaseService<ICustomerAddressRepository, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, CustomerAddressValidateDTO, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO, EnumValidateProcessGeneric>(repository, translationService), ICustomerAddressService
 {
-    internal override void ValidateProcess(List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO, EnumValidateProcessGeneric processType)
+    internal override async Task ValidateProcess(List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO, EnumValidateProcessGeneric processType)
     {
         switch (processType)
         {
@@ -21,7 +22,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (customerAddressValidateDTO.InputCreateCustomerAddress == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
@@ -29,62 +30,62 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     {
                         customerAddressValidateDTO.SetInvalid();
                         if (customerAddressValidateDTO.InputCreateCustomerAddress.CustomerId != 0)
-                            ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Cliente informado não encontrado", EnumValidateType.Invalid);
+                            await ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Cliente informado não encontrado", EnumValidateType.Invalid);
                         else
-                            ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Informe um cliente", EnumValidateType.NonInformed);
+                            await ManualNotification(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Informe um cliente", EnumValidateType.NonInformed);
                     }
 
                     var resultFirstNameInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, 1, 100);
                     if (resultFirstNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, 1, 100, resultFirstNameInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, 1, 100, resultFirstNameInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace));
                     }
 
                     var resultNumberInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.Number, 1, 10);
                     if (resultNumberInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Number, 1, 10, resultNumberInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Number));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Number, 1, 10, resultNumberInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Number));
                     }
 
                     var resultComplementInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.Complement, 1, 50);
                     if (resultComplementInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Complement, 1, 50, resultComplementInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Complement));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Complement, 1, 50, resultComplementInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Complement));
                     }
 
                     var resultNeighborhoodInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.Neighborhood, 1, 50);
                     if (resultNeighborhoodInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Neighborhood, 1, 50, resultNeighborhoodInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Neighborhood));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Neighborhood, 1, 50, resultNeighborhoodInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Neighborhood));
                     }
 
                     var resultPostalCodeInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PostalCode, 1, 8);
                     if (resultPostalCodeInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.PostalCode, 1, 8, resultPostalCodeInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.PostalCode));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.PostalCode, 1, 8, resultPostalCodeInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.PostalCode));
                     }
 
                     var resultReferenceInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.Reference, 0, 200);
                     if (resultReferenceInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Reference, 0, 200, resultReferenceInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Reference));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Reference, 0, 200, resultReferenceInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Reference));
                     }
 
                     var resultObservationInvalidLength = InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.Observation, 0, 400);
                     if (resultObservationInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Observation, 0, 400, resultObservationInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Observation));
+                        await InvalidLength(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, customerAddressValidateDTO.InputCreateCustomerAddress.Observation, 0, 400, resultObservationInvalidLength, nameof(customerAddressValidateDTO.InputCreateCustomerAddress.Observation));
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        AddSuccessMessage(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Endereço do cliente cadastrado com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.InputCreateCustomerAddress.PublicPlace, "Endereço do cliente cadastrado com sucesso");
                 }
                 break;
             case EnumValidateProcessGeneric.Update:
@@ -93,21 +94,21 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (customerAddressValidateDTO.InputIdentityUpdateCustomerAddress == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
                     if (customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
                     if (customerAddressValidateDTO.OriginalCustomerAddressDTO == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
@@ -115,7 +116,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (repeatedInputUpdate)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
@@ -123,53 +124,53 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (resultFirstNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, 1, 100, resultFirstNameInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, 1, 100, resultFirstNameInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace));
                     }
 
                     var resultNumberInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Number, 1, 10);
                     if (resultNumberInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Number, 1, 10, resultNumberInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Number));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Number, 1, 10, resultNumberInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Number));
                     }
 
                     var resultComplementInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Complement, 1, 50);
                     if (resultComplementInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Complement, 1, 50, resultComplementInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Complement));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Complement, 1, 50, resultComplementInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Complement));
                     }
 
                     var resultNeighborhoodInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Neighborhood, 1, 50);
                     if (resultNeighborhoodInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Neighborhood, 1, 50, resultNeighborhoodInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Neighborhood));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Neighborhood, 1, 50, resultNeighborhoodInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Neighborhood));
                     }
 
                     var resultPostalCodeInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PostalCode, 1, 8);
                     if (resultPostalCodeInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PostalCode, 1, 8, resultPostalCodeInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PostalCode));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PostalCode, 1, 8, resultPostalCodeInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PostalCode));
                     }
 
                     var resultReferenceInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Reference, 0, 200);
                     if (resultReferenceInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Reference, 0, 200, resultReferenceInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Reference));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Reference, 0, 200, resultReferenceInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Reference));
                     }
 
                     var resultObservationInvalidLength = InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Observation, 0, 400);
                     if (resultObservationInvalidLength != EnumValidateType.Valid)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Observation, 0, 400, resultObservationInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Observation));
+                        await InvalidLength(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.PublicPlace, customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Observation, 0, 400, resultObservationInvalidLength, nameof(customerAddressValidateDTO.InputIdentityUpdateCustomerAddress.InputUpdate.Observation));
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente alterado com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente alterado com sucesso");
                 }
                 break;
             case EnumValidateProcessGeneric.Delete:
@@ -178,14 +179,14 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (customerAddressValidateDTO.InputIdentityDeleteCustomerAddress == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
                     if (customerAddressValidateDTO.OriginalCustomerAddressDTO == null)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
@@ -193,12 +194,12 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                     if (repeatedInputDelete)
                     {
                         customerAddressValidateDTO.SetInvalid();
-                        Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
+                        await Invalid(listCustomerAddressValidateDTO.IndexOf(customerAddressValidateDTO));
                         continue;
                     }
 
                     if (!customerAddressValidateDTO.Invalid)
-                        AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente excluído com sucesso");
+                        await AddSuccessMessage(customerAddressValidateDTO.OriginalCustomerAddressDTO.ExternalPropertiesDTO.PublicPlace, "Endereço do cliente excluído com sucesso");
                 }
                 break;
         }
@@ -217,7 +218,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listCreate select new CustomerAddressValidateDTO().ValidateCreate(i.InputCreateCustomerAddress, i.RelatedCustomerDTO)).ToList();
-        ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Create);
+        await ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateCustomerAddress.Count)
@@ -242,7 +243,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listUpdate select new CustomerAddressValidateDTO().ValidateUpdate(i.InputIdentityUpdateCustomerAddress, i.ListRepeatedInputIdentityUpdateCustomerAddress, i.OriginalCustomerAddressDTO)).ToList();
-        ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Update);
+        await ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateCustomerAddress.Count)
@@ -267,7 +268,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ICust
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listDelete select new CustomerAddressValidateDTO().ValidateDelete(i.InputIdentityDeleteCustomerAddress, i.ListRepeatedInputIdentityDeleteCustomerAddress, i.OriginalCustomerAddressDTO)).ToList();
-        ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Delete);
+        await ValidateProcess(listCustomerAddressValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteCustomerAddress.Count)

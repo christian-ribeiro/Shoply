@@ -12,15 +12,16 @@ using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Service.Base;
 using Shoply.Security.Encryption;
+using Shoply.Translation.Interface.Service;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumValidateProcessUser>(repository), IUserService
+public class UserService(IUserRepository repository, ITranslationService translationService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumValidateProcessUser>(repository, translationService), IUserService
 {
-    internal override void ValidateProcess(List<UserValidateDTO> listUserValidateDTO, EnumValidateProcessUser processType)
+    internal override async Task ValidateProcess(List<UserValidateDTO> listUserValidateDTO, EnumValidateProcessUser processType)
     {
         switch (processType)
         {
@@ -30,7 +31,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputCreateUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -38,7 +39,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (repeatedEmail)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -46,7 +47,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (resultInvalidEmail != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, resultInvalidEmail);
+                        await InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputCreateUser.Email, resultInvalidEmail);
 
                         if (resultInvalidEmail == EnumValidateType.NonInformed)
                             continue;
@@ -55,32 +56,32 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.OriginalUserDTO != null)
                     {
                         userValidateDTO.SetInvalid();
-                        AlreadyExists(userValidateDTO.InputCreateUser.Email);
+                        await AlreadyExists(userValidateDTO.InputCreateUser.Email);
                     }
 
                     var resultNameInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Name, 1, 150);
                     if (resultNameInvalidLength != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
+                        await InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
                     }
 
                     var resultPasswordInvalidLength = InvalidLength(userValidateDTO.InputCreateUser.Password, 6, 150);
                     if (resultPasswordInvalidLength != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Password, 6, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Password));
+                        await InvalidLength(userValidateDTO.InputCreateUser.Email, userValidateDTO.InputCreateUser.Password, 6, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Password));
                     }
 
                     var resultPasswordInvalidMatch = InvalidMatch(userValidateDTO.InputCreateUser.Password, userValidateDTO.InputCreateUser.ConfirmPassword);
                     if (resultPasswordInvalidMatch != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidMatch(userValidateDTO.InputCreateUser.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputCreateUser.Password), nameof(userValidateDTO.InputCreateUser.ConfirmPassword));
+                        await InvalidMatch(userValidateDTO.InputCreateUser.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputCreateUser.Password), nameof(userValidateDTO.InputCreateUser.ConfirmPassword));
                     }
 
                     if (!userValidateDTO.Invalid)
-                        AddSuccessMessage(userValidateDTO.InputCreateUser.Email, "Usuário cadastrado com sucesso");
+                        await AddSuccessMessage(userValidateDTO.InputCreateUser.Email, "Usuário cadastrado com sucesso");
                 }
                 break;
             case EnumValidateProcessUser.Update:
@@ -89,21 +90,21 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputIdentityUpdateUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.InputIdentityUpdateUser.InputUpdate == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -111,7 +112,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (repeatedInputUpdate)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -119,11 +120,11 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (resultNameInvalidLength != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidLength(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, userValidateDTO.InputIdentityUpdateUser.InputUpdate.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
+                        await InvalidLength(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, userValidateDTO.InputIdentityUpdateUser.InputUpdate.Name, 1, 150, resultNameInvalidLength, nameof(userValidateDTO.InputCreateUser.Name));
                     }
 
                     if (!userValidateDTO.Invalid)
-                        AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário alterado com sucesso");
+                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário alterado com sucesso");
                 }
                 break;
             case EnumValidateProcessUser.Delete:
@@ -132,14 +133,14 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputIdentityDeleteUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -147,12 +148,12 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (repeatedInputDelete)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (!userValidateDTO.Invalid)
-                        AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário excluído com sucesso");
+                        await AddSuccessMessage(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Usuário excluído com sucesso");
                 }
                 break;
             case EnumValidateProcessUser.Authenticate:
@@ -161,14 +162,14 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputAuthenticateUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Usuário ou senha inválidos", EnumValidateType.Invalid);
                         continue;
                     }
 
@@ -184,7 +185,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                         userValidateDTO.SetInvalid();
 
                     if (userValidateDTO.Invalid)
-                        ManualNotification(userValidateDTO.InputAuthenticateUser.Email, "Usuário ou senha inválidos", EnumValidateType.Invalid);
+                        await ManualNotification(userValidateDTO.InputAuthenticateUser.Email, "Usuário ou senha inválidos", EnumValidateType.Invalid);
                 }
                 break;
             case EnumValidateProcessUser.RefreshToken:
@@ -193,28 +194,28 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputRefreshTokenUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (string.IsNullOrEmpty(userValidateDTO.InputRefreshTokenUser.RefreshToken))
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação não informado", EnumValidateType.NonInformed);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação não informado", EnumValidateType.NonInformed);
                         continue;
                     }
 
                     if (userValidateDTO.InputRefreshTokenUser.RefreshToken != userValidateDTO.OriginalUserDTO.InternalPropertiesDTO.RefreshToken)
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação inválido", EnumValidateType.Invalid);
+                        await ManualNotification(listUserValidateDTO.IndexOf(userValidateDTO), "Token de renovação inválido", EnumValidateType.Invalid);
                         continue;
                     }
                 }
@@ -225,7 +226,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputSendEmailForgotPasswordUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -233,7 +234,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (resultInvalidEmail != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputSendEmailForgotPasswordUser.Email, resultInvalidEmail);
+                        await InvalidEmail(listUserValidateDTO.IndexOf(userValidateDTO), userValidateDTO.InputSendEmailForgotPasswordUser.Email, resultInvalidEmail);
 
                         if (resultInvalidEmail == EnumValidateType.NonInformed)
                             continue;
@@ -242,7 +243,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
                 }
@@ -253,14 +254,14 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputRedefinePasswordForgotPasswordUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
@@ -268,7 +269,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (resultPasswordInvalidMatch != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidMatch(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputRedefinePasswordForgotPasswordUser.NewPassword), nameof(userValidateDTO.InputRedefinePasswordForgotPasswordUser.ConfirmNewPassword));
+                        await InvalidMatch(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputRedefinePasswordForgotPasswordUser.NewPassword), nameof(userValidateDTO.InputRedefinePasswordForgotPasswordUser.ConfirmNewPassword));
                     }
                 }
                 break;
@@ -278,34 +279,34 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                     if (userValidateDTO.InputRedefinePasswordUser == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (userValidateDTO.OriginalUserDTO == null)
                     {
                         userValidateDTO.SetInvalid();
-                        Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
+                        await Invalid(listUserValidateDTO.IndexOf(userValidateDTO));
                         continue;
                     }
 
                     if (string.IsNullOrEmpty(userValidateDTO.InputRedefinePasswordUser.CurrentPassword))
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha não informada", EnumValidateType.NonInformed);
+                        await ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha não informada", EnumValidateType.NonInformed);
                     }
 
                     if (userValidateDTO.InputRedefinePasswordUser.CurrentPassword != null && !userValidateDTO.InputRedefinePasswordUser.CurrentPassword.CompareHash(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Password))
                     {
                         userValidateDTO.SetInvalid();
-                        ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha inválida", EnumValidateType.NonInformed);
+                        await ManualNotification(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, "Senha inválida", EnumValidateType.NonInformed);
                     }
 
                     var resultPasswordInvalidMatch = InvalidMatch(userValidateDTO.InputRedefinePasswordUser.NewPassword, userValidateDTO.InputRedefinePasswordUser.ConfirmNewPassword);
                     if (resultPasswordInvalidMatch != EnumValidateType.Valid)
                     {
                         userValidateDTO.SetInvalid();
-                        InvalidMatch(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputRedefinePasswordUser.NewPassword), nameof(userValidateDTO.InputRedefinePasswordUser.ConfirmNewPassword));
+                        await InvalidMatch(userValidateDTO.OriginalUserDTO.ExternalPropertiesDTO.Email, resultPasswordInvalidMatch, nameof(userValidateDTO.InputRedefinePasswordUser.NewPassword), nameof(userValidateDTO.InputRedefinePasswordUser.ConfirmNewPassword));
                     }
                 }
                 break;
@@ -326,7 +327,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
-        ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Create);
+        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateUser.Count)
@@ -351,7 +352,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO)).ToList();
-        ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Update);
+        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateUser.Count)
@@ -376,7 +377,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO)).ToList();
-        ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Delete);
+        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteUser.Count)
@@ -393,7 +394,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateAuthenticate(inputAuthenticateUser, originalUserDTO);
-        ValidateProcess([userValidateDTO], EnumValidateProcessUser.Authenticate);
+        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.Authenticate);
 
         var (_, errors) = GetValidationResults();
         if (errors.Count > 0)
@@ -419,7 +420,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         UserDTO originalUserDTO = await _repository.Get(userId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRefreshToken(inputRefreshTokenUser, originalUserDTO);
-        ValidateProcess([userValidateDTO], EnumValidateProcessUser.RefreshToken);
+        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RefreshToken);
 
         var (_, errors) = GetValidationResults();
         if (errors.Count > 0)
@@ -441,7 +442,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputSendEmailForgotPasswordUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateSendEmailForgotPassword(inputSendEmailForgotPasswordUser, originalUserDTO);
-        ValidateProcess([userValidateDTO], EnumValidateProcessUser.SendEmailForgotPassword);
+        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.SendEmailForgotPassword);
 
         var (_, errors) = GetValidationResults();
         if (errors.Count > 0)
@@ -472,7 +473,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         UserDTO? originalUserDTO = await _repository.GetByPasswordRecoveryCode(inputRedefinePasswordForgotPasswordUser.PasswordRecoveryCode);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePasswordForgotPassword(inputRedefinePasswordForgotPasswordUser, originalUserDTO);
-        ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePasswordForgotPassword);
+        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePasswordForgotPassword);
 
         var (_, errors) = GetValidationResults();
         if (errors.Count > 0)
@@ -492,7 +493,7 @@ public class UserService(IUserRepository repository, IJwtService jwtService, ISe
         UserDTO? originalUserDTO = await _repository.Get(loggedUserId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePassword(inputRedefinePasswordUser, originalUserDTO);
-        ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePassword);
+        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePassword);
 
         var (_, errors) = GetValidationResults();
         if (errors.Count > 0)

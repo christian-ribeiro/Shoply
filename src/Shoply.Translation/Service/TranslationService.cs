@@ -20,7 +20,7 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
 
         string? translation = await redis.StringGetAsync(redisKey);
         if (!string.IsNullOrEmpty(translation))
-            return string.Format(translation, args);
+            return args.Length > 0 ? string.Format(translation, args) : translation;
 
         var collection = _mongoContext.GetCollection("translations");
         var filter = Builders<OutputTranslation>.Filter.Eq("Key", key);
@@ -30,7 +30,7 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
         {
             string template = document.TranslationLanguage[language.GetMemberValue()];
             await redis.StringSetAsync(redisKey, template, TimeSpan.FromHours(6));
-            return string.Format(template, args);
+            return args.Length > 0 ? string.Format(template, args) : template;
         }
 
         return $"[{key}]";

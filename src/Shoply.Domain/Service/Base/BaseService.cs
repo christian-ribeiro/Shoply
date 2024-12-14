@@ -3,10 +3,11 @@ using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Domain.Interface.Service.Base;
+using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Base;
 
-public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(TRepository repository) : BaseValidate<TValidateDTO, TProcessType>, IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
+public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(TRepository repository, ITranslationService translationService) : BaseValidate<TValidateDTO, TProcessType>(translationService), IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
         where TRepository : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
         where TInputCreate : BaseInputCreate<TInputCreate>
         where TInputUpdate : BaseInputUpdate<TInputUpdate>

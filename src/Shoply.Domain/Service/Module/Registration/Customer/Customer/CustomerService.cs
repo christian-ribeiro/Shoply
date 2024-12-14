@@ -7,12 +7,13 @@ using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Service.Base;
+using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class CustomerService(ICustomerRepository repository) : BaseService<ICustomerRepository, InputCreateCustomer, InputUpdateCustomer, InputIdentifierCustomer, OutputCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO, EnumValidateProcessGeneric>(repository), ICustomerService
+public class CustomerService(ICustomerRepository repository, ITranslationService translationService) : BaseService<ICustomerRepository, InputCreateCustomer, InputUpdateCustomer, InputIdentifierCustomer, OutputCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO, EnumValidateProcessGeneric>(repository, translationService), ICustomerService
 {
-    internal override void ValidateProcess(List<CustomerValidateDTO> listCustomerValidateDTO, EnumValidateProcessGeneric processType)
+    internal override async Task ValidateProcess(List<CustomerValidateDTO> listCustomerValidateDTO, EnumValidateProcessGeneric processType)
     {
         switch (processType)
         {
@@ -22,7 +23,7 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (customerValidateDTO.InputCreateCustomer == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
@@ -30,28 +31,28 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (repeatedCustomer)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
                     if (customerValidateDTO.OriginalCustomerDTO != null)
                     {
                         customerValidateDTO.SetInvalid();
-                        AlreadyExists(customerValidateDTO.InputCreateCustomer.Code);
+                        await AlreadyExists(customerValidateDTO.InputCreateCustomer.Code);
                     }
 
                     var resultFirstNameInvalidLength = InvalidLength(customerValidateDTO.InputCreateCustomer.FirstName, 1, 100);
                     if (resultFirstNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerValidateDTO.SetInvalid();
-                        InvalidLength(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.FirstName, 1, 100, resultFirstNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.FirstName));
+                        await InvalidLength(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.FirstName, 1, 100, resultFirstNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.FirstName));
                     }
 
                     var resultLastNameInvalidLength = InvalidLength(customerValidateDTO.InputCreateCustomer.LastName, 1, 100);
                     if (resultLastNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerValidateDTO.SetInvalid();
-                        InvalidLength(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.LastName, 1, 100, resultLastNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.LastName));
+                        await InvalidLength(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.LastName, 1, 100, resultLastNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.LastName));
                     }
 
                     switch (customerValidateDTO.InputCreateCustomer.PersonType)
@@ -61,14 +62,14 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                             if (resultInvalidCFP != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                InvalidCPF(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCFP);
+                                await InvalidCPF(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCFP);
                             }
 
                             var resultInvalidBirthDate = InvalidBirthDate(customerValidateDTO.InputCreateCustomer.BirthDate, 18, false);
                             if (resultInvalidBirthDate != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                InvalidBirthDate(customerValidateDTO.InputCreateCustomer.Code, 1, resultInvalidBirthDate, nameof(customerValidateDTO.InputCreateCustomer.BirthDate));
+                                await InvalidBirthDate(customerValidateDTO.InputCreateCustomer.Code, 1, resultInvalidBirthDate, nameof(customerValidateDTO.InputCreateCustomer.BirthDate));
                             }
                             break;
                         case EnumPersonType.Legal:
@@ -76,23 +77,23 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                             if (resultInvalidCNPJ != EnumValidateType.Valid)
                             {
                                 customerValidateDTO.SetInvalid();
-                                InvalidCNPJ(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCNPJ);
+                                await InvalidCNPJ(customerValidateDTO.InputCreateCustomer.Code, customerValidateDTO.InputCreateCustomer.Document, resultInvalidCNPJ);
                             }
 
                             if (customerValidateDTO.InputCreateCustomer.BirthDate != null)
                             {
                                 customerValidateDTO.SetInvalid();
-                                ManualNotification(customerValidateDTO.InputCreateCustomer.Code, "Pessoa jurídica não possui data de nascimento", EnumValidateType.Invalid);
+                                await ManualNotification(customerValidateDTO.InputCreateCustomer.Code, "Pessoa jurídica não possui data de nascimento", EnumValidateType.Invalid);
                             }
                             break;
                         default:
                             customerValidateDTO.SetInvalid();
-                            ManualNotification(customerValidateDTO.InputCreateCustomer.Code, "Tipo de pessoa inválido", EnumValidateType.Invalid);
+                            await ManualNotification(customerValidateDTO.InputCreateCustomer.Code, "Tipo de pessoa inválido", EnumValidateType.Invalid);
                             break;
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        AddSuccessMessage(customerValidateDTO.InputCreateCustomer.Code, "Cliente cadastrado com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.InputCreateCustomer.Code, "Cliente cadastrado com sucesso");
                 }
                 break;
             case EnumValidateProcessGeneric.Update:
@@ -101,21 +102,21 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (customerValidateDTO.InputIdentityUpdateCustomer == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
                     if (customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
                     if (customerValidateDTO.OriginalCustomerDTO == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
@@ -123,7 +124,7 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (repeatedInputUpdate)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
@@ -131,18 +132,18 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (resultFirstNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerValidateDTO.SetInvalid();
-                        InvalidLength(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate.FirstName, 1, 100, resultFirstNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.FirstName));
+                        await InvalidLength(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate.FirstName, 1, 100, resultFirstNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.FirstName));
                     }
 
                     var resultLastNameInvalidLength = InvalidLength(customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate.LastName, 1, 100);
                     if (resultLastNameInvalidLength != EnumValidateType.Valid)
                     {
                         customerValidateDTO.SetInvalid();
-                        InvalidLength(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate.LastName, 1, 100, resultLastNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.LastName));
+                        await InvalidLength(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, customerValidateDTO.InputIdentityUpdateCustomer.InputUpdate.LastName, 1, 100, resultLastNameInvalidLength, nameof(customerValidateDTO.InputCreateCustomer.LastName));
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente alterado com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente alterado com sucesso");
                 }
                 break;
             case EnumValidateProcessGeneric.Delete:
@@ -151,14 +152,14 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (customerValidateDTO.InputIdentityDeleteCustomer == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
                     if (customerValidateDTO.OriginalCustomerDTO == null)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
@@ -166,12 +167,12 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                     if (repeatedInputDelete)
                     {
                         customerValidateDTO.SetInvalid();
-                        Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
+                        await Invalid(listCustomerValidateDTO.IndexOf(customerValidateDTO));
                         continue;
                     }
 
                     if (!customerValidateDTO.Invalid)
-                        AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente excluído com sucesso");
+                        await AddSuccessMessage(customerValidateDTO.OriginalCustomerDTO.ExternalPropertiesDTO.Code, "Cliente excluído com sucesso");
                 }
                 break;
         }
@@ -191,7 +192,7 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listCreate select new CustomerValidateDTO().ValidateCreate(i.InputCreateCustomer, i.ListRepeatedInputCreateCustomer, i.OriginalCustomerDTO)).ToList();
-        ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Create);
+        await ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateCustomer.Count)
@@ -216,7 +217,7 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listUpdate select new CustomerValidateDTO().ValidateUpdate(i.InputIdentityUpdateCustomer, i.ListRepeatedInputIdentityUpdateCustomer, i.OriginalCustomerDTO)).ToList();
-        ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Update);
+        await ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateCustomer.Count)
@@ -241,7 +242,7 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listDelete select new CustomerValidateDTO().ValidateDelete(i.InputIdentityDeleteCustomer, i.ListRepeatedInputIdentityDeleteCustomer, i.OriginalCustomerDTO)).ToList();
-        ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Delete);
+        await ValidateProcess(listCustomerValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteCustomer.Count)
@@ -251,5 +252,4 @@ public class CustomerService(ICustomerRepository repository) : BaseService<ICust
         return BaseResult<bool>.Success(await _repository.Delete(listDeletepdateCustomerDTO), [.. successes, .. errors]);
     }
     #endregion
-
 }

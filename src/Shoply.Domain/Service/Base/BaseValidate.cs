@@ -1,23 +1,20 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Enum.Base;
 using Shoply.Arguments.Enum.Base.Validate;
+using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Base;
+using Shoply.Translation.Interface.Service;
 using System.Collections.Concurrent;
 using System.Net.Mail;
 
 namespace Shoply.Domain.Service;
 
-public class BaseValidate<TValidateDTO, TProcessType>
+public class BaseValidate<TValidateDTO, TProcessType>(ITranslationService translationService)
     where TValidateDTO : BaseValidateDTO
     where TProcessType : Enum
 {
-    public BaseValidate()
-    {
-        validateMessages = [];
-    }
-
     #region Base
-    internal virtual void ValidateProcess(List<TValidateDTO> listValidateDTO, TProcessType processType) => throw new NotImplementedException();
+    internal virtual Task ValidateProcess(List<TValidateDTO> listValidateDTO, TProcessType processType) => throw new NotImplementedException();
     internal static List<TValidateDTO> RemoveInvalid(List<TValidateDTO> listValidateDTO) => (from i in listValidateDTO where !i.Invalid select i).ToList();
     #endregion
 
@@ -147,73 +144,72 @@ public class BaseValidate<TValidateDTO, TProcessType>
     #region Notification
     private class NotificationMessages
     {
-        public const string InvalidRecord = "Registro inválido";
-        public const string InvalidEmail = "O e-mail '{0}' informado não é válido";
-        public const string EmailNotProvided = "E-mail não informado";
-        public const string InvalidLength = "O valor {0} é inválido, '{1}' deve ser entre '{2}' e '{3}'";
-        public const string ValueNotProvided = "Valor não informado para '{0}'";
-        public const string RecordsDoNotMatch = "Os registros '{0}' não coincidem";
-        public const string NoRecordsProvided = "Nenhum registro informado";
-        public const string AlreadyExists = "O registro '{0}' já existe";
-        public const string InvalidCPF = "O CPF '{0}' informado é inválido";
-        public const string InvalidCNPJ = "O CNPJ '{0}' informado é inválido";
-        public const string CPFNonInformed = "O CPF não foi informado";
-        public const string CNPJNonInformed = "O CNPJ não foi informado";
-        public const string InvalidBirthDate = "Data de aniversário inválida. Deve possuir no mínimo '{0}' anos de idade";
-
+        public const string InvalidRecordKey = "InvalidRecord";
+        public const string InvalidEmailKey = "InvalidEmail";
+        public const string EmailNotProvidedKey = "EmailNotProvided";
+        public const string InvalidLengthKey = "InvalidLength";
+        public const string ValueNotProvidedKey = "ValueNotProvided";
+        public const string RecordsDoNotMatchKey = "RecordsDoNotMatch";
+        public const string NoRecordsProvidedKey = "NoRecordsProvided";
+        public const string AlreadyExistsKey = "AlreadyExists";
+        public const string InvalidCPFKey = "InvalidCPF";
+        public const string InvalidCNPJKey = "InvalidCNPJ";
+        public const string CPFNonInformedKey = "CPFNonInformed";
+        public const string CNPJNonInformedKey = "CNPJNonInformed";
+        public const string InvalidBirthDateKey = "InvalidBirthDate";
     }
 
-    private static ConcurrentDictionary<string, List<DetailedNotification>> validateMessages = [];
+    private readonly ConcurrentDictionary<string, List<DetailedNotification>> validateMessages = [];
 
-    public static bool ManualNotification(object key, string message, EnumValidateType enumValidateType)
+    public async Task<bool> ManualNotification(object key, string message, EnumValidateType enumValidateType)
     {
-        return HandleValidation(key?.ToString() ?? "", enumValidateType, message, string.Empty);
+        return await Task.FromResult(HandleValidation(key?.ToString() ?? "", enumValidateType, message, string.Empty));
     }
 
-    public static bool Invalid(int index)
+    public async Task<bool> Invalid(int index)
     {
-        return HandleValidation(index.ToString(), EnumValidateType.Invalid, NotificationMessages.InvalidRecord, string.Empty);
+        return HandleValidation(index.ToString(), EnumValidateType.Invalid, await GetMessage(NotificationMessages.InvalidRecordKey), string.Empty);
     }
 
-    public static bool AlreadyExists(string key)
+    public async Task<bool> AlreadyExists(string key)
     {
-        return HandleValidation(key, EnumValidateType.Invalid, string.Format(NotificationMessages.AlreadyExists, key), string.Empty);
+        return HandleValidation(key, EnumValidateType.Invalid, await GetMessage(NotificationMessages.AlreadyExistsKey, key), string.Empty);
     }
 
-    public static bool InvalidEmail(int? index, string? email, EnumValidateType validateType)
+    public async Task<bool> InvalidEmail(int? index, string? email, EnumValidateType validateType)
     {
         string key = validateType == EnumValidateType.NonInformed ? index?.ToString()! : email!;
-        return HandleValidation(key, validateType, string.Format(NotificationMessages.InvalidEmail, email), NotificationMessages.EmailNotProvided);
+        return HandleValidation(key, validateType, await GetMessage(NotificationMessages.InvalidEmailKey, email), await GetMessage(NotificationMessages.EmailNotProvidedKey));
     }
 
-    public static bool InvalidLength(string identifier, string? value, int minLength, int maxLength, EnumValidateType validateType, string propertyName)
+    public async Task<bool> InvalidLength(string identifier, string? value, int minLength, int maxLength, EnumValidateType validateType, string propertyName)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidLength, value, propertyName, minLength, maxLength), string.Format(NotificationMessages.ValueNotProvided, propertyName));
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidLengthKey, value, propertyName, minLength, maxLength), await GetMessage(NotificationMessages.ValueNotProvidedKey, propertyName));
     }
 
-    public static bool InvalidMatch(string identifier, EnumValidateType validateType, params string[] propertiesName)
+    public async Task<bool> InvalidMatch(string identifier, EnumValidateType validateType, params string[] propertiesName)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.RecordsDoNotMatch, string.Join(", ", propertiesName)), NotificationMessages.NoRecordsProvided);
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.RecordsDoNotMatchKey, string.Join(", ", propertiesName)), await GetMessage(NotificationMessages.NoRecordsProvidedKey));
     }
 
-    public static bool InvalidCPF(string identifier, string? value, EnumValidateType validateType)
+    public async Task<bool> InvalidCPF(string identifier, string? value, EnumValidateType validateType)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidCPF, value), NotificationMessages.CPFNonInformed);
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidCPFKey, value!), await GetMessage(NotificationMessages.CPFNonInformedKey));
     }
 
-    public static bool InvalidCNPJ(string identifier, string? value, EnumValidateType validateType)
+    public async Task<bool> InvalidCNPJ(string identifier, string? value, EnumValidateType validateType)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidCNPJ, value), NotificationMessages.CNPJNonInformed);
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidCNPJKey, value!), await GetMessage(NotificationMessages.CNPJNonInformedKey));
     }
 
-    public static bool InvalidBirthDate(string identifier, int minAge, EnumValidateType validateType, string propertyName)
+    public async Task<bool> InvalidBirthDate(string identifier, int minAge, EnumValidateType validateType, string propertyName)
     {
-        return HandleValidation(identifier, validateType, string.Format(NotificationMessages.InvalidBirthDate, minAge), string.Format(NotificationMessages.ValueNotProvided, propertyName));
+        return HandleValidation(identifier, validateType, await GetMessage(NotificationMessages.InvalidBirthDateKey, minAge), await GetMessage(NotificationMessages.ValueNotProvidedKey, propertyName));
     }
     #endregion
 
     #region Helpers
-    private static bool AddToDictionary(string key, DetailedNotification validationMessage)
+    private bool AddToDictionary(string key, DetailedNotification validationMessage)
     {
         var existingNotification = validateMessages.GetOrAdd(key, _ => [new(key, [], validationMessage.NotificationType)]);
 
@@ -227,12 +223,12 @@ public class BaseValidate<TValidateDTO, TProcessType>
         return true;
     }
 
-    public static bool AddSuccessMessage(string key, string message)
+    public async Task<bool> AddSuccessMessage(string key, string message)
     {
-        return AddToDictionary(key, new DetailedNotification(key, [message], EnumNotificationType.Success));
+        return await Task.FromResult(AddToDictionary(key, new DetailedNotification(key, [message], EnumNotificationType.Success)));
     }
 
-    private static bool HandleValidation(string key, EnumValidateType validateType, string invalidMessage, string nonInformedMessage)
+    private bool HandleValidation(string key, EnumValidateType validateType, string invalidMessage, string nonInformedMessage)
     {
         return validateType switch
         {
@@ -242,11 +238,16 @@ public class BaseValidate<TValidateDTO, TProcessType>
         };
     }
 
-    public static (List<DetailedNotification> Successes, List<DetailedNotification> Errors) GetValidationResults()
+    public (List<DetailedNotification> Successes, List<DetailedNotification> Errors) GetValidationResults()
     {
         var successes = validateMessages.Values.SelectMany(v => v).Where(m => m.NotificationType == EnumNotificationType.Success).ToList();
         var errors = validateMessages.Values.SelectMany(v => v).Where(m => m.NotificationType != EnumNotificationType.Success).ToList();
         return (successes, errors);
     }
     #endregion
+
+    private async Task<string> GetMessage(string key, params object[] args)
+    {
+        return await translationService.TranslateAsync(key, EnumLanguage.Portuguese, args);
+    }
 }
