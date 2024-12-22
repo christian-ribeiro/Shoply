@@ -1,0 +1,8 @@
+using Shoply.Domain.DTO.Base;
+
+namespace Shoply.Domain.DTO.Module.{{Module}};
+
+public class AuxiliaryProperties{{EntityName}}DTO : BaseAuxiliaryPropertiesDTO<AuxiliaryProperties{{EntityName}}DTO>
+{
+    public AuxiliaryProperties{{EntityName}}DTO() { }
+}

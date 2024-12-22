@@ -1,0 +1,10 @@
+﻿using Shoply.Arguments.Argument.Base;
+using System.Text.Json.Serialization;
+
+namespace Shoply.Arguments.Argument.Module.{{Module}};
+
+[method: JsonConstructor]
+public class InputUpdate{{EntityName}}({{Constructor}}) : BaseInputUpdate<InputUpdate{{EntityName}}>
+{
+{{Properties}}
+}

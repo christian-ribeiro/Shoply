@@ -1,0 +1,34 @@
+using Shoply.Arguments.Argument.Module.{{Module}};
+using Shoply.Domain.DTO.Base;
+
+namespace Shoply.Domain.DTO.Module.{{Module}};
+
+public class {{EntityName}}PropertyValidateDTO : BaseValidateDTO
+{
+    public List<InputCreate{{EntityName}}>? ListRepeatedInputCreate{{EntityName}} { get; private set; }
+    public List<InputIdentityUpdate{{EntityName}}>? ListRepeatedInputIdentityUpdate{{EntityName}} { get; private set; }
+    public List<InputIdentityDelete{{EntityName}}>? ListRepeatedInputIdentityDelete{{EntityName}} { get; private set; }
+    public {{EntityName}}DTO? Original{{EntityName}}DTO { get; private set; }
+
+    public {{EntityName}}PropertyValidateDTO ValidateCreate(List<InputCreate{{EntityName}}>? listRepeatedInputCreate{{EntityName}}, {{EntityName}}DTO? original{{EntityName}}DTO)
+    {
+        ListRepeatedInputCreate{{EntityName}} = listRepeatedInputCreate{{EntityName}};
+        Original{{EntityName}}DTO = original{{EntityName}}DTO;
+        return this;
+    }
+
+    public {{EntityName}}PropertyValidateDTO ValidateUpdate(List<InputIdentityUpdate{{EntityName}}>? listRepeatedInputIdentityUpdate{{EntityName}}, {{EntityName}}DTO original{{EntityName}}DTO)
+    {
+        ListRepeatedInputIdentityUpdate{{EntityName}} = listRepeatedInputIdentityUpdate{{EntityName}};
+        Original{{EntityName}}DTO = original{{EntityName}}DTO;
+        return this;
+    }
+
+
+    public {{EntityName}}PropertyValidateDTO ValidateDelete(List<InputIdentityDelete{{EntityName}}>? listRepeatedInputIdentityDelete{{EntityName}}, {{EntityName}}DTO original{{EntityName}}DTO)
+    {
+        ListRepeatedInputIdentityDelete{{EntityName}} = listRepeatedInputIdentityDelete{{EntityName}};
+        Original{{EntityName}}DTO = original{{EntityName}}DTO;
+        return this;
+    }
+}

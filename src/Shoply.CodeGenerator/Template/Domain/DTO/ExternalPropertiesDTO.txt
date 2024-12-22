@@ -1,0 +1,16 @@
+using Shoply.Arguments.Enum.Module;
+using Shoply.Domain.DTO.Base;
+
+namespace Shoply.Domain.DTO.Module.{{Module}};
+
+public class ExternalProperties{{EntityName}}DTO : BaseExternalPropertiesDTO<ExternalProperties{{EntityName}}DTO>
+{
+{{Properties}}
+
+    public ExternalProperties{{EntityName}}DTO() { }
+
+    public ExternalProperties{{EntityName}}DTO({{Constructor}})
+    {
+{{ConstructorProperties}}
+    }
+}

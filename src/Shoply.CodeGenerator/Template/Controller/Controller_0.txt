@@ -1,0 +1,8 @@
+﻿using Shoply.Api.Controller.Base;
+using Shoply.Arguments.Argument.Module.{{Module}};
+using Shoply.Domain.Interface.Service.Module.{{Module}};
+using Shoply.Infrastructure.Persistence.EFCore.UnitOfWork.Interface;
+
+namespace Shoply.Api.Controller.Module.{{Module}};
+
+public class {{EntityName}}Controller(I{{EntityName}}Service service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<I{{EntityName}}Service, IShoplyUnitOfWork, Output{{EntityName}}, InputIdentifier{{EntityName}}, InputCreate{{EntityName}}, InputUpdate{{EntityName}}, InputIdentityUpdate{{EntityName}}, InputIdentityDelete{{EntityName}}>(service, unitOfWork, userService) { }

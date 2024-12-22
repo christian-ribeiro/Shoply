@@ -1,0 +1,18 @@
+using Shoply.Arguments.Argument.Module.{{Module}};
+using Shoply.Arguments.Enum.Module.{{Module}};
+using Shoply.Domain.DTO.Module.{{Module}};
+using Shoply.Infrastructure.Entity.Base;
+
+namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.{{Module}};
+
+public class {{EntityName}} : BaseEntity<{{EntityName}}, InputCreate{{EntityName}}, InputUpdate{{EntityName}}, Output{{EntityName}}, {{EntityName}}DTO, InternalProperties{{EntityName}}DTO, ExternalProperties{{EntityName}}DTO, AuxiliaryProperties{{EntityName}}DTO>
+{
+    {{Properties}}
+
+    public {{EntityName}}() { }
+
+    public {{EntityName}}({{Constructor}})
+    {
+        {{ConstructorProperties}}
+    }
+}

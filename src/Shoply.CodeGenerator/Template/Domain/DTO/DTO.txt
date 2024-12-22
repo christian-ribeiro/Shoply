@@ -1,0 +1,6 @@
+using Shoply.Arguments.Argument.Module.{{Module}};
+using Shoply.Domain.DTO.Base;
+
+namespace Shoply.Domain.DTO.Module.{{Module}};
+
+public class {{EntityName}}DTO : BaseDTO<InputCreate{{EntityName}}, InputUpdate{{EntityName}}, Output{{EntityName}}, {{EntityName}}DTO, InternalProperties{{EntityName}}DTO, ExternalProperties{{EntityName}}DTO, AuxiliaryProperties{{EntityName}}DTO> { }

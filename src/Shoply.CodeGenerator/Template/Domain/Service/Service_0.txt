@@ -1,0 +1,103 @@
+using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Argument.Module.{{Module}};
+using Shoply.Arguments.Enum.Base;
+using Shoply.Arguments.Enum.Base.Validate;
+using Shoply.Arguments.Enum.Module.{{Module}};
+using Shoply.Domain.DTO.Module.{{Module}};
+using Shoply.Domain.Interface.Repository.Module.{{Module}};
+using Shoply.Domain.Interface.Service.Module.{{Module}};
+using Shoply.Domain.Service.Base;
+using Shoply.Translation.Interface.Service;
+
+namespace Shoply.Domain.Service.Module.{{Module}};
+
+public class {{EntityName}}Service(I{{EntityName}}Repository repository, ITranslationService translationService) : BaseService<I{{EntityName}}Repository, InputCreate{{EntityName}}, InputUpdate{{EntityName}}, InputIdentifier{{EntityName}}, Output{{EntityName}}, InputIdentityUpdate{{EntityName}}, InputIdentityDelete{{EntityName}}, {{EntityName}}ValidateDTO, {{EntityName}}DTO, InternalProperties{{EntityName}}DTO, ExternalProperties{{EntityName}}DTO, AuxiliaryProperties{{EntityName}}DTO, EnumValidateProcessGeneric>(repository, translationService), I{{EntityName}}Service
+{
+    internal override async Task ValidateProcess(List<{{EntityName}}ValidateDTO> list{{EntityName}}ValidateDTO, EnumValidateProcessGeneric processType)
+    {
+        switch (processType)
+        {
+            case EnumValidateProcessGeneric.Create:
+                break;
+            case EnumValidateProcessGeneric.Update:
+                break;
+            case EnumValidateProcessGeneric.Delete:
+                break;
+        }
+    }
+
+    #region Create
+    public override async Task<BaseResult<List<Output{{EntityName}}?>>> Create(List<InputCreate{{EntityName}}> listInputCreate{{EntityName}})
+    {
+        List<{{EntityName}}DTO> listOriginal{{EntityName}}DTO = await _repository.GetListByListIdentifier((from i in listInputCreate{{EntityName}} select new InputIdentifier{{EntityName}}(i.Code)).ToList());
+
+        var listCreate = (from i in listInputCreate{{EntityName}}
+                          select new
+                          {
+                              InputCreate{{EntityName}} = i,
+                              ListRepeatedInputCreate{{EntityName}} = (from j in listInputCreate{{EntityName}} where listInputCreate{{EntityName}}.Count(x => x.Code == i.Code) > 1 select j).ToList(),
+                              Original{{EntityName}}DTO = (from j in listOriginal{{EntityName}}DTO where j.ExternalPropertiesDTO.Code == i.Code select j).FirstOrDefault(),
+                          }).ToList();
+
+        List<{{EntityName}}ValidateDTO> list{{EntityName}}ValidateDTO = (from i in listCreate select new {{EntityName}}ValidateDTO().ValidateCreate(i.InputCreate{{EntityName}}, i.ListRepeatedInputCreate{{EntityName}}, i.Original{{EntityName}}DTO)).ToList();
+        await ValidateProcess(list{{EntityName}}ValidateDTO, EnumValidateProcessGeneric.Create);
+
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputCreate{{EntityName}}.Count)
+            return BaseResult<List<Output{{EntityName}}?>>.Failure(errors);
+
+        List<{{EntityName}}DTO> listCreate{{EntityName}}DTO = (from i in RemoveInvalid(list{{EntityName}}ValidateDTO) select new {{EntityName}}DTO().Create(i.InputCreate{{EntityName}}!)).ToList();
+        return BaseResult<List<Output{{EntityName}}?>>.Success(FromDTOToOutput(await _repository.Create(listCreate{{EntityName}}DTO))!, [.. successes, .. errors]);
+    }
+    #endregion
+
+    #region Update
+    public override async Task<BaseResult<List<Output{{EntityName}}?>>> Update(List<InputIdentityUpdate{{EntityName}}> listInputIdentityUpdate{{EntityName}})
+    {
+        List<{{EntityName}}DTO> listOriginal{{EntityName}}DTO = await _repository.GetListByListId((from i in listInputIdentityUpdate{{EntityName}} select i.Id).ToList());
+
+        var listUpdate = (from i in listInputIdentityUpdate{{EntityName}}
+                          select new
+                          {
+                              InputIdentityUpdate{{EntityName}} = i,
+                              ListRepeatedInputIdentityUpdate{{EntityName}} = (from j in listInputIdentityUpdate{{EntityName}} where listInputIdentityUpdate{{EntityName}}.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              Original{{EntityName}}DTO = (from j in listOriginal{{EntityName}}DTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
+                          }).ToList();
+
+        List<{{EntityName}}ValidateDTO> list{{EntityName}}ValidateDTO = (from i in listUpdate select new {{EntityName}}ValidateDTO().ValidateUpdate(i.InputIdentityUpdate{{EntityName}}, i.ListRepeatedInputIdentityUpdate{{EntityName}}, i.Original{{EntityName}}DTO)).ToList();
+        await ValidateProcess(list{{EntityName}}ValidateDTO, EnumValidateProcessGeneric.Update);
+
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputIdentityUpdate{{EntityName}}.Count)
+            return BaseResult<List<Output{{EntityName}}?>>.Failure(errors);
+
+        List<{{EntityName}}DTO> listUpdate{{EntityName}}DTO = (from i in RemoveInvalid(list{{EntityName}}ValidateDTO) select i.Original{{EntityName}}DTO!.Update(i.InputIdentityUpdate{{EntityName}}!.InputUpdate!)).ToList();
+        return BaseResult<List<Output{{EntityName}}?>>.Success(FromDTOToOutput(await _repository.Update(listUpdate{{EntityName}}DTO))!, [.. successes, .. errors]);
+    }
+    #endregion
+
+    #region Delete
+    public override async Task<BaseResult<bool>> Delete(List<InputIdentityDelete{{EntityName}}> listInputIdentityDelete{{EntityName}})
+    {
+        List<{{EntityName}}DTO> listOriginal{{EntityName}}DTO = await _repository.GetListByListId((from i in listInputIdentityDelete{{EntityName}} select i.Id).ToList());
+
+        var listDelete = (from i in listInputIdentityDelete{{EntityName}}
+                          select new
+                          {
+                              InputIdentityDelete{{EntityName}} = i,
+                              ListRepeatedInputIdentityDelete{{EntityName}} = (from j in listInputIdentityDelete{{EntityName}} where listInputIdentityDelete{{EntityName}}.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              Original{{EntityName}}DTO = (from j in listOriginal{{EntityName}}DTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
+                          }).ToList();
+
+        List<{{EntityName}}ValidateDTO> list{{EntityName}}ValidateDTO = (from i in listDelete select new {{EntityName}}ValidateDTO().ValidateDelete(i.InputIdentityDelete{{EntityName}}, i.ListRepeatedInputIdentityDelete{{EntityName}}, i.Original{{EntityName}}DTO)).ToList();
+        await ValidateProcess(list{{EntityName}}ValidateDTO, EnumValidateProcessGeneric.Delete);
+
+        var (successes, errors) = GetValidationResults();
+        if (errors.Count == listInputIdentityDelete{{EntityName}}.Count)
+            return BaseResult<bool>.Failure(errors);
+
+        List<{{EntityName}}DTO> listDeletepdate{{EntityName}}DTO = (from i in RemoveInvalid(list{{EntityName}}ValidateDTO) select i.Original{{EntityName}}DTO).ToList();
+        return BaseResult<bool>.Success(await _repository.Delete(listDeletepdate{{EntityName}}DTO), [.. successes, .. errors]);
+    }
+    #endregion
+}
