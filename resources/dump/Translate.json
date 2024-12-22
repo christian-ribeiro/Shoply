@@ -1,0 +1,165 @@
+[{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4afe"
+  },
+  "Key": "InvalidLength",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:25.008Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "O valor {0} é inválido, '{1}' deve ser entre '{2}' e '{3}'",
+    "en-us": "The value {0} is invalid, '{1}' must be between '{2}' and '{3}'",
+    "es-es": "El valor {0} no es válido, '{1}' debe estar entre '{2}' y '{3}'"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4aff"
+  },
+  "Key": "RecordsDoNotMatch",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:25.180Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "Os registros '{0}' não coincidem",
+    "en-us": "The records '{0}' do not match",
+    "es-es": "Los registros '{0}' no coinciden"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b00"
+  },
+  "Key": "AlreadyExists",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:25.346Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "O registro '{0}' já existe",
+    "en-us": "The record '{0}' already exists",
+    "es-es": "El registro '{0}' ya existe"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b01"
+  },
+  "Key": "InvalidBirthDate",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:25.579Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "Data de nascimento inválida. Deve possuir no mínimo '{0}' anos de idade",
+    "en-us": "Invalid birth date. Must be at least '{0}' years old",
+    "es-es": "Fecha de nacimiento inválida. Debe tener al menos '{0}' años de edad"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b02"
+  },
+  "Key": "SuccessfullyRegistered",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:25.839Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "'{0}' cadastrado com sucesso",
+    "en-us": "'{0}' successfully registered",
+    "es-es": "'{0}' registrado con éxito"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b03"
+  },
+  "Key": "SuccessfullyUpdated",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:26.034Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "'{0}' alterado com sucesso",
+    "en-us": "'{0}' successfully updated",
+    "es-es": "'{0}' actualizado con éxito"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b04"
+  },
+  "Key": "SuccessfullyDeleted",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:27.112Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "'{0}' excluído com sucesso",
+    "en-us": "'{0}' successfully deleted",
+    "es-es": "'{0}' eliminado con éxito"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b05"
+  },
+  "Key": "InvalidUserPassword",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:27.345Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "Usuário ou senha inválidos",
+    "en-us": "Invalid username or password",
+    "es-es": "Usuario o contraseña inválidos"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b06"
+  },
+  "Key": "InvalidRecord",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:27.499Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "Registro inválido",
+    "en-us": "Invalid record",
+    "es-es": "Registro inválido"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b07"
+  },
+  "Key": "GenericInvalidValue",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:28.207Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "O {0} '{1}' informado não é válido",
+    "en-us": "The {0} '{1}' provided is not valid",
+    "es-es": "The {0} '{1}' provided is not valid"
+  }
+},
+{
+  "_id": {
+    "$oid": "675dad09a00cf9b2c66f4b08"
+  },
+  "Key": "GenericNotProvide",
+  "CreationDate": {
+    "$date": "2024-12-14T16:06:28.479Z"
+  },
+  "ChangeDate": null,
+  "Translation": {
+    "pt-br": "{0} não informado",
+    "en-us": "{0} not provided",
+    "es-es": "{0} no proporcionado"
+  }
+}]
