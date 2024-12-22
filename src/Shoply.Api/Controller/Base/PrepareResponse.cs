@@ -3,7 +3,7 @@ using Shoply.Arguments.Argument.General.Session;
 using System.Collections;
 using System.Dynamic;
 
-namespace Shoply.Api.Controllers.Base;
+namespace Shoply.Api.Controller.Base;
 
 public static class PrepareResponse
 {

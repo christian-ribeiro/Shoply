@@ -13,12 +13,12 @@ using Shoply.Domain.Interface.UnitOfWork;
 using System.Net;
 using System.Text.Json;
 
-namespace Shoply.Api.Controllers.Base;
+namespace Shoply.Api.Controller.Base;
 
 [Authorize]
 [ApiController]
 [Route("/api/v1/[controller]")]
-public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork, IUserService userService) : Controller
+public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork, IUserService userService) : Microsoft.AspNetCore.Mvc.Controller
     where TUnitOfWork : IBaseUnitOfWork
     where TService : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
     where TOutput : BaseOutput<TOutput>
