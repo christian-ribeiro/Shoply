@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Arguments.Extensions;
 using Shoply.Translation.Argument.Translation;
@@ -8,19 +10,23 @@ using Shoply.Translation.Persistence.Redis.Context;
 
 namespace Shoply.Translation.Service;
 
-public class TranslationService(TranslationMongoDBContext mongoContext, TranslationRedisContext redisContext) : ITranslationService
+public class TranslationService(IOptions<FeatureFlags> featureFlags, TranslationMongoDBContext mongoContext, TranslationRedisContext redisContext) : ITranslationService
 {
     private readonly TranslationMongoDBContext _mongoContext = mongoContext;
     private readonly TranslationRedisContext _redisContext = redisContext;
+    private readonly bool useRedis = featureFlags.Value.UseRedis;
 
     public async Task<string> TranslateAsync(string key, EnumLanguage language, params object[] args)
     {
         var redis = _redisContext.GetDatabase();
         string redisKey = $"translations:{language.GetMemberValue()}:{key}";
 
-        string? translation = await redis.StringGetAsync(redisKey);
-        if (!string.IsNullOrEmpty(translation))
-            return args.Length > 0 ? string.Format(translation, args) : translation;
+        if (useRedis)
+        {
+            string? translation = await redis.StringGetAsync(redisKey);
+            if (!string.IsNullOrEmpty(translation))
+                return args.Length > 0 ? string.Format(translation, args) : translation;
+        }
 
         var collection = _mongoContext.GetCollection("translations");
         var filter = Builders<OutputTranslation>.Filter.Eq("Key", key);
@@ -29,7 +35,8 @@ public class TranslationService(TranslationMongoDBContext mongoContext, Translat
         if (document != null && document.Translation.ContainsKey(language.GetMemberValue()))
         {
             string template = document.Translation[language.GetMemberValue()];
-            await redis.StringSetAsync(redisKey, template, TimeSpan.FromHours(6));
+            if (useRedis)
+                await redis.StringSetAsync(redisKey, template, TimeSpan.FromHours(6));
             return args.Length > 0 ? string.Format(template, args) : template;
         }
 

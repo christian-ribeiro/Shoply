@@ -1,5 +1,6 @@
 ﻿using Shoply.Application.Argument.Authentication;
 using Shoply.Application.Argument.Integration;
+using Shoply.Arguments.Argument.Base;
 using Shoply.Translation.Argument.Translation;
 
 namespace Shoply.Api.Extensions;
@@ -12,6 +13,7 @@ public static class ConfigureExtension
         services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
         services.Configure<TranslateMongoConfiguration>(builder.Configuration.GetSection("Translate:Mongo"));
         services.Configure<TranslateRedisConfiguration>(builder.Configuration.GetSection("Translate:Redis"));
+        services.Configure<FeatureFlags>(builder.Configuration.GetSection("FeatureFlags"));
         return services;
     }
 }
