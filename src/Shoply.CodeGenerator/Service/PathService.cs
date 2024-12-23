@@ -18,6 +18,7 @@ public static class PathService
         GenerateFullPath.Repository = GeneratePath.Repository.ReplacePath(inputGenerate);
         GenerateFullPath.MapperEntityDTO = GeneratePath.MapperEntityDTO.ReplacePath(inputGenerate);
         GenerateFullPath.MapperDTOOutput = GeneratePath.MapperDTOOutput.ReplacePath(inputGenerate);
+        GenerateFullPath.DbContext = GeneratePath.DbContext.ReplacePath(inputGenerate);
 
         TemplateFullPath.Controller = TemplatePath.Api.ReplacePath(inputGenerate);
         TemplateFullPath.Arguments = TemplatePath.Arguments.ReplacePath(inputGenerate);
@@ -36,6 +37,6 @@ public static class PathService
         string basePath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.Parent!.Parent!.FullName;
         string subPath = !string.IsNullOrEmpty(inputGenerate.SubPath) ? $"{inputGenerate.SubPath}\\{inputGenerate.EntityName}" : $"{inputGenerate.EntityName}";
 
-        return path.Replace("{{BasePath}}", basePath).Replace("{{Module}}", inputGenerate.Module.GetMemberValue()).Replace("{{SubPath}}", subPath);
+        return path.Replace("{{BasePath}}", basePath).Replace("{{Module}}", inputGenerate.Module.GetMemberValue()).Replace("{{DbContext}}", inputGenerate.Context.GetMemberValue()).Replace("{{SubPath}}", subPath);
     }
 }

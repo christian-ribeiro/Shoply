@@ -15,6 +15,7 @@ public static class CodeGenerateService
 
         PathService.SetFullPath(inputGenerate);
 
+        ContextGenerator.Generate(inputGenerate);
         ControllerGenerator.Generate(inputGenerate);
         ArgumentGenerator.Generate(inputGenerate);
         DTOGenerator.Generate(inputGenerate);

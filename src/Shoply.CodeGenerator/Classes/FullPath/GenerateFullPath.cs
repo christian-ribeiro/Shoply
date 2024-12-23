@@ -12,4 +12,5 @@ public static class GenerateFullPath
     public static string? Repository { get; set; }
     public static string? MapperEntityDTO { get; set; }
     public static string? MapperDTOOutput { get; set; }
+    public static string? DbContext { get; set; }
 }

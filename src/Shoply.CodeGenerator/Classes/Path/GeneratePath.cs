@@ -12,4 +12,5 @@ public static class GeneratePath
     public static string Repository { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Persistence\\EFCore\\Repository\\Module\\{{Module}}\\{{SubPath}}\\";
     public static string MapperEntityDTO { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Mapper\\MapperEntityDTO.cs";
     public static string MapperDTOOutput { get; set; } = "{{BasePath}}\\Shoply.Domain\\Mapper\\MapperDTOOutput.cs";
+    public static string DbContext { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Persistence\\EFCore\\Context\\{{DbContext}}.cs";
 }
