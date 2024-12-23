@@ -14,8 +14,8 @@ public static class ContextGenerator
 
         if (!(from i in originalFile where i.Trim() == dbSet select i).Any())
         {
-            int lastOcurrency = (from i in originalFile select i.Trim()).ToList().LastIndexOf($"#endregion {inputGenerate.Module.GetMemberValue()}");
-            originalFile.Insert(lastOcurrency, $"    {dbSet}");
+            int lastOcurrency = (from i in originalFile where i.Contains("public DbSet") select originalFile.IndexOf(i)).LastOrDefault();
+            originalFile.Insert(lastOcurrency + 1, $"    {dbSet}");
 
             WriteFile(GenerateFullPath.DbContext!, string.Join(Environment.NewLine, originalFile));
         }

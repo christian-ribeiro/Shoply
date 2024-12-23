@@ -15,13 +15,13 @@ public static class CodeGenerateService
 
         PathService.SetFullPath(inputGenerate);
 
-        ContextGenerator.Generate(inputGenerate);
         ControllerGenerator.Generate(inputGenerate);
         ArgumentGenerator.Generate(inputGenerate);
         DTOGenerator.Generate(inputGenerate);
         InterfaceGenerator.Generate(inputGenerate);
         ServiceGenerator.Generate(inputGenerate);
         InfrastructureGenerator.Generate(inputGenerate);
+        ContextGenerator.Generate(inputGenerate);
         MapperGenerator.Generate(inputGenerate);
     }
 }
