@@ -10,4 +10,6 @@ public static class TemplatePath
     public static string Service { get; private set; } = "{{BasePath}}\\Shoply.CodeGenerator\\Template\\Domain\\Service\\{{TemplateName}}.txt";
     public static string Entity { get; private set; } = "{{BasePath}}\\Shoply.CodeGenerator\\Template\\Infrastructure\\Persistence\\EFCore\\Entity\\{{TemplateName}}.txt";
     public static string Repository { get; private set; } = "{{BasePath}}\\Shoply.CodeGenerator\\Template\\Infrastructure\\Persistence\\EFCore\\Repository\\{{TemplateName}}.txt";
+    public static string MapperEntityDTO { get; private set; } = "{{BasePath}}\\Shoply.CodeGenerator\\Template\\Mapper\\MapperEntityDTO\\{{TemplateName}}.txt";
+    public static string MapperDTOOutput { get; private set; } = "{{BasePath}}\\Shoply.CodeGenerator\\Template\\Mapper\\MapperDTOOutput\\{{TemplateName}}.txt";
 }

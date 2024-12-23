@@ -1,7 +1,6 @@
 ﻿using Shoply.Arguments.Extensions;
 using Shoply.CodeGenerator.Argument;
 using Shoply.CodeGenerator.Classes;
-using System.Linq;
 
 namespace Shoply.CodeGenerator.Service;
 

@@ -10,4 +10,6 @@ public static class TemplateFullPath
     public static string? Service { get; set; }
     public static string? Entity { get; set; }
     public static string? Repository { get; set; }
+    public static string? MapperEntityDTO { get; set; }
+    public static string? MapperDTOOutput { get; set; }
 }

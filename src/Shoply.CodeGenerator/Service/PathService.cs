@@ -16,6 +16,8 @@ public static class PathService
         GenerateFullPath.Service = GeneratePath.Service.ReplacePath(inputGenerate);
         GenerateFullPath.Entity = GeneratePath.Entity.ReplacePath(inputGenerate);
         GenerateFullPath.Repository = GeneratePath.Repository.ReplacePath(inputGenerate);
+        GenerateFullPath.MapperEntityDTO = GeneratePath.MapperEntityDTO.ReplacePath(inputGenerate);
+        GenerateFullPath.MapperDTOOutput = GeneratePath.MapperDTOOutput.ReplacePath(inputGenerate);
 
         TemplateFullPath.Controller = TemplatePath.Api.ReplacePath(inputGenerate);
         TemplateFullPath.Arguments = TemplatePath.Arguments.ReplacePath(inputGenerate);
@@ -25,6 +27,8 @@ public static class PathService
         TemplateFullPath.Service = TemplatePath.Service.ReplacePath(inputGenerate);
         TemplateFullPath.Entity = TemplatePath.Entity.ReplacePath(inputGenerate);
         TemplateFullPath.Repository = TemplatePath.Repository.ReplacePath(inputGenerate);
+        TemplateFullPath.MapperEntityDTO = TemplatePath.MapperEntityDTO.ReplacePath(inputGenerate);
+        TemplateFullPath.MapperDTOOutput = TemplatePath.MapperDTOOutput.ReplacePath(inputGenerate);
     }
 
     private static string ReplacePath(this string path, InputGenerate inputGenerate)

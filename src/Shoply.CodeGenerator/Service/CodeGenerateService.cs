@@ -21,5 +21,6 @@ public static class CodeGenerateService
         InterfaceGenerator.Generate(inputGenerate);
         ServiceGenerator.Generate(inputGenerate);
         InfrastructureGenerator.Generate(inputGenerate);
+        MapperGenerator.Generate(inputGenerate);
     }
 }

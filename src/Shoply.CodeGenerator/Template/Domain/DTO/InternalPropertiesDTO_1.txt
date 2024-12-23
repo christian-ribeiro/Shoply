@@ -4,12 +4,12 @@ namespace Shoply.Domain.DTO.Module.{{Module}};
 
 public class InternalProperties{{EntityName}}DTO : BaseInternalPropertiesDTO<InternalProperties{{EntityName}}DTO>
 {
-	{{Properties}}
+{{Properties}}
 
     public InternalProperties{{EntityName}}DTO() { }
 
     public InternalProperties{{EntityName}}DTO({{Constructor}})
     {
-        {{ConstructorProperties}}
+{{ConstructorProperties}}
     }
 }
