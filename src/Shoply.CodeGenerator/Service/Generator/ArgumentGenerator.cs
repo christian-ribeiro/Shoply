@@ -133,6 +133,4 @@ public static class ArgumentGenerator
             .Replace("{{Nullable}}", inputGenerateProperty.Nullable ? "?" : "")
             .Replace("{{PropertyName}}", Char.ToLower(inputGenerateProperty.Name[0]).ToString() + inputGenerateProperty.Name[1..]);
     }
-
-    
 }
