@@ -2,15 +2,15 @@
 
 public static class GeneratePath
 {
-    public static string Controller { get; set; } = "{{BasePath}}\\Shoply.Api\\Controller\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string Arguments { get; set; } = "{{BasePath}}\\Shoply.Arguments\\Argument\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string DTO { get; set; } = "{{BasePath}}\\Shoply.Domain\\DTO\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string InterfaceRepository { get; set; } = "{{BasePath}}\\Shoply.Domain\\Interface\\Repository\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string InterfaceService { get; set; } = "{{BasePath}}\\Shoply.Domain\\Interface\\Service\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string Service { get; set; } = "{{BasePath}}\\Shoply.Domain\\Service\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string Entity { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Persistence\\EFCore\\Entity\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string Repository { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Persistence\\EFCore\\Repository\\Module\\{{Module}}\\{{SubPath}}\\";
-    public static string MapperEntityDTO { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Mapper\\MapperEntityDTO.cs";
-    public static string MapperDTOOutput { get; set; } = "{{BasePath}}\\Shoply.Domain\\Mapper\\MapperDTOOutput.cs";
-    public static string DbContext { get; set; } = "{{BasePath}}\\Shoply.Infrastructure\\Persistence\\EFCore\\Context\\{{DbContext}}.cs";
+    public static string Controller { get; set; } = Path.Combine(BasePath.Path, "Shoply.Api", "Controller", "Module");
+    public static string Arguments { get; set; } = Path.Combine(BasePath.Path, "Shoply.Arguments", "Argument", "Module");
+    public static string DTO { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "DTO", "Module");
+    public static string InterfaceRepository { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "Interface", "Repository", "Module");
+    public static string InterfaceService { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "Interface", "Service", "Module");
+    public static string Service { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "Service", "Module");
+    public static string Entity { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Entity", "Module");
+    public static string Repository { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Repository", "Module");
+    public static string MapperEntityDTO { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Mapper", "MapperEntityDTO.cs");
+    public static string MapperDTOOutput { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "Mapper", "MapperDTOOutput.cs");
+    public static string DbContext { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Context");
 }

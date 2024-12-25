@@ -19,29 +19,29 @@ public static class DTOGenerator
 
     private static void GenerateAuxiliaryDTO(InputGenerate inputGenerate)
     {
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", "AuxiliaryPropertiesDTO"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, "AuxiliaryPropertiesDTO.txt"));
 
         template = template
             .Replace("{{Module}}", inputGenerate.Module.GetMemberValue())
             .Replace("{{EntityName}}", inputGenerate.EntityName);
 
-        WriteFile(GenerateFullPath.DTO!, $"AuxiliaryProperties{inputGenerate.EntityName}DTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"AuxiliaryProperties{inputGenerate.EntityName}DTO.cs", template);
     }
 
     private static void GenerateDTO(InputGenerate inputGenerate)
     {
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", "DTO"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, "DTO.txt"));
 
         template = template
             .Replace("{{Module}}", inputGenerate.Module.GetMemberValue())
             .Replace("{{EntityName}}", inputGenerate.EntityName);
 
-        WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}DTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}DTO.cs", template);
     }
 
     private static void GenerateExternalDTO(InputGenerate inputGenerate)
     {
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", "ExternalPropertiesDTO"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, "ExternalPropertiesDTO.txt"));
 
         string properties = string.Join(Environment.NewLine, (from i in inputGenerate.ListPropertyExternal select i.GenerateProperty()).ToList());
         string constructor = string.Join(", ", (from i in inputGenerate.ListPropertyExternal select i.GenerateConstructor()).ToList());
@@ -54,14 +54,14 @@ public static class DTOGenerator
             .Replace("{{Constructor}}", constructor)
             .Replace("{{ConstructorProperties}}", constructorProperty);
 
-        WriteFile(GenerateFullPath.DTO!, $"ExternalProperties{inputGenerate.EntityName}DTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"ExternalProperties{inputGenerate.EntityName}DTO.cs", template);
     }
 
     private static void GenerateInternalDTO(InputGenerate inputGenerate)
     {
         bool hasInternal = inputGenerate.ListPropertyInternal.Count > 0;
 
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", hasInternal ? "InternalPropertiesDTO_1" : "InternalPropertiesDTO_0"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, hasInternal ? "InternalPropertiesDTO_1.txt" : "InternalPropertiesDTO_0.txt"));
 
         string properties = string.Join(Environment.NewLine, (from i in inputGenerate.ListPropertyInternal select i.GenerateProperty()).ToList());
         string constructor = string.Join(", ", (from i in inputGenerate.ListPropertyInternal select i.GenerateConstructor()).ToList());
@@ -74,29 +74,29 @@ public static class DTOGenerator
             .Replace("{{Constructor}}", constructor)
             .Replace("{{ConstructorProperties}}", constructorProperty);
 
-        WriteFile(GenerateFullPath.DTO!, $"InternalProperties{inputGenerate.EntityName}DTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"InternalProperties{inputGenerate.EntityName}DTO.cs", template);
     }
 
     private static void GeneratePropertyValidateDTO(InputGenerate inputGenerate)
     {
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", "PropertyValidateDTO"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, "PropertyValidateDTO.txt"));
 
         template = template
             .Replace("{{Module}}", inputGenerate.Module.GetMemberValue())
             .Replace("{{EntityName}}", inputGenerate.EntityName);
 
-        WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}PropertyValidateDTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}PropertyValidateDTO.cs", template);
     }
 
     private static void GenerateValidateDTO(InputGenerate inputGenerate)
     {
-        var template = File.ReadAllText(TemplateFullPath.DTO!.Replace("{{TemplateName}}", "ValidateDTO"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.DTO, "ValidateDTO.txt"));
 
         template = template
             .Replace("{{Module}}", inputGenerate.Module.GetMemberValue())
             .Replace("{{EntityName}}", inputGenerate.EntityName);
 
-        WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}ValidateDTO.cs", template);
+        FileService.WriteFile(GenerateFullPath.DTO!, $"{inputGenerate.EntityName}ValidateDTO.cs", template);
     }
 
     private static string GenerateProperty(this InputGenerateProperty inputGenerateProperty)
@@ -126,13 +126,5 @@ public static class DTOGenerator
         return template
             .Replace("{{PropertyName}}", inputGenerateProperty.Name)
             .Replace("{{ConstructorPropertyName}}", Char.ToLower(inputGenerateProperty.Name[0]).ToString() + inputGenerateProperty.Name[1..]);
-    }
-
-    private static void WriteFile(string directoryPath, string fileName, string file)
-    {
-        if (!Directory.Exists(directoryPath))
-            Directory.CreateDirectory(directoryPath);
-
-        File.WriteAllText($"{directoryPath}\\{fileName}", file);
     }
 }

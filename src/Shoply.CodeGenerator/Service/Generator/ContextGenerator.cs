@@ -17,15 +17,9 @@ public static class ContextGenerator
             int lastOcurrency = (from i in originalFile where i.Contains("public DbSet") select originalFile.IndexOf(i)).LastOrDefault();
             originalFile.Insert(lastOcurrency + 1, $"    {dbSet}");
 
-            WriteFile(GenerateFullPath.DbContext!, string.Join(Environment.NewLine, originalFile));
+            FileService.WriteFile(GenerateFullPath.DbContext!, string.Join(Environment.NewLine, originalFile));
         }
 
         return true;
-    }
-
-
-    private static void WriteFile(string path, string file)
-    {
-        File.WriteAllText(path, file);
     }
 }

@@ -16,7 +16,7 @@ public static class MapperGenerator
     {
         bool hasExternal = inputGenerate.ListPropertyExternal.Count > 0;
 
-        var template = File.ReadAllText(TemplateFullPath.MapperEntityDTO!.Replace("{{TemplateName}}", hasExternal ? "MapperEntityDTO_0" : "MapperEntityDTO_1"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.MapperEntityDTO, hasExternal ? "MapperEntityDTO_0.txt" : "MapperEntityDTO_1.txt"));
 
         string externalProperties = string.Join(", ", (from i in inputGenerate.ListPropertyExternal select i.GenerateProperty()).ToList());
         string internalProperties = string.Join(", ", (from i in inputGenerate.ListPropertyInternal select i.GenerateProperty()).ToList());
@@ -32,7 +32,7 @@ public static class MapperGenerator
             int lastOcurrency = (from i in originalFile select i.Trim()).ToList().LastIndexOf("#endregion");
             originalFile.InsertRange(lastOcurrency + 1, template.Split(Environment.NewLine));
 
-            WriteFile(GenerateFullPath.MapperEntityDTO!, string.Join(Environment.NewLine, originalFile));
+            FileService.WriteFile(GenerateFullPath.MapperEntityDTO!, originalFile);
         }
     }
 
@@ -40,7 +40,7 @@ public static class MapperGenerator
     {
         bool hasExternal = inputGenerate.ListPropertyExternal.Count > 0;
 
-        var template = File.ReadAllText(TemplateFullPath.MapperDTOOutput!.Replace("{{TemplateName}}", hasExternal ? "MapperDTOOutput_0" : "MapperDTOOutput_1"));
+        var template = File.ReadAllText(Path.Combine(TemplatePath.MapperDTOOutput, hasExternal ? "MapperDTOOutput_0.txt" : "MapperDTOOutput_1.txt"));
 
         string externalProperties = string.Join(", ", (from i in inputGenerate.ListPropertyExternal select i.GenerateProperty()).ToList());
         string internalProperties = string.Join(", ", (from i in inputGenerate.ListPropertyInternal select i.GenerateProperty()).ToList());
@@ -56,7 +56,7 @@ public static class MapperGenerator
             int lastOcurrency = (from i in originalFile select i.Trim()).ToList().LastIndexOf("#endregion");
             originalFile.InsertRange(lastOcurrency + 1, template.Split(Environment.NewLine));
 
-            WriteFile(GenerateFullPath.MapperDTOOutput!, string.Join(Environment.NewLine, originalFile));
+            FileService.WriteFile(GenerateFullPath.MapperDTOOutput!, originalFile);
         }
     }
 
@@ -65,10 +65,5 @@ public static class MapperGenerator
         string template = "src.{{PropertyName}}";
         return template
             .Replace("{{PropertyName}}", inputGenerateProperty.Name);
-    }
-
-    private static void WriteFile(string path, string file)
-    {
-        File.WriteAllText(path, file);
     }
 }
