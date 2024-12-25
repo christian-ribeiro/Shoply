@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Template\Infrastructure\Persistence\EFCore\Mapping\**" />
-    <EmbeddedResource Remove="Template\Infrastructure\Persistence\EFCore\Mapping\**" />
-    <None Remove="Template\Infrastructure\Persistence\EFCore\Mapping\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
   </ItemGroup>
 

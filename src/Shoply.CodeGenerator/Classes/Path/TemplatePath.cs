@@ -12,4 +12,5 @@ public static class TemplatePath
     public static string Repository { get; private set; } = Path.Combine(BasePath.Path, "Shoply.CodeGenerator", "Template", "Infrastructure", "Persistence", "EFCore", "Repository");
     public static string MapperEntityDTO { get; private set; } = Path.Combine(BasePath.Path, "Shoply.CodeGenerator", "Template", "Mapper", "MapperEntityDTO");
     public static string MapperDTOOutput { get; private set; } = Path.Combine(BasePath.Path, "Shoply.CodeGenerator", "Template", "Mapper", "MapperDTOOutput");
+    public static string Mapping { get; private set; } = Path.Combine(BasePath.Path, "Shoply.CodeGenerator", "Template", "Infrastructure", "Persistence", "EFCore", "Mapping");
 }

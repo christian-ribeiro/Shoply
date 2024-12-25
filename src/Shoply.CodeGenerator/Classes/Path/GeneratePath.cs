@@ -13,4 +13,6 @@ public static class GeneratePath
     public static string MapperEntityDTO { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Mapper", "MapperEntityDTO.cs");
     public static string MapperDTOOutput { get; set; } = Path.Combine(BasePath.Path, "Shoply.Domain", "Mapper", "MapperDTOOutput.cs");
     public static string DbContext { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Context");
+    public static string Mapping { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Mapping", "Module");
+    public static string UserInheritance { get; set; } = Path.Combine(BasePath.Path, "Shoply.Infrastructure", "Persistence", "EFCore", "Entity", "Module", "Registration", "User", "User.cs");
 }

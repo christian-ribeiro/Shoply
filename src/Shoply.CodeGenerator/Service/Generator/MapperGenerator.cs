@@ -26,13 +26,13 @@ public static class MapperGenerator
             .Replace("{{InternalProperties}}", internalProperties)
             .Replace("{{ExternalProperties}}", externalProperties);
 
-        var originalFile = File.ReadAllLines(GenerateFullPath.MapperEntityDTO!).ToList();
+        var originalFile = File.ReadAllLines(GeneratePath.MapperEntityDTO!).ToList();
         if (!(from i in originalFile where i.Trim() == $"#region {inputGenerate.EntityName}" select i).Any())
         {
             int lastOcurrency = (from i in originalFile select i.Trim()).ToList().LastIndexOf("#endregion");
             originalFile.InsertRange(lastOcurrency + 1, template.Split(Environment.NewLine));
 
-            FileService.WriteFile(GenerateFullPath.MapperEntityDTO!, originalFile);
+            FileService.WriteFile(GeneratePath.MapperEntityDTO!, originalFile);
         }
     }
 
@@ -50,13 +50,13 @@ public static class MapperGenerator
             .Replace("{{InternalProperties}}", internalProperties)
             .Replace("{{ExternalProperties}}", externalProperties);
 
-        var originalFile = File.ReadAllLines(GenerateFullPath.MapperDTOOutput!).ToList();
+        var originalFile = File.ReadAllLines(GeneratePath.MapperDTOOutput!).ToList();
         if (!(from i in originalFile where i.Trim() == $"#region {inputGenerate.EntityName}" select i).Any())
         {
             int lastOcurrency = (from i in originalFile select i.Trim()).ToList().LastIndexOf("#endregion");
             originalFile.InsertRange(lastOcurrency + 1, template.Split(Environment.NewLine));
 
-            FileService.WriteFile(GenerateFullPath.MapperDTOOutput!, originalFile);
+            FileService.WriteFile(GeneratePath.MapperDTOOutput!, originalFile);
         }
     }
 

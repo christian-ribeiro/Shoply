@@ -10,7 +10,6 @@ public static class GenerateFullPath
     public static string? Service { get; set; }
     public static string? Entity { get; set; }
     public static string? Repository { get; set; }
-    public static string? MapperEntityDTO { get; set; }
-    public static string? MapperDTOOutput { get; set; }
     public static string? DbContext { get; set; }
+    public static string? Mapping { get; set; }
 }

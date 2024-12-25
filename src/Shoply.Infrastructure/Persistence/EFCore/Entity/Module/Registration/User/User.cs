@@ -15,8 +15,7 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
     public Guid? LoginKey { get; private set; }
     public string? PasswordRecoveryCode { get; private set; }
 
-    #region Virtual Properties
-    #region External
+    #region Inheritance
     #region User
     public virtual List<User>? ListCreationUserUser { get; private set; }
     public virtual List<User>? ListChangeUserUser { get; private set; }
@@ -28,7 +27,6 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
     #region CustomerAddress
     public virtual List<CustomerAddress>? ListCreationUserCustomerAddress { get; private set; }
     public virtual List<CustomerAddress>? ListChangeUserCustomerAddress { get; private set; }
-    #endregion
     #endregion
     #endregion
 

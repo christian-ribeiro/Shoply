@@ -18,8 +18,7 @@ public static class PathService
         GenerateFullPath.Service = Path.Combine(GeneratePath.Service, inputGenerate.Module.GetMemberValue(), subPath);
         GenerateFullPath.Entity = Path.Combine(GeneratePath.Entity, inputGenerate.Module.GetMemberValue(), subPath);
         GenerateFullPath.Repository = Path.Combine(GeneratePath.Repository, inputGenerate.Module.GetMemberValue(), subPath);
-        GenerateFullPath.MapperEntityDTO = GeneratePath.MapperEntityDTO;
-        GenerateFullPath.MapperDTOOutput = GeneratePath.MapperDTOOutput;
         GenerateFullPath.DbContext = Path.Combine(GeneratePath.DbContext, $"{inputGenerate.Context.GetMemberValue()}.cs");
+        GenerateFullPath.Mapping = Path.Combine(GeneratePath.Mapping, inputGenerate.Module.GetMemberValue(), subPath);
     }
 }

@@ -6,24 +6,26 @@ public static class CodeGenerateService
 {
     public static void Generate(InputGenerate inputGenerate)
     {
-        var listSameProperty = (from i in inputGenerate.ListPropertyExternal
+        var listRepeatedProperty = (from i in inputGenerate.ListPropertyExternal
                                 join j in inputGenerate.ListPropertyInternal on i.Name equals j.Name
-                                select i.Name).ToList();
+                                select i.Name).Any();
 
-        var listSamePropertyExternal = (from i in inputGenerate.ListPropertyExternal
+        var listRepeatedPropertyExternal = (from i in inputGenerate.ListPropertyExternal
                                         join j in inputGenerate.ListPropertyExternal on i.Name equals j.Name
                                         where i.Name == j.Name && inputGenerate.ListPropertyExternal.IndexOf(i) != inputGenerate.ListPropertyExternal.IndexOf(j)
-                                        select i).ToList();
+                                        select i).Any();
 
-        var listSamePropertyInternal = (from i in inputGenerate.ListPropertyInternal
+        var listRepeatedPropertyInternal = (from i in inputGenerate.ListPropertyInternal
                                         join j in inputGenerate.ListPropertyInternal on i.Name equals j.Name
                                         where i.Name == j.Name && inputGenerate.ListPropertyInternal.IndexOf(i) != inputGenerate.ListPropertyInternal.IndexOf(j)
-                                        select i).ToList();
+                                        select i).Any();
 
-        if (listSameProperty.Count > 0 || listSamePropertyExternal.Count > 0 || listSamePropertyInternal.Count > 0)
+        if (listRepeatedProperty || listRepeatedPropertyExternal || listRepeatedPropertyInternal)
             throw new Exception("Carai borracha, tá indeciso?");
 
         PathService.SetFullPath(inputGenerate);
+
+        MappingGenerator.Generate(inputGenerate);
 
         ControllerGenerator.Generate(inputGenerate);
         ArgumentGenerator.Generate(inputGenerate);
