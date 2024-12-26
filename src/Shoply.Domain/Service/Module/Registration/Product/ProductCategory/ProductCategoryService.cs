@@ -9,7 +9,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentifierProductCategory, OutputProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO, EnumValidateProcessGeneric>(repository, translationService), IProductCategoryService
+public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, InputIdentifierProductCategory, OutputProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO, EnumValidateProcessGeneric>(repository, translationService), IProductCategoryService
 {
     internal override async Task ValidateProcess(List<ProductCategoryValidateDTO> listProductCategoryValidateDTO, EnumValidateProcessGeneric processType)
     {

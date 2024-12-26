@@ -9,7 +9,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class BrandService(IBrandRepository repository, ITranslationService translationService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentifierBrand, OutputBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO, EnumValidateProcessGeneric>(repository, translationService), IBrandService
+public class BrandService(IBrandRepository repository, ITranslationService translationService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO, EnumValidateProcessGeneric>(repository, translationService), IBrandService
 {
     internal override async Task ValidateProcess(List<BrandValidateDTO> listBrandValidateDTO, EnumValidateProcessGeneric processType)
     {

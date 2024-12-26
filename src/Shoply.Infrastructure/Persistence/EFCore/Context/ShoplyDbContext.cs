@@ -13,6 +13,7 @@ public class ShoplyDbContext(DbContextOptions<ShoplyDbContext> options) : DbCont
     public DbSet<ProductCategory>? ProductCategory { get; set; }
     public DbSet<MeasureUnit>? MeasureUnit { get; set; }
     public DbSet<Product>? Product { get; set; }
+    public DbSet<ProductImage>? ProductImage { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

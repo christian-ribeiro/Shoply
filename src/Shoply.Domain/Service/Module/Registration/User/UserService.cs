@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository, ITranslationService translationService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumValidateProcessUser>(repository, translationService), IUserService
+public class UserService(IUserRepository repository, ITranslationService translationService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumValidateProcessUser>(repository, translationService), IUserService
 {
     internal override async Task ValidateProcess(List<UserValidateDTO> listUserValidateDTO, EnumValidateProcessUser processType)
     {

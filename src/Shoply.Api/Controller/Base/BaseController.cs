@@ -18,15 +18,15 @@ namespace Shoply.Api.Controller.Base;
 [Authorize]
 [ApiController]
 [Route("/api/v1/[controller]")]
-public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdentifier, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete>(TService service, TUnitOfWork unitOfWork, IUserService userService) : Microsoft.AspNetCore.Mvc.Controller
+public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete, TInputIdentifier, TOutput>(TService service, TUnitOfWork unitOfWork, IUserService userService) : Microsoft.AspNetCore.Mvc.Controller
     where TUnitOfWork : IBaseUnitOfWork
-    where TService : IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
-    where TOutput : BaseOutput<TOutput>
-    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+    where TService : IBaseService<TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete, TInputIdentifier, TOutput>
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
     where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+    where TOutput : BaseOutput<TOutput>
 {
     protected readonly Guid _guidSessionDataRequest = SessionData.Initialize();
     protected readonly TService _service = service;
@@ -326,5 +326,26 @@ public abstract class BaseController<TService, TUnitOfWork, TOutput, TInputIdent
     public object? PrepareReturn<T>(T input)
     {
         return PrepareResponse.PrepareReturn(_guidSessionDataRequest, input);
+    }
+}
+
+public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput>(TService service, TUnitOfWork unitOfWork, IUserService userService) : BaseController<TService, TUnitOfWork, TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput>(service, unitOfWork, userService)
+    where TUnitOfWork : IBaseUnitOfWork
+    where TService : IBaseService<TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput>
+    where TInputCreate : BaseInputCreate<TInputCreate>
+    where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+    where TOutput : BaseOutput<TOutput>
+{
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<ActionResult<TOutput>> Update([FromBody] BaseInputIdentityUpdate_0 inputIdentityUpdate)
+    {
+        throw new NotImplementedException();
+    }
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<ActionResult<TOutput>> Update([FromBody] List<BaseInputIdentityUpdate_0> listInputIdentityUpdate)
+    {
+        throw new NotImplementedException();
     }
 }

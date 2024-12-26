@@ -173,7 +173,7 @@ public class MapperDTOOutput : Profile
             {
                 InternalPropertiesDTO = new InternalPropertiesProductDTO(src.Markup),
                 ExternalPropertiesDTO = new ExternalPropertiesProductDTO(src.Code, src.Description, src.BarCode, src.CostValue, src.SaleValue, src.Status, src.ProductCategoryId, src.MeasureUnitId, src.BrandId),
-                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand))
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand), mapper.Mapper.Map<List<ProductImageDTO>>(src.ListProductImage))
             })
             .ReverseMap();
 
@@ -186,7 +186,33 @@ public class MapperDTOOutput : Profile
             .ReverseMap();
 
         CreateMap<OutputProduct, AuxiliaryPropertiesProductDTO>()
-            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand)))
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand), mapper.Mapper.Map<List<ProductImageDTO>>(src.ListProductImage)))
+            .ReverseMap();
+        #endregion
+   
+        #region ProductImage
+        CreateMap<OutputProductImage, ProductImageDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new ProductImageDTO()
+            {
+                InternalPropertiesDTO = new InternalPropertiesProductImageDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesProductImageDTO(src.FileName, src.FileLength, src.ImageUrl, src.ProductId),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductImageDTO(mapper.Mapper.Map<ProductDTO>(src.Product))
+            })
+            .ReverseMap();
+        
+        CreateMap<OutputProductImage, InternalPropertiesProductImageDTO>()
+            .ConstructUsing(src => new InternalPropertiesProductImageDTO())
+            .ReverseMap();
+        
+        CreateMap<OutputProductImage, ExternalPropertiesProductImageDTO>()
+            .ConstructUsing(src => new ExternalPropertiesProductImageDTO(src.FileName, src.FileLength, src.ImageUrl, src.ProductId))
+            .ReverseMap();
+        
+        CreateMap<OutputProductImage, AuxiliaryPropertiesProductImageDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesProductImageDTO(mapper.Mapper.Map<ProductDTO>(src.Product)))
             .ReverseMap();
         #endregion
     }

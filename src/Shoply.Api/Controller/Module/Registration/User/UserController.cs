@@ -9,7 +9,7 @@ using Shoply.Infrastructure.Persistence.EFCore.UnitOfWork.Interface;
 
 namespace Shoply.Api.Controller.Module.Registration;
 
-public class UserController(IUserService service, IShoplyUnitOfWork unitOfWork) : BaseController<IUserService, IShoplyUnitOfWork, OutputUser, InputIdentifierUser, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser>(service, unitOfWork, service)
+public class UserController(IUserService service, IShoplyUnitOfWork unitOfWork) : BaseController<IUserService, IShoplyUnitOfWork, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser>(service, unitOfWork, service)
 {
     [AllowAnonymous]
     [HttpPost("Authenticate")]

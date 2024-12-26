@@ -7,14 +7,14 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Base;
 
-public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(TRepository repository, ITranslationService translationService) : BaseValidate<TValidateDTO, TProcessType>(translationService), IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
+public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete, TInputIdentifier, TOutput, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(TRepository repository, ITranslationService translationService) : BaseValidate<TValidateDTO, TProcessType>(translationService), IBaseService<TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete, TInputIdentifier, TOutput>
         where TRepository : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
         where TInputCreate : BaseInputCreate<TInputCreate>
         where TInputUpdate : BaseInputUpdate<TInputUpdate>
-        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
-        where TOutput : BaseOutput<TOutput>
         where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
         where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+        where TOutput : BaseOutput<TOutput>
         where TValidateDTO : BaseValidateDTO
         where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
         where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
@@ -110,3 +110,17 @@ public abstract class BaseService<TRepository, TInputCreate, TInputUpdate, TInpu
     }
     #endregion
 }
+
+public abstract class BaseService<TRepository, TInputCreate, TInputIdentifier, TOutput, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(TRepository repository, ITranslationService translationService) : BaseService<TRepository, TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO, TProcessType>(repository, translationService), IBaseService<TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput>
+        where TRepository : IBaseRepository<TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+        where TInputCreate : BaseInputCreate<TInputCreate>
+        where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+        where TOutput : BaseOutput<TOutput>
+        where TValidateDTO : BaseValidateDTO
+        where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+        where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+        where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+        where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+        where TProcessType : Enum
+{ }

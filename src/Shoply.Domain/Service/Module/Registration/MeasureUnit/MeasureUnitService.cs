@@ -9,7 +9,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO, EnumValidateProcessGeneric>(repository, translationService), IMeasureUnitService
+public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO, EnumValidateProcessGeneric>(repository, translationService), IMeasureUnitService
 {
     internal override async Task ValidateProcess(List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO, EnumValidateProcessGeneric processType)
     {

@@ -5,4 +5,4 @@ using Shoply.Infrastructure.Persistence.EFCore.UnitOfWork.Interface;
 
 namespace Shoply.Api.Controller.Module.Registration;
 
-public class BrandController(IBrandService service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<IBrandService, IShoplyUnitOfWork, OutputBrand, InputIdentifierBrand, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand>(service, unitOfWork, userService) { }
+public class BrandController(IBrandService service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<IBrandService, IShoplyUnitOfWork, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand>(service, unitOfWork, userService) { }

@@ -16,6 +16,10 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
     public string? PasswordRecoveryCode { get; private set; }
 
     #region Inheritance
+    #region ProductImage
+    public virtual List<ProductImage>? ListCreationUserProductImage { get; private set; }
+    #endregion
+
     #region Product
     public virtual List<Product>? ListCreationUserProduct { get; private set; }
     public virtual List<Product>? ListChangeUserProduct { get; private set; }

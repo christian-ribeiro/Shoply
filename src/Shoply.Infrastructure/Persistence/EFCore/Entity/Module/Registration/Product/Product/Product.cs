@@ -22,9 +22,10 @@ public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduc
     public virtual MeasureUnit? MeasureUnit { get; private set; }
     public virtual Brand? Brand { get; private set; }
 
+    public virtual List<ProductImage>? ListProductImage { get; private set; }
     public Product() { }
 
-    public Product(string code, string description, string? barCode, decimal costValue, decimal saleValue, EnumProductStatus status, long? productCategoryId, long measureUnitId, long brandId, decimal markup, ProductCategory? productCategory, MeasureUnit? measureUnit, Brand? brand)
+    public Product(string code, string description, string? barCode, decimal costValue, decimal saleValue, EnumProductStatus status, long? productCategoryId, long measureUnitId, long brandId, decimal markup, ProductCategory? productCategory, MeasureUnit? measureUnit, Brand? brand, List<ProductImage>? listProductImage)
     {
         Code = code;
         Description = description;
@@ -39,5 +40,6 @@ public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduc
         ProductCategory = productCategory;
         MeasureUnit = measureUnit;
         Brand = brand;
+        ListProductImage = listProductImage;
     }
 }

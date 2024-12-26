@@ -2,13 +2,13 @@
 
 namespace Shoply.Domain.Interface.Service.Base;
 
-public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TInputIdentityUpdate, TInputIdentityDelete>
+public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentityUpdate, TInputIdentityDelete, TInputIdentifier, TOutput>
         where TInputCreate : BaseInputCreate<TInputCreate>
         where TInputUpdate : BaseInputUpdate<TInputUpdate>
-        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
-        where TOutput : BaseOutput<TOutput>
         where TInputIdentityUpdate : BaseInputIdentityUpdate<TInputUpdate>
         where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+        where TOutput : BaseOutput<TOutput>
 {
     void SetGuid(Guid guidSessionDataRequest);
     Task<TOutput?> Get(long id);
@@ -23,3 +23,10 @@ public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentifier, TOut
     Task<BaseResult<bool>> Delete(TInputIdentityDelete inputIdentityDelete);
     Task<BaseResult<bool>> Delete(List<TInputIdentityDelete> listInputIdentityDelete);
 }
+
+public interface IBaseService<TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput> : IBaseService<TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput>
+        where TInputCreate : BaseInputCreate<TInputCreate>
+        where TInputIdentityDelete : BaseInputIdentityDelete<TInputIdentityDelete>
+        where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+        where TOutput : BaseOutput<TOutput>
+{ }

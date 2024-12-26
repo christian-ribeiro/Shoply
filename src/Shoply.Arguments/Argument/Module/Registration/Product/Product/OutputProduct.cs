@@ -3,7 +3,7 @@ using Shoply.Arguments.Enum.Module.Registration;
 
 namespace Shoply.Arguments.Argument.Module.Registration;
 
-public class OutputProduct(string code, string description, string? barCode, decimal costValue, decimal saleValue, EnumProductStatus status, long? productCategoryId, long measureUnitId, long brandId, decimal markup, OutputProductCategory? productCategory, OutputMeasureUnit? measureUnit, OutputBrand? brand) : BaseOutput<OutputProduct>
+public class OutputProduct(string code, string description, string? barCode, decimal costValue, decimal saleValue, EnumProductStatus status, long? productCategoryId, long measureUnitId, long brandId, decimal markup, OutputProductCategory? productCategory, OutputMeasureUnit? measureUnit, OutputBrand? brand, List<OutputProductImage>? listProductImage) : BaseOutput<OutputProduct>
 {
     public string Code { get; private set; } = code;
     public string Description { get; private set; } = description;
@@ -18,4 +18,5 @@ public class OutputProduct(string code, string description, string? barCode, dec
     public OutputProductCategory? ProductCategory { get; private set; } = productCategory;
     public OutputMeasureUnit? MeasureUnit { get; private set; } = measureUnit;
     public OutputBrand? Brand { get; private set; } = brand;
+    public List<OutputProductImage>? ListProductImage { get; private set; } = listProductImage;
 }

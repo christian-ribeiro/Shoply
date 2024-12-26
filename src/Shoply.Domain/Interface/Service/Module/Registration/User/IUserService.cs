@@ -5,7 +5,7 @@ using Shoply.Domain.Interface.Service.Base;
 
 namespace Shoply.Domain.Interface.Service.Module.Registration;
 
-public interface IUserService : IBaseService<InputCreateUser, InputUpdateUser, InputIdentifierUser, OutputUser, InputIdentityUpdateUser, InputIdentityDeleteUser>
+public interface IUserService : IBaseService<InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser>
 {
     Task<BaseResult<OutputAuthenticateUser>> Authenticate(InputAuthenticateUser inputAuthenticateUser);
     Task<BaseResult<OutputAuthenticateUser>> RefreshToken(InputRefreshTokenUser inputRefreshTokenUser);

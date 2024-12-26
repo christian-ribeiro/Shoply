@@ -3,4 +3,4 @@ using Shoply.Domain.Interface.Service.Base;
 
 namespace Shoply.Domain.Interface.Service.Module.Registration;
 
-public interface ICustomerAddressService : IBaseService<InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress> { }
+public interface ICustomerAddressService : IBaseService<InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress> { }

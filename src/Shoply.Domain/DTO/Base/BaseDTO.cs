@@ -72,3 +72,12 @@ public class BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropert
         return (TDTO)this;
     }
 }
+
+public class BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : BaseDTO<TInputCreate, BaseInputUpdate_0, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TOutput : BaseOutput<TOutput>
+    where TInputCreate : BaseInputCreate<TInputCreate>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+{ }

@@ -5,4 +5,4 @@ using Shoply.Infrastructure.Persistence.EFCore.UnitOfWork.Interface;
 
 namespace Shoply.Api.Controller.Module.Registration;
 
-public class CustomerAddressController(ICustomerAddressService service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<ICustomerAddressService, IShoplyUnitOfWork, OutputCustomerAddress, InputIdentifierCustomerAddress, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress>(service, unitOfWork, userService) { }
+public class CustomerAddressController(ICustomerAddressService service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<ICustomerAddressService, IShoplyUnitOfWork, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress>(service, unitOfWork, userService) { }

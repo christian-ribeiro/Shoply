@@ -235,3 +235,15 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     }
     #endregion
 }
+
+public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : BaseRepository<TContext, TEntity, TInputCreate, BaseInputUpdate_0, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(context), IBaseRepository<TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TContext : DbContext
+    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, new()
+    where TInputCreate : BaseInputCreate<TInputCreate>
+    where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
+    where TOutput : BaseOutput<TOutput>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+{ }

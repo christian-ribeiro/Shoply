@@ -3,4 +3,4 @@ using Shoply.Domain.Interface.Service.Base;
 
 namespace Shoply.Domain.Interface.Service.Module.Registration;
 
-public interface IBrandService : IBaseService<InputCreateBrand, InputUpdateBrand, InputIdentifierBrand, OutputBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand> { }
+public interface IBrandService : IBaseService<InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand> { }

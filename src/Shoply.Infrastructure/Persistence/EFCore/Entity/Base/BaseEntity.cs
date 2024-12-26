@@ -49,3 +49,13 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
                 select i.PropertyName).ToList(); ;
     }
 }
+
+public abstract class BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : BaseEntity<TEntity, TInputCreate, BaseInputUpdate_0, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TInputCreate : BaseInputCreate<TInputCreate>
+    where TOutput : BaseOutput<TOutput>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
+    where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
+    where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
+{ }

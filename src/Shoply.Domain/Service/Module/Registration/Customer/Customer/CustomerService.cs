@@ -11,7 +11,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class CustomerService(ICustomerRepository repository, ITranslationService translationService) : BaseService<ICustomerRepository, InputCreateCustomer, InputUpdateCustomer, InputIdentifierCustomer, OutputCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO, EnumValidateProcessGeneric>(repository, translationService), ICustomerService
+public class CustomerService(ICustomerRepository repository, ITranslationService translationService) : BaseService<ICustomerRepository, InputCreateCustomer, InputUpdateCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, InputIdentifierCustomer, OutputCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO, EnumValidateProcessGeneric>(repository, translationService), ICustomerService
 {
     internal override async Task ValidateProcess(List<CustomerValidateDTO> listCustomerValidateDTO, EnumValidateProcessGeneric processType)
     {
