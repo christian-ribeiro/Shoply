@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
@@ -83,6 +83,110 @@ public class MapperEntityDTO : Profile
 
         CreateMap<CustomerAddress, AuxiliaryPropertiesCustomerAddressDTO>()
             .ConstructUsing((src, mapper) => new AuxiliaryPropertiesCustomerAddressDTO(mapper.Mapper.Map<CustomerDTO>(src.Customer)))
+            .ReverseMap();
+        #endregion
+
+        #region Brand
+        CreateMap<Brand, BrandDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new BrandDTO
+            {
+                InternalPropertiesDTO = new InternalPropertiesBrandDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesBrandDTO(src.Code, src.Description),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesBrandDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct))
+            })
+            .ReverseMap();
+
+        CreateMap<Brand, InternalPropertiesBrandDTO>()
+            .ConstructUsing(src => new InternalPropertiesBrandDTO())
+            .ReverseMap();
+
+        CreateMap<Brand, ExternalPropertiesBrandDTO>()
+            .ConstructUsing(src => new ExternalPropertiesBrandDTO(src.Code, src.Description))
+            .ReverseMap();
+
+        CreateMap<Brand, AuxiliaryPropertiesBrandDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesBrandDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct)))
+            .ReverseMap();
+        #endregion
+
+        #region ProductCategory
+        CreateMap<ProductCategory, ProductCategoryDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new ProductCategoryDTO
+            {
+                InternalPropertiesDTO = new InternalPropertiesProductCategoryDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesProductCategoryDTO(src.Code, src.Description),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductCategoryDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct))
+            })
+            .ReverseMap();
+
+        CreateMap<ProductCategory, InternalPropertiesProductCategoryDTO>()
+            .ConstructUsing(src => new InternalPropertiesProductCategoryDTO())
+            .ReverseMap();
+
+        CreateMap<ProductCategory, ExternalPropertiesProductCategoryDTO>()
+            .ConstructUsing(src => new ExternalPropertiesProductCategoryDTO(src.Code, src.Description))
+            .ReverseMap();
+
+        CreateMap<ProductCategory, AuxiliaryPropertiesProductCategoryDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesProductCategoryDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct)))
+            .ReverseMap();
+        #endregion
+
+        #region MeasureUnit
+        CreateMap<MeasureUnit, MeasureUnitDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new MeasureUnitDTO
+            {
+                InternalPropertiesDTO = new InternalPropertiesMeasureUnitDTO(),
+                ExternalPropertiesDTO = new ExternalPropertiesMeasureUnitDTO(src.Code, src.Description),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesMeasureUnitDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct))
+            })
+            .ReverseMap();
+
+        CreateMap<MeasureUnit, InternalPropertiesMeasureUnitDTO>()
+            .ConstructUsing(src => new InternalPropertiesMeasureUnitDTO())
+            .ReverseMap();
+
+        CreateMap<MeasureUnit, ExternalPropertiesMeasureUnitDTO>()
+            .ConstructUsing(src => new ExternalPropertiesMeasureUnitDTO(src.Code, src.Description))
+            .ReverseMap();
+
+        CreateMap<MeasureUnit, AuxiliaryPropertiesMeasureUnitDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesMeasureUnitDTO(mapper.Mapper.Map<List<ProductDTO>>(src.ListProduct)))
+            .ReverseMap();
+        #endregion
+
+        #region Product
+        CreateMap<Product, ProductDTO>()
+            .ForMember(dest => dest.InternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.ExternalPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.AuxiliaryPropertiesDTO, opt => opt.MapFrom(src => src))
+            .ConstructUsing((src, mapper) => new ProductDTO
+            {
+                InternalPropertiesDTO = new InternalPropertiesProductDTO(src.Markup),
+                ExternalPropertiesDTO = new ExternalPropertiesProductDTO(src.Code, src.Description, src.BarCode, src.CostValue, src.SaleValue, src.Status, src.ProductCategoryId, src.MeasureUnitId, src.BrandId),
+                AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand))
+            })
+            .ReverseMap();
+
+        CreateMap<Product, InternalPropertiesProductDTO>()
+            .ConstructUsing(src => new InternalPropertiesProductDTO(src.Markup))
+            .ReverseMap();
+
+        CreateMap<Product, ExternalPropertiesProductDTO>()
+            .ConstructUsing(src => new ExternalPropertiesProductDTO(src.Code, src.Description, src.BarCode, src.CostValue, src.SaleValue, src.Status, src.ProductCategoryId, src.MeasureUnitId, src.BrandId))
+            .ReverseMap();
+
+        CreateMap<Product, AuxiliaryPropertiesProductDTO>()
+            .ConstructUsing((src, mapper) => new AuxiliaryPropertiesProductDTO(mapper.Mapper.Map<ProductCategoryDTO>(src.ProductCategory), mapper.Mapper.Map<MeasureUnitDTO>(src.MeasureUnit), mapper.Mapper.Map<BrandDTO>(src.Brand)))
             .ReverseMap();
         #endregion
     }
