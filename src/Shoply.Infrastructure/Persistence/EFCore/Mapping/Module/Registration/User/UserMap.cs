@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Mapping.Module.Registration;
@@ -49,5 +50,7 @@ public class UserMap : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.PasswordRecoveryCode).HasColumnName("codigo_recuperacao_senha");
         builder.Property(x => x.PasswordRecoveryCode).HasMaxLength(6);
+
+        builder.HasData(new User("Usuario Padrão", "default@shoply.com", "$2a$11$252h2vGrxOa1D/ZO.SCreeO3NWC4cSzKJlF.dyzxIQlbJ24ooULO2", EnumLanguage.Portuguese, null, null, null).SetInternalData(1, new DateTime(2025, 01, 01, 0, 0, 0), null, null, null));
     }
 }

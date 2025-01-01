@@ -48,6 +48,17 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
         return (from i in dictionary.ListProperty
                 select i.PropertyName).ToList(); ;
     }
+
+    public TEntity SetInternalData(long id, DateTime? creationDate, long? creationUserId, DateTime? changeDate, long? changeUserId)
+    {
+        Id = id;
+        CreationDate = creationDate;
+        CreationUserId = creationUserId;
+        ChangeDate = changeDate;
+        ChangeUserId = changeUserId;
+
+        return (TEntity)this;
+    }
 }
 
 public abstract class BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : BaseEntity<TEntity, TInputCreate, BaseInputUpdate_0, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
