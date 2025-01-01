@@ -5,29 +5,29 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class BrandPropertyValidateDTO : BaseValidateDTO
 {
-    public List<InputCreateBrand>? ListRepeatedInputCreateBrand { get; private set; }
-    public List<InputIdentityUpdateBrand>? ListRepeatedInputIdentityUpdateBrand { get; private set; }
-    public List<InputIdentityDeleteBrand>? ListRepeatedInputIdentityDeleteBrand { get; private set; }
+    public List<InputCreateBrand>? ListRepeatedInputCreate { get; private set; }
+    public List<InputIdentityUpdateBrand>? ListRepeatedInputIdentityUpdate { get; private set; }
+    public List<InputIdentityDeleteBrand>? ListRepeatedInputIdentityDelete { get; private set; }
     public BrandDTO? OriginalBrandDTO { get; private set; }
 
-    public BrandPropertyValidateDTO ValidateCreate(List<InputCreateBrand>? listRepeatedInputCreateBrand, BrandDTO? originalBrandDTO)
+    public BrandPropertyValidateDTO ValidateCreate(List<InputCreateBrand>? listRepeatedInputCreate, BrandDTO? originalBrandDTO)
     {
-        ListRepeatedInputCreateBrand = listRepeatedInputCreateBrand;
+        ListRepeatedInputCreate = listRepeatedInputCreate;
         OriginalBrandDTO = originalBrandDTO;
         return this;
     }
 
-    public BrandPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateBrand>? listRepeatedInputIdentityUpdateBrand, BrandDTO originalBrandDTO)
+    public BrandPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateBrand>? listRepeatedInputIdentityUpdate, BrandDTO originalBrandDTO)
     {
-        ListRepeatedInputIdentityUpdateBrand = listRepeatedInputIdentityUpdateBrand;
+        ListRepeatedInputIdentityUpdate = listRepeatedInputIdentityUpdate;
         OriginalBrandDTO = originalBrandDTO;
         return this;
     }
 
 
-    public BrandPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteBrand>? listRepeatedInputIdentityDeleteBrand, BrandDTO originalBrandDTO)
+    public BrandPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteBrand>? listRepeatedInputIdentityDelete, BrandDTO originalBrandDTO)
     {
-        ListRepeatedInputIdentityDeleteBrand = listRepeatedInputIdentityDeleteBrand;
+        ListRepeatedInputIdentityDelete = listRepeatedInputIdentityDelete;
         OriginalBrandDTO = originalBrandDTO;
         return this;
     }

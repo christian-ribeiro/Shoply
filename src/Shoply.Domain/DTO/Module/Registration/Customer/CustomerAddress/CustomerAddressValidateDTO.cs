@@ -4,28 +4,28 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class CustomerAddressValidateDTO : CustomerAddressPropertyValidateDTO
 {
-    public InputCreateCustomerAddress? InputCreateCustomerAddress { get; private set; }
-    public InputIdentityUpdateCustomerAddress? InputIdentityUpdateCustomerAddress { get; private set; }
-    public InputIdentityDeleteCustomerAddress? InputIdentityDeleteCustomerAddress { get; private set; }
+    public InputCreateCustomerAddress? InputCreate { get; private set; }
+    public InputIdentityUpdateCustomerAddress? InputIdentityUpdate { get; private set; }
+    public InputIdentityDeleteCustomerAddress? InputIdentityDelete { get; private set; }
 
-    public CustomerAddressValidateDTO ValidateCreate(InputCreateCustomerAddress? inputCreateCustomerAddress, CustomerDTO? relatedCustomerDTO)
+    public CustomerAddressValidateDTO ValidateCreate(InputCreateCustomerAddress? inputCreate, CustomerDTO? relatedCustomerDTO)
     {
-        InputCreateCustomerAddress = inputCreateCustomerAddress;
+        InputCreate = inputCreate;
         ValidateCreate(relatedCustomerDTO);
         return this;
     }
 
-    public CustomerAddressValidateDTO ValidateUpdate(InputIdentityUpdateCustomerAddress? inputIdentityUpdateCustomerAddress, List<InputIdentityUpdateCustomerAddress>? listRepeatedInputIdentityUpdateCustomerAddress, CustomerAddressDTO originalCustomerAddressDTO)
+    public CustomerAddressValidateDTO ValidateUpdate(InputIdentityUpdateCustomerAddress? inputIdentityUpdate, List<InputIdentityUpdateCustomerAddress>? listRepeatedInputIdentityUpdate, CustomerAddressDTO originalCustomerAddressDTO)
     {
-        InputIdentityUpdateCustomerAddress = inputIdentityUpdateCustomerAddress;
-        ValidateUpdate(listRepeatedInputIdentityUpdateCustomerAddress, originalCustomerAddressDTO);
+        InputIdentityUpdate = inputIdentityUpdate;
+        ValidateUpdate(listRepeatedInputIdentityUpdate, originalCustomerAddressDTO);
         return this;
     }
 
-    public CustomerAddressValidateDTO ValidateDelete(InputIdentityDeleteCustomerAddress? inputIdentityDeleteCustomerAddress, List<InputIdentityDeleteCustomerAddress>? listRepeatedInputIdentityDeleteCustomerAddress, CustomerAddressDTO originalCustomerAddressDTO)
+    public CustomerAddressValidateDTO ValidateDelete(InputIdentityDeleteCustomerAddress? inputIdentityDelete, List<InputIdentityDeleteCustomerAddress>? listRepeatedInputIdentityDelete, CustomerAddressDTO originalCustomerAddressDTO)
     {
-        InputIdentityDeleteCustomerAddress = inputIdentityDeleteCustomerAddress;
-        ValidateDelete(listRepeatedInputIdentityDeleteCustomerAddress, originalCustomerAddressDTO);
+        InputIdentityDelete = inputIdentityDelete;
+        ValidateDelete(listRepeatedInputIdentityDelete, originalCustomerAddressDTO);
         return this;
     }
 }

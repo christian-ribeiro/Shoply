@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class BrandService(IBrandRepository repository, ITranslationService translationService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO>(repository, translationService), IBrandService
+public class BrandService(IBrandRepository repository, ITranslationService translationService, IBrandValidateService brandValidateService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO>(repository, translationService), IBrandService
 {
     #region Create
     public override async Task<BaseResult<List<OutputBrand?>>> Create(List<InputCreateBrand> listInputCreateBrand)
@@ -24,12 +24,13 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listCreate select new BrandValidateDTO().ValidateCreate(i.InputCreateBrand, i.ListRepeatedInputCreateBrand, i.OriginalBrandDTO)).ToList();
+        brandValidateService.Create(listBrandValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateBrand.Count)
             return BaseResult<List<OutputBrand?>>.Failure(errors);
 
-        List<BrandDTO> listCreateBrandDTO = (from i in RemoveInvalid(listBrandValidateDTO) select new BrandDTO().Create(i.InputCreateBrand!)).ToList();
+        List<BrandDTO> listCreateBrandDTO = (from i in RemoveInvalid(listBrandValidateDTO) select new BrandDTO().Create(i.InputCreate!)).ToList();
         return BaseResult<List<OutputBrand?>>.Success(FromDTOToOutput(await _repository.Create(listCreateBrandDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -48,12 +49,13 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listUpdate select new BrandValidateDTO().ValidateUpdate(i.InputIdentityUpdateBrand, i.ListRepeatedInputIdentityUpdateBrand, i.OriginalBrandDTO)).ToList();
+        brandValidateService.Update(listBrandValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateBrand.Count)
             return BaseResult<List<OutputBrand?>>.Failure(errors);
 
-        List<BrandDTO> listUpdateBrandDTO = (from i in RemoveInvalid(listBrandValidateDTO) select i.OriginalBrandDTO!.Update(i.InputIdentityUpdateBrand!.InputUpdate!)).ToList();
+        List<BrandDTO> listUpdateBrandDTO = (from i in RemoveInvalid(listBrandValidateDTO) select i.OriginalBrandDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
         return BaseResult<List<OutputBrand?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateBrandDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -72,6 +74,7 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listDelete select new BrandValidateDTO().ValidateDelete(i.InputIdentityDeleteBrand, i.ListRepeatedInputIdentityDeleteBrand, i.OriginalBrandDTO)).ToList();
+        brandValidateService.Delete(listBrandValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteBrand.Count)

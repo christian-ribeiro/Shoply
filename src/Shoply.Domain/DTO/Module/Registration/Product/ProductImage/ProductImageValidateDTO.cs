@@ -4,20 +4,20 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class ProductImageValidateDTO : ProductImagePropertyValidateDTO
 {
-    public InputCreateProductImage? InputCreateProductImage { get; private set; }
-    public InputIdentityDeleteProductImage? InputIdentityDeleteProductImage { get; private set; }
+    public InputCreateProductImage? InputCreate { get; private set; }
+    public InputIdentityDeleteProductImage? InputIdentityDelete { get; private set; }
 
-    public ProductImageValidateDTO ValidateCreate(InputCreateProductImage? inputCreateProductImage, List<InputCreateProductImage>? listRepeatedInputCreateProductImage, ProductImageDTO originalProductImageDTO)
+    public ProductImageValidateDTO ValidateCreate(InputCreateProductImage? inputCreate, List<InputCreateProductImage>? listRepeatedInputCreate, ProductImageDTO originalProductImageDTO)
     {
-        InputCreateProductImage = inputCreateProductImage;
-        ValidateCreate(listRepeatedInputCreateProductImage, originalProductImageDTO);
+        InputCreate = inputCreate;
+        ValidateCreate(listRepeatedInputCreate, originalProductImageDTO);
         return this;
     }
 
-    public ProductImageValidateDTO ValidateDelete(InputIdentityDeleteProductImage? inputIdentityDeleteProductImage, List<InputIdentityDeleteProductImage>? listRepeatedInputIdentityDeleteProductImage, ProductImageDTO originalProductImageDTO)
+    public ProductImageValidateDTO ValidateDelete(InputIdentityDeleteProductImage? inputIdentityDelete, List<InputIdentityDeleteProductImage>? listRepeatedInputIdentityDelete, ProductImageDTO originalProductImageDTO)
     {
-        InputIdentityDeleteProductImage = inputIdentityDeleteProductImage;
-        ValidateDelete(listRepeatedInputIdentityDeleteProductImage, originalProductImageDTO);
+        InputIdentityDelete = inputIdentityDelete;
+        ValidateDelete(listRepeatedInputIdentityDelete, originalProductImageDTO);
         return this;
     }
 }

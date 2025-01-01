@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO>(repository, translationService), IMeasureUnitService
+public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService, IMeasureUnitValidateService measureUnitValidateService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO>(repository, translationService), IMeasureUnitService
 {
     #region Create
     public override async Task<BaseResult<List<OutputMeasureUnit?>>> Create(List<InputCreateMeasureUnit> listInputCreateMeasureUnit)
@@ -24,12 +24,13 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listCreate select new MeasureUnitValidateDTO().ValidateCreate(i.InputCreateMeasureUnit, i.ListRepeatedInputCreateMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
+        measureUnitValidateService.Create(listMeasureUnitValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateMeasureUnit.Count)
             return BaseResult<List<OutputMeasureUnit?>>.Failure(errors);
 
-        List<MeasureUnitDTO> listCreateMeasureUnitDTO = (from i in RemoveInvalid(listMeasureUnitValidateDTO) select new MeasureUnitDTO().Create(i.InputCreateMeasureUnit!)).ToList();
+        List<MeasureUnitDTO> listCreateMeasureUnitDTO = (from i in RemoveInvalid(listMeasureUnitValidateDTO) select new MeasureUnitDTO().Create(i.InputCreate!)).ToList();
         return BaseResult<List<OutputMeasureUnit?>>.Success(FromDTOToOutput(await _repository.Create(listCreateMeasureUnitDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -48,12 +49,13 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listUpdate select new MeasureUnitValidateDTO().ValidateUpdate(i.InputIdentityUpdateMeasureUnit, i.ListRepeatedInputIdentityUpdateMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
+        measureUnitValidateService.Update(listMeasureUnitValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateMeasureUnit.Count)
             return BaseResult<List<OutputMeasureUnit?>>.Failure(errors);
 
-        List<MeasureUnitDTO> listUpdateMeasureUnitDTO = (from i in RemoveInvalid(listMeasureUnitValidateDTO) select i.OriginalMeasureUnitDTO!.Update(i.InputIdentityUpdateMeasureUnit!.InputUpdate!)).ToList();
+        List<MeasureUnitDTO> listUpdateMeasureUnitDTO = (from i in RemoveInvalid(listMeasureUnitValidateDTO) select i.OriginalMeasureUnitDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
         return BaseResult<List<OutputMeasureUnit?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateMeasureUnitDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -72,6 +74,7 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listDelete select new MeasureUnitValidateDTO().ValidateDelete(i.InputIdentityDeleteMeasureUnit, i.ListRepeatedInputIdentityDeleteMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
+        measureUnitValidateService.Delete(listMeasureUnitValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteMeasureUnit.Count)

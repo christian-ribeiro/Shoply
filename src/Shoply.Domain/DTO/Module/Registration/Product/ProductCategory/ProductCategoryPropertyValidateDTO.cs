@@ -5,29 +5,29 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class ProductCategoryPropertyValidateDTO : BaseValidateDTO
 {
-    public List<InputCreateProductCategory>? ListRepeatedInputCreateProductCategory { get; private set; }
-    public List<InputIdentityUpdateProductCategory>? ListRepeatedInputIdentityUpdateProductCategory { get; private set; }
-    public List<InputIdentityDeleteProductCategory>? ListRepeatedInputIdentityDeleteProductCategory { get; private set; }
+    public List<InputCreateProductCategory>? ListRepeatedInputCreate { get; private set; }
+    public List<InputIdentityUpdateProductCategory>? ListRepeatedInputIdentityUpdate { get; private set; }
+    public List<InputIdentityDeleteProductCategory>? ListRepeatedInputIdentityDelete { get; private set; }
     public ProductCategoryDTO? OriginalProductCategoryDTO { get; private set; }
 
-    public ProductCategoryPropertyValidateDTO ValidateCreate(List<InputCreateProductCategory>? listRepeatedInputCreateProductCategory, ProductCategoryDTO? originalProductCategoryDTO)
+    public ProductCategoryPropertyValidateDTO ValidateCreate(List<InputCreateProductCategory>? listRepeatedInputCreate, ProductCategoryDTO? originalProductCategoryDTO)
     {
-        ListRepeatedInputCreateProductCategory = listRepeatedInputCreateProductCategory;
+        ListRepeatedInputCreate = listRepeatedInputCreate;
         OriginalProductCategoryDTO = originalProductCategoryDTO;
         return this;
     }
 
-    public ProductCategoryPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateProductCategory>? listRepeatedInputIdentityUpdateProductCategory, ProductCategoryDTO originalProductCategoryDTO)
+    public ProductCategoryPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateProductCategory>? listRepeatedInputIdentityUpdate, ProductCategoryDTO originalProductCategoryDTO)
     {
-        ListRepeatedInputIdentityUpdateProductCategory = listRepeatedInputIdentityUpdateProductCategory;
+        ListRepeatedInputIdentityUpdate = listRepeatedInputIdentityUpdate;
         OriginalProductCategoryDTO = originalProductCategoryDTO;
         return this;
     }
 
 
-    public ProductCategoryPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteProductCategory>? listRepeatedInputIdentityDeleteProductCategory, ProductCategoryDTO originalProductCategoryDTO)
+    public ProductCategoryPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteProductCategory>? listRepeatedInputIdentityDelete, ProductCategoryDTO originalProductCategoryDTO)
     {
-        ListRepeatedInputIdentityDeleteProductCategory = listRepeatedInputIdentityDeleteProductCategory;
+        ListRepeatedInputIdentityDelete = listRepeatedInputIdentityDelete;
         OriginalProductCategoryDTO = originalProductCategoryDTO;
         return this;
     }

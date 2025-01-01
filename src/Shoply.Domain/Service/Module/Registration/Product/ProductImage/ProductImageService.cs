@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductImageService(IProductImageRepository repository, ITranslationService translationService) : BaseService<IProductImageRepository, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>(repository, translationService), IProductImageService
+public class ProductImageService(IProductImageRepository repository, ITranslationService translationService, IProductImageValidateService productImageValidateService) : BaseService<IProductImageRepository, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>(repository, translationService), IProductImageService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProductImage?>>> Create(List<InputCreateProductImage> listInputCreateProductImage)
@@ -24,12 +24,13 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
                           }).ToList();
 
         List<ProductImageValidateDTO> listProductImageValidateDTO = (from i in listCreate select new ProductImageValidateDTO().ValidateCreate(i.InputCreateProductImage, i.ListRepeatedInputCreateProductImage, i.OriginalProductImageDTO)).ToList();
+        productImageValidateService.Create(listProductImageValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProductImage.Count)
             return BaseResult<List<OutputProductImage?>>.Failure(errors);
 
-        List<ProductImageDTO> listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO) select new ProductImageDTO().Create(i.InputCreateProductImage!)).ToList();
+        List<ProductImageDTO> listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO) select new ProductImageDTO().Create(i.InputCreate!)).ToList();
         return BaseResult<List<OutputProductImage?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductImageDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -48,6 +49,7 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
                           }).ToList();
 
         List<ProductImageValidateDTO> listProductImageValidateDTO = (from i in listDelete select new ProductImageValidateDTO().ValidateDelete(i.InputIdentityDeleteProductImage, i.ListRepeatedInputIdentityDeleteProductImage, i.OriginalProductImageDTO)).ToList();
+        productImageValidateService.Delete(listProductImageValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProductImage.Count)

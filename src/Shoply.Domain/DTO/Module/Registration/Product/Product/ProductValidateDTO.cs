@@ -4,28 +4,28 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class ProductValidateDTO : ProductPropertyValidateDTO
 {
-    public InputCreateProduct? InputCreateProduct { get; private set; }
-    public InputIdentityUpdateProduct? InputIdentityUpdateProduct { get; private set; }
-    public InputIdentityDeleteProduct? InputIdentityDeleteProduct { get; private set; }
+    public InputCreateProduct? InputCreate { get; private set; }
+    public InputIdentityUpdateProduct? InputIdentityUpdate { get; private set; }
+    public InputIdentityDeleteProduct? InputIdentityDelete { get; private set; }
 
-    public ProductValidateDTO ValidateCreate(InputCreateProduct? inputCreateProduct, List<InputCreateProduct>? listRepeatedInputCreateProduct, ProductDTO originalProductDTO)
+    public ProductValidateDTO ValidateCreate(InputCreateProduct? inputCreate, List<InputCreateProduct>? listRepeatedInputCreate, ProductDTO originalProductDTO)
     {
-        InputCreateProduct = inputCreateProduct;
-        ValidateCreate(listRepeatedInputCreateProduct, originalProductDTO);
+        InputCreate = inputCreate;
+        ValidateCreate(listRepeatedInputCreate, originalProductDTO);
         return this;
     }
 
-    public ProductValidateDTO ValidateUpdate(InputIdentityUpdateProduct? inputIdentityUpdateProduct, List<InputIdentityUpdateProduct>? listRepeatedInputIdentityUpdateProduct, ProductDTO originalProductDTO)
+    public ProductValidateDTO ValidateUpdate(InputIdentityUpdateProduct? inputIdentityUpdate, List<InputIdentityUpdateProduct>? listRepeatedInputIdentityUpdate, ProductDTO originalProductDTO)
     {
-        InputIdentityUpdateProduct = inputIdentityUpdateProduct;
-        ValidateUpdate(listRepeatedInputIdentityUpdateProduct, originalProductDTO);
+        InputIdentityUpdate = inputIdentityUpdate;
+        ValidateUpdate(listRepeatedInputIdentityUpdate, originalProductDTO);
         return this;
     }
 
-    public ProductValidateDTO ValidateDelete(InputIdentityDeleteProduct? inputIdentityDeleteProduct, List<InputIdentityDeleteProduct>? listRepeatedInputIdentityDeleteProduct, ProductDTO originalProductDTO)
+    public ProductValidateDTO ValidateDelete(InputIdentityDeleteProduct? inputIdentityDelete, List<InputIdentityDeleteProduct>? listRepeatedInputIdentityDelete, ProductDTO originalProductDTO)
     {
-        InputIdentityDeleteProduct = inputIdentityDeleteProduct;
-        ValidateDelete(listRepeatedInputIdentityDeleteProduct, originalProductDTO);
+        InputIdentityDelete = inputIdentityDelete;
+        ValidateDelete(listRepeatedInputIdentityDelete, originalProductDTO);
         return this;
     }
 }

@@ -5,8 +5,8 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class CustomerAddressPropertyValidateDTO : BaseValidateDTO
 {
-    public List<InputIdentityUpdateCustomerAddress>? ListRepeatedInputIdentityUpdateCustomerAddress { get; private set; }
-    public List<InputIdentityDeleteCustomerAddress>? ListRepeatedInputIdentityDeleteCustomerAddress { get; private set; }
+    public List<InputIdentityUpdateCustomerAddress>? ListRepeatedInputIdentityUpdate { get; private set; }
+    public List<InputIdentityDeleteCustomerAddress>? ListRepeatedInputIdentityDelete { get; private set; }
     public CustomerAddressDTO? OriginalCustomerAddressDTO { get; private set; }
     public CustomerDTO? RelatedCustomerDTO { get; private set; }
 
@@ -16,17 +16,17 @@ public class CustomerAddressPropertyValidateDTO : BaseValidateDTO
         return this;
     }
 
-    public CustomerAddressPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateCustomerAddress>? listRepeatedInputIdentityUpdateCustomerAddress, CustomerAddressDTO originalCustomerAddressDTO)
+    public CustomerAddressPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateCustomerAddress>? listRepeatedInputIdentityUpdate, CustomerAddressDTO originalCustomerAddressDTO)
     {
-        ListRepeatedInputIdentityUpdateCustomerAddress = listRepeatedInputIdentityUpdateCustomerAddress;
+        ListRepeatedInputIdentityUpdate = listRepeatedInputIdentityUpdate;
         OriginalCustomerAddressDTO = originalCustomerAddressDTO;
         return this;
     }
 
 
-    public CustomerAddressPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteCustomerAddress>? listRepeatedInputIdentityDeleteCustomerAddress, CustomerAddressDTO originalCustomerAddressDTO)
+    public CustomerAddressPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteCustomerAddress>? listRepeatedInputIdentityDelete, CustomerAddressDTO originalCustomerAddressDTO)
     {
-        ListRepeatedInputIdentityDeleteCustomerAddress = listRepeatedInputIdentityDeleteCustomerAddress;
+        ListRepeatedInputIdentityDelete = listRepeatedInputIdentityDelete;
         OriginalCustomerAddressDTO = originalCustomerAddressDTO;
         return this;
     }

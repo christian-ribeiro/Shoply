@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, InputIdentifierProductCategory, OutputProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO>(repository, translationService), IProductCategoryService
+public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService, IProductCategoryValidateService productCategoryValidateService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, InputIdentifierProductCategory, OutputProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO>(repository, translationService), IProductCategoryService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProductCategory?>>> Create(List<InputCreateProductCategory> listInputCreateProductCategory)
@@ -24,12 +24,13 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listCreate select new ProductCategoryValidateDTO().ValidateCreate(i.InputCreateProductCategory, i.ListRepeatedInputCreateProductCategory, i.OriginalProductCategoryDTO)).ToList();
+        productCategoryValidateService.Create(listProductCategoryValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProductCategory.Count)
             return BaseResult<List<OutputProductCategory?>>.Failure(errors);
 
-        List<ProductCategoryDTO> listCreateProductCategoryDTO = (from i in RemoveInvalid(listProductCategoryValidateDTO) select new ProductCategoryDTO().Create(i.InputCreateProductCategory!)).ToList();
+        List<ProductCategoryDTO> listCreateProductCategoryDTO = (from i in RemoveInvalid(listProductCategoryValidateDTO) select new ProductCategoryDTO().Create(i.InputCreate!)).ToList();
         return BaseResult<List<OutputProductCategory?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductCategoryDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -48,12 +49,13 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listUpdate select new ProductCategoryValidateDTO().ValidateUpdate(i.InputIdentityUpdateProductCategory, i.ListRepeatedInputIdentityUpdateProductCategory, i.OriginalProductCategoryDTO)).ToList();
+        productCategoryValidateService.Update(listProductCategoryValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateProductCategory.Count)
             return BaseResult<List<OutputProductCategory?>>.Failure(errors);
 
-        List<ProductCategoryDTO> listUpdateProductCategoryDTO = (from i in RemoveInvalid(listProductCategoryValidateDTO) select i.OriginalProductCategoryDTO!.Update(i.InputIdentityUpdateProductCategory!.InputUpdate!)).ToList();
+        List<ProductCategoryDTO> listUpdateProductCategoryDTO = (from i in RemoveInvalid(listProductCategoryValidateDTO) select i.OriginalProductCategoryDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
         return BaseResult<List<OutputProductCategory?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateProductCategoryDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -72,6 +74,7 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listDelete select new ProductCategoryValidateDTO().ValidateDelete(i.InputIdentityDeleteProductCategory, i.ListRepeatedInputIdentityDeleteProductCategory, i.OriginalProductCategoryDTO)).ToList();
+        productCategoryValidateService.Delete(listProductCategoryValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProductCategory.Count)

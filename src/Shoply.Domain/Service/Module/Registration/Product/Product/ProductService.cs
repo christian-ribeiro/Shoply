@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductService(IProductRepository repository, ITranslationService translationService) : BaseService<IProductRepository, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, translationService), IProductService
+public class ProductService(IProductRepository repository, ITranslationService translationService, IProductValidateService productValidateService) : BaseService<IProductRepository, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, translationService), IProductService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProduct?>>> Create(List<InputCreateProduct> listInputCreateProduct)
@@ -24,12 +24,13 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listCreate select new ProductValidateDTO().ValidateCreate(i.InputCreateProduct, i.ListRepeatedInputCreateProduct, i.OriginalProductDTO)).ToList();
+        productValidateService.Create(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProduct.Count)
             return BaseResult<List<OutputProduct?>>.Failure(errors);
 
-        List<ProductDTO> listCreateProductDTO = (from i in RemoveInvalid(listProductValidateDTO) select new ProductDTO().Create(i.InputCreateProduct!, new InternalPropertiesProductDTO(0))).ToList();
+        List<ProductDTO> listCreateProductDTO = (from i in RemoveInvalid(listProductValidateDTO) select new ProductDTO().Create(i.InputCreate!, new InternalPropertiesProductDTO(0))).ToList();
         return BaseResult<List<OutputProduct?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -48,12 +49,13 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listUpdate select new ProductValidateDTO().ValidateUpdate(i.InputIdentityUpdateProduct, i.ListRepeatedInputIdentityUpdateProduct, i.OriginalProductDTO)).ToList();
+        productValidateService.Update(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateProduct.Count)
             return BaseResult<List<OutputProduct?>>.Failure(errors);
 
-        List<ProductDTO> listUpdateProductDTO = (from i in RemoveInvalid(listProductValidateDTO) select i.OriginalProductDTO!.Update(i.InputIdentityUpdateProduct!.InputUpdate!)).ToList();
+        List<ProductDTO> listUpdateProductDTO = (from i in RemoveInvalid(listProductValidateDTO) select i.OriginalProductDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
         return BaseResult<List<OutputProduct?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateProductDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -72,6 +74,7 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listDelete select new ProductValidateDTO().ValidateDelete(i.InputIdentityDeleteProduct, i.ListRepeatedInputIdentityDeleteProduct, i.OriginalProductDTO)).ToList();
+        productValidateService.Delete(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProduct.Count)

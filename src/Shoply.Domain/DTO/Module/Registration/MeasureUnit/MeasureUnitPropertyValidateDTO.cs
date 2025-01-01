@@ -5,29 +5,29 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class MeasureUnitPropertyValidateDTO : BaseValidateDTO
 {
-    public List<InputCreateMeasureUnit>? ListRepeatedInputCreateMeasureUnit { get; private set; }
-    public List<InputIdentityUpdateMeasureUnit>? ListRepeatedInputIdentityUpdateMeasureUnit { get; private set; }
-    public List<InputIdentityDeleteMeasureUnit>? ListRepeatedInputIdentityDeleteMeasureUnit { get; private set; }
+    public List<InputCreateMeasureUnit>? ListRepeatedInputCreate { get; private set; }
+    public List<InputIdentityUpdateMeasureUnit>? ListRepeatedInputIdentityUpdate { get; private set; }
+    public List<InputIdentityDeleteMeasureUnit>? ListRepeatedInputIdentityDelete { get; private set; }
     public MeasureUnitDTO? OriginalMeasureUnitDTO { get; private set; }
 
-    public MeasureUnitPropertyValidateDTO ValidateCreate(List<InputCreateMeasureUnit>? listRepeatedInputCreateMeasureUnit, MeasureUnitDTO? originalMeasureUnitDTO)
+    public MeasureUnitPropertyValidateDTO ValidateCreate(List<InputCreateMeasureUnit>? listRepeatedInputCreate, MeasureUnitDTO? originalMeasureUnitDTO)
     {
-        ListRepeatedInputCreateMeasureUnit = listRepeatedInputCreateMeasureUnit;
+        ListRepeatedInputCreate = listRepeatedInputCreate;
         OriginalMeasureUnitDTO = originalMeasureUnitDTO;
         return this;
     }
 
-    public MeasureUnitPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateMeasureUnit>? listRepeatedInputIdentityUpdateMeasureUnit, MeasureUnitDTO originalMeasureUnitDTO)
+    public MeasureUnitPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateMeasureUnit>? listRepeatedInputIdentityUpdate, MeasureUnitDTO originalMeasureUnitDTO)
     {
-        ListRepeatedInputIdentityUpdateMeasureUnit = listRepeatedInputIdentityUpdateMeasureUnit;
+        ListRepeatedInputIdentityUpdate = listRepeatedInputIdentityUpdate;
         OriginalMeasureUnitDTO = originalMeasureUnitDTO;
         return this;
     }
 
 
-    public MeasureUnitPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteMeasureUnit>? listRepeatedInputIdentityDeleteMeasureUnit, MeasureUnitDTO originalMeasureUnitDTO)
+    public MeasureUnitPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteMeasureUnit>? listRepeatedInputIdentityDelete, MeasureUnitDTO originalMeasureUnitDTO)
     {
-        ListRepeatedInputIdentityDeleteMeasureUnit = listRepeatedInputIdentityDeleteMeasureUnit;
+        ListRepeatedInputIdentityDelete = listRepeatedInputIdentityDelete;
         OriginalMeasureUnitDTO = originalMeasureUnitDTO;
         return this;
     }

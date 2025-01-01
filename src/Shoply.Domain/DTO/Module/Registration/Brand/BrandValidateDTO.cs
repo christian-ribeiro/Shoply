@@ -4,28 +4,28 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class BrandValidateDTO : BrandPropertyValidateDTO
 {
-    public InputCreateBrand? InputCreateBrand { get; private set; }
-    public InputIdentityUpdateBrand? InputIdentityUpdateBrand { get; private set; }
-    public InputIdentityDeleteBrand? InputIdentityDeleteBrand { get; private set; }
+    public InputCreateBrand? InputCreate { get; private set; }
+    public InputIdentityUpdateBrand? InputIdentityUpdate { get; private set; }
+    public InputIdentityDeleteBrand? InputIdentityDelete { get; private set; }
 
-    public BrandValidateDTO ValidateCreate(InputCreateBrand? inputCreateBrand, List<InputCreateBrand>? listRepeatedInputCreateBrand, BrandDTO originalBrandDTO)
+    public BrandValidateDTO ValidateCreate(InputCreateBrand? inputCreate, List<InputCreateBrand>? listRepeatedInputCreateBrand, BrandDTO originalBrandDTO)
     {
-        InputCreateBrand = inputCreateBrand;
+        InputCreate = inputCreate;
         ValidateCreate(listRepeatedInputCreateBrand, originalBrandDTO);
         return this;
     }
 
-    public BrandValidateDTO ValidateUpdate(InputIdentityUpdateBrand? inputIdentityUpdateBrand, List<InputIdentityUpdateBrand>? listRepeatedInputIdentityUpdateBrand, BrandDTO originalBrandDTO)
+    public BrandValidateDTO ValidateUpdate(InputIdentityUpdateBrand? inputIdentityUpdate, List<InputIdentityUpdateBrand>? listRepeatedInputIdentityUpdate, BrandDTO originalBrandDTO)
     {
-        InputIdentityUpdateBrand = inputIdentityUpdateBrand;
-        ValidateUpdate(listRepeatedInputIdentityUpdateBrand, originalBrandDTO);
+        InputIdentityUpdate = inputIdentityUpdate;
+        ValidateUpdate(listRepeatedInputIdentityUpdate, originalBrandDTO);
         return this;
     }
 
-    public BrandValidateDTO ValidateDelete(InputIdentityDeleteBrand? inputIdentityDeleteBrand, List<InputIdentityDeleteBrand>? listRepeatedInputIdentityDeleteBrand, BrandDTO originalBrandDTO)
+    public BrandValidateDTO ValidateDelete(InputIdentityDeleteBrand? inputIdentityDelete, List<InputIdentityDeleteBrand>? listRepeatedInputIdentityDelete, BrandDTO originalBrandDTO)
     {
-        InputIdentityDeleteBrand = inputIdentityDeleteBrand;
-        ValidateDelete(listRepeatedInputIdentityDeleteBrand, originalBrandDTO);
+        InputIdentityDelete = inputIdentityDelete;
+        ValidateDelete(listRepeatedInputIdentityDelete, originalBrandDTO);
         return this;
     }
 }
