@@ -14,6 +14,45 @@ Projeto feito para ser utilizado como portfólio. O sistema contará com recurso
 - Cadastro de Usuários
 - Cadastro de Clientes
 - Cadastro de Produtos e categorização
+- Limite de 1 acesso por usuário, impedindo que mais de uma pessoa utilize o mesmo usuário simultâneamente. 
+
+### Recurso de consulta dinâmica
+- O sistema conta com suporte a queries dinâmicas para consulta, permitindo que o usuário escolha quais as propriedades ele queira no retorno a partir do objeto pré configurado. Dando mais liberdade para o usuário e reduzindo a necessidade de manutenções esporádicas para  customizações por parte do desenvolvimento. O recurso já está disponível para todos os endpoints de consulta.
+- A consulta dinâmica é feita através do Header RETURN-PROPERTY, que recebe apenas um array com os nomes das propriedades, internamente é interpretada para gerar uma consulta no EntityFrameworkCore e montar o objeto com o resultado.
+- Não possui limite de profundidade para as consultas
+#### Exemplo de utilização da consulta dinâmica:
+
+```
+["Id", "Code", "FirstName", "LastName", "BirthDate", "Document", "PersonType", "ListCustomerAddress.Id","ListCustomerAddress.CustomerId", "ListCustomerAddress.AddressType", "ListCustomerAddress.PublicPlace", "ListCustomerAddress.Number", "ListCustomerAddress.Complement", "ListCustomerAddress.Neighborhood", "ListCustomerAddress.PostalCode", "ListCustomerAddress.Reference", "ListCustomerAddress.Observation"]
+```
+#### Retorno da API:
+```
+{
+  "result": {
+    "Id": 1,
+    "Code": "001",
+    "FirstName": "Christian",
+    "LastName": "Ribeiro",
+    "BirthDate": "2025-01-01",
+    "Document": "41363206044",
+    "PersonType": 0,
+    "ListCustomerAddress": [
+      {
+        "Id": 5,
+        "CustomerId": 1,
+        "AddressType": 0,
+        "PublicPlace": "Rua Rio Azul",
+        "Number": "12345",
+        "Complement": "Casa",
+        "Neighborhood": "Emaús",
+        "PostalCode": "59148743",
+        "Reference": "Posto do seu zé",
+        "Observation": "Apenas horário comercial"
+      }
+    ]
+  }
+}
+```
 
 ### Planejamento - **Em desenvolvimento**
 A ideia é desenvolver um mini-ERP contando com alguns recursos simples apenas para demonstração de funcionalidade
@@ -51,7 +90,13 @@ dotnet run
 ```bash
 http://localhost:5074
 ```
-
+- A autenticação no sistema é feita através do endpoint */api/v1/User/Authenticate* com o seguinte usuário padrão:
+```
+{
+  "email": "default@shoply.com",
+  "password": "string"
+}
+```
 ## Estrutura
 
 A estrutura do projeto segue um padrão de clean code. A Solution foi segmentada em vários projetos para garantir legibilidade e modularidade aos componentes.
