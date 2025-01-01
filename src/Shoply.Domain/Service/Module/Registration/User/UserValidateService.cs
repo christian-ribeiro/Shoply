@@ -9,7 +9,7 @@ namespace Shoply.Domain.Service.Module.Registration;
 
 public class UserValidateService(ITranslationService translationService) : BaseValidateService<UserValidateDTO>(translationService), IUserValidateService
 {
-    public void ValidateCreate(List<UserValidateDTO> listUserValidateDTO)
+    public void Create(List<UserValidateDTO> listUserValidateDTO)
     {
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.InputCreate == null
@@ -54,7 +54,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
              select AddSuccessMessage(i.InputCreate!.Email, GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Usuário"))).ToList();
     }
 
-    public void ValidateUpdate(List<UserValidateDTO> listUserValidateDTO)
+    public void Update(List<UserValidateDTO> listUserValidateDTO)
     {
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.InputIdentityUpdate?.InputUpdate == null
@@ -81,7 +81,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
              select AddSuccessMessage(i.OriginalUserDTO!.ExternalPropertiesDTO.Email, GetMessage(NotificationMessages.SuccessfullyUpdatedKey, "Usuário"))).ToList();
     }
 
-    public void ValidateDelete(List<UserValidateDTO> listUserValidateDTO)
+    public void Delete(List<UserValidateDTO> listUserValidateDTO)
     {
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.ListRepeatedInputIdentityDelete == null
@@ -102,7 +102,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
              select AddSuccessMessage(i.OriginalUserDTO!.ExternalPropertiesDTO.Email, GetMessage(NotificationMessages.SuccessfullyDeletedKey, "Usuário"))).ToList();
     }
 
-    public void ValidateAuthenticate(UserValidateDTO userValidateDTO)
+    public void Authenticate(UserValidateDTO userValidateDTO)
     {
         if (!userValidateDTO.Ignore && userValidateDTO.InputAuthenticate == null)
         {
@@ -133,7 +133,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
             ManualNotification(userValidateDTO.InputAuthenticate!.Email, GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
     }
 
-    public void ValidateRefreshToken(UserValidateDTO userValidateDTO)
+    public void RefreshToken(UserValidateDTO userValidateDTO)
     {
         if (!userValidateDTO.Ignore && userValidateDTO.InputRefreshToken == null)
         {
@@ -157,7 +157,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
             ManualNotification(userValidateDTO.InputAuthenticate?.Email ?? "", GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
     }
 
-    public void ValidateSendEmailForgotPassword(UserValidateDTO userValidateDTO)
+    public void SendEmailForgotPassword(UserValidateDTO userValidateDTO)
     {
         if (!userValidateDTO.Ignore && userValidateDTO.InputSendEmailForgotPassword == null)
         {
@@ -188,7 +188,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         }
     }
 
-    public void ValidateRedefinePasswordForgotPassword(UserValidateDTO userValidateDTO)
+    public void RedefinePasswordForgotPassword(UserValidateDTO userValidateDTO)
     {
         if (!userValidateDTO.Ignore && userValidateDTO.InputRedefinePasswordForgotPassword == null)
         {
@@ -213,7 +213,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         }
     }
 
-    public void ValidateRedefinePassword(UserValidateDTO userValidateDTO)
+    public void RedefinePassword(UserValidateDTO userValidateDTO)
     {
         if (!userValidateDTO.Ignore && userValidateDTO.InputRedefinePassword == null)
         {

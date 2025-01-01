@@ -5,12 +5,12 @@ namespace Shoply.Domain.Interface.Service.Module.Registration;
 
 public interface IUserValidateService : IBaseValidateService
 {
-    void ValidateCreate(List<UserValidateDTO> listUserValidateDTO);
-    void ValidateUpdate(List<UserValidateDTO> listUserValidateDTO);
-    void ValidateDelete(List<UserValidateDTO> listUserValidateDTO);
-    void ValidateAuthenticate(UserValidateDTO userValidateDTO);
-    void ValidateRefreshToken(UserValidateDTO userValidateDTO);
-    void ValidateSendEmailForgotPassword(UserValidateDTO userValidateDTO);
-    void ValidateRedefinePasswordForgotPassword(UserValidateDTO userValidateDTO);
-    void ValidateRedefinePassword(UserValidateDTO userValidateDTO);
+    void Create(List<UserValidateDTO> listUserValidateDTO);
+    void Update(List<UserValidateDTO> listUserValidateDTO);
+    void Delete(List<UserValidateDTO> listUserValidateDTO);
+    void Authenticate(UserValidateDTO userValidateDTO);
+    void RefreshToken(UserValidateDTO userValidateDTO);
+    void SendEmailForgotPassword(UserValidateDTO userValidateDTO);
+    void RedefinePasswordForgotPassword(UserValidateDTO userValidateDTO);
+    void RedefinePassword(UserValidateDTO userValidateDTO);
 }
