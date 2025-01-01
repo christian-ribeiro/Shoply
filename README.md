@@ -26,8 +26,8 @@ A ideia é desenvolver um mini-ERP contando com alguns recursos simples apenas p
 ## Requisitos
 - [SQL Server](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads)
 - [.NET SDK 9.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Redis] (https://redis.io/downloads/) (opcional)
-- [MongoDB] (https://www.mongodb.com/try/download/community)
+- [Redis](https://redis.io/downloads/) (Opcional - desativar FeatureFlag no appsettings.json)
+- [MongoDB](https://www.mongodb.com/try/download/community)
 
 # Como executar
 - Importar os dados do arquivo resources/dump/Translate.json no MongoDB
@@ -56,14 +56,14 @@ http://localhost:5074
 
 A estrutura do projeto segue um padrão de clean code. A Solution foi segmentada em vários projetos para garantir legibilidade e modularidade aos componentes.
 
-Shoply.Api - Onde ficam disponibilizados todos os endpoints da aplicação
-Shoply.Application - Onde ficam disponilizados serviços auxiliares, como autenticação, envio de e-mail, entre outros. 
-Shoply.Arguments - Contém todas as classes comuns no sistema e onde ficam todos os objetos de entrada/saída da API. Inputs de criação, atualização e os Outputs.
-Shoply.Domain - Toda a parte de regra de negócio do sistema
-Shoply.Infrastructure - Toda a parte de persistência no banco de dados relacional (SQL Server). Repositório, entidades, unidade de trabalho, Fluent Mapping e outros
-Shoply.Security - Contém toda a parte de criptografia e outros recursos de segurança do projeto
-Shoply.Translation - Destinado a toda a parte de tradução do sistema, utilizando como base o MongoDB e o Redis para agilizar o processo de tradução
+- **Shoply.Api** - Onde ficam disponibilizados todos os endpoints da aplicação
+- **Shoply.Application** - Onde ficam disponilizados serviços auxiliares, como autenticação, envio de e-mail, entre outros. 
+- **Shoply.Arguments** - Contém todas as classes comuns no sistema e onde ficam todos os objetos de entrada/saída da API. Inputs de criação, atualização e os Outputs.
+- **Shoply.Domain** - Toda a parte de regra de negócio do sistema
+- **Shoply.Infrastructure** - Toda a parte de persistência no banco de dados relacional (SQL Server). Repositório, entidades, unidade de trabalho, Fluent Mapping e outros
+- **Shoply.Security** - Contém toda a parte de criptografia e outros recursos de segurança do projeto
+- **Shoply.Translation** - Destinado a toda a parte de tradução do sistema, utilizando como base o MongoDB e o Redis para agilizar o processo de tradução
 
-Shoply.CodeGenerator - Esse não faz parte da estrutura, é um console App destinado a geração de todas as camadas para a criação de uma nova entidade. Ele é responsável pela escrita em todos os outros projetos citados acima. Ainda está em desenvolvimento.
+**Shoply.CodeGenerator** - Esse não faz parte da estrutura, é um console App destinado a geração de todas as camadas para a criação de uma nova entidade. Ele é responsável pela escrita em todos os outros projetos citados acima. Ainda está em desenvolvimento.
 
 Todos os projetos foram feitos em .NET 9.
