@@ -10,6 +10,7 @@ using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Domain.Interface.Service.Module.Registration;
 using Shoply.Domain.Interface.UnitOfWork;
+using Shoply.Domain.Utils;
 using System.Net;
 using System.Text.Json;
 
@@ -236,6 +237,7 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
     {
         base.OnActionExecuted(context);
         SessionData.RemoveSessionDataRequest(_guidSessionDataRequest);
+        NotificationHelper.Remove(_guidSessionDataRequest);
         await unitOfWork.CommitAsync();
     }
 

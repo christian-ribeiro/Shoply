@@ -1,6 +1,5 @@
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -9,21 +8,8 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, InputIdentifierProductCategory, OutputProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO, EnumValidateProcessGeneric>(repository, translationService), IProductCategoryService
+public class ProductCategoryService(IProductCategoryRepository repository, ITranslationService translationService) : BaseService<IProductCategoryRepository, InputCreateProductCategory, InputUpdateProductCategory, InputIdentityUpdateProductCategory, InputIdentityDeleteProductCategory, InputIdentifierProductCategory, OutputProductCategory, ProductCategoryValidateDTO, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO>(repository, translationService), IProductCategoryService
 {
-    internal override async Task ValidateProcess(List<ProductCategoryValidateDTO> listProductCategoryValidateDTO, EnumValidateProcessGeneric processType)
-    {
-        switch (processType)
-        {
-            case EnumValidateProcessGeneric.Create:
-                break;
-            case EnumValidateProcessGeneric.Update:
-                break;
-            case EnumValidateProcessGeneric.Delete:
-                break;
-        }
-    }
-
     #region Create
     public override async Task<BaseResult<List<OutputProductCategory?>>> Create(List<InputCreateProductCategory> listInputCreateProductCategory)
     {
@@ -38,7 +24,6 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listCreate select new ProductCategoryValidateDTO().ValidateCreate(i.InputCreateProductCategory, i.ListRepeatedInputCreateProductCategory, i.OriginalProductCategoryDTO)).ToList();
-        await ValidateProcess(listProductCategoryValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProductCategory.Count)
@@ -63,7 +48,6 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listUpdate select new ProductCategoryValidateDTO().ValidateUpdate(i.InputIdentityUpdateProductCategory, i.ListRepeatedInputIdentityUpdateProductCategory, i.OriginalProductCategoryDTO)).ToList();
-        await ValidateProcess(listProductCategoryValidateDTO, EnumValidateProcessGeneric.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateProductCategory.Count)
@@ -88,7 +72,6 @@ public class ProductCategoryService(IProductCategoryRepository repository, ITran
                           }).ToList();
 
         List<ProductCategoryValidateDTO> listProductCategoryValidateDTO = (from i in listDelete select new ProductCategoryValidateDTO().ValidateDelete(i.InputIdentityDeleteProductCategory, i.ListRepeatedInputIdentityDeleteProductCategory, i.OriginalProductCategoryDTO)).ToList();
-        await ValidateProcess(listProductCategoryValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProductCategory.Count)

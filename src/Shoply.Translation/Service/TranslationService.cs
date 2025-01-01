@@ -16,34 +16,34 @@ public class TranslationService(IOptions<FeatureFlags> featureFlags, Translation
     private readonly TranslationRedisContext _redisContext = redisContext;
     private readonly bool useRedis = featureFlags.Value.UseRedis;
 
-    public async Task<string> TranslateAsync(string key, EnumLanguage language, params object[] args)
+    public string Translate(string key, EnumLanguage language, params object[] args)
     {
-        var redis = _redisContext.GetDatabase();
+        var redis = useRedis ? _redisContext.GetDatabase() : default;
         string redisKey = $"translations:{language.GetMemberValue()}:{key}";
 
         if (useRedis)
         {
-            string? translation = await redis.StringGetAsync(redisKey);
+            string? translation = redis!.StringGet(redisKey);
             if (!string.IsNullOrEmpty(translation))
                 return args.Length > 0 ? string.Format(translation, args) : translation;
         }
 
         var collection = _mongoContext.GetCollection("translations");
         var filter = Builders<OutputTranslation>.Filter.Eq("Key", key);
-        var document = await collection.Find(filter).FirstOrDefaultAsync();
+        var document = collection.Find(filter).FirstOrDefault();
 
         if (document != null && document.Translation.ContainsKey(language.GetMemberValue()))
         {
             string template = document.Translation[language.GetMemberValue()];
             if (useRedis)
-                await redis.StringSetAsync(redisKey, template, TimeSpan.FromHours(6));
+                redis!.StringSet(redisKey, template, TimeSpan.FromHours(6));
             return args.Length > 0 ? string.Format(template, args) : template;
         }
 
         return $"[{key}]";
     }
 
-    public async Task UpdateTranslationAsync(string key, EnumLanguage language, string newTranslation)
+    public void UpdateTranslation(string key, EnumLanguage language, string newTranslation)
     {
         var collection = _mongoContext.GetCollection("translations");
 
@@ -53,16 +53,16 @@ public class TranslationService(IOptions<FeatureFlags> featureFlags, Translation
             .Set(t => t.Translation[language.GetMemberValue()], newTranslation)
             .Set(t => t.ChangeDate, DateTime.UtcNow);
 
-        await collection.UpdateOneAsync(filter, update);
+        collection.UpdateOne(filter, update);
 
         var redis = _redisContext.GetDatabase();
         string redisKey = $"translations:{language.GetMemberValue()}:{key}";
-        await redis.StringSetAsync(redisKey, newTranslation, TimeSpan.FromHours(6));
+        redis.StringSet(redisKey, newTranslation, TimeSpan.FromHours(6));
     }
 
-    public async Task InsertTranslationAsync(List<OutputTranslation> listTranslation)
+    public void InsertTranslation(List<OutputTranslation> listTranslation)
     {
         var collection = _mongoContext.GetCollection("translations");
-        await collection.InsertManyAsync(listTranslation);
+        collection.InsertMany(listTranslation);
     }
 }

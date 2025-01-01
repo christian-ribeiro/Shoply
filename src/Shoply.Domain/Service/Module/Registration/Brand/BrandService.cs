@@ -1,6 +1,5 @@
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -9,21 +8,8 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class BrandService(IBrandRepository repository, ITranslationService translationService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO, EnumValidateProcessGeneric>(repository, translationService), IBrandService
+public class BrandService(IBrandRepository repository, ITranslationService translationService) : BaseService<IBrandRepository, InputCreateBrand, InputUpdateBrand, InputIdentityUpdateBrand, InputIdentityDeleteBrand, InputIdentifierBrand, OutputBrand, BrandValidateDTO, BrandDTO, InternalPropertiesBrandDTO, ExternalPropertiesBrandDTO, AuxiliaryPropertiesBrandDTO>(repository, translationService), IBrandService
 {
-    internal override async Task ValidateProcess(List<BrandValidateDTO> listBrandValidateDTO, EnumValidateProcessGeneric processType)
-    {
-        switch (processType)
-        {
-            case EnumValidateProcessGeneric.Create:
-                break;
-            case EnumValidateProcessGeneric.Update:
-                break;
-            case EnumValidateProcessGeneric.Delete:
-                break;
-        }
-    }
-
     #region Create
     public override async Task<BaseResult<List<OutputBrand?>>> Create(List<InputCreateBrand> listInputCreateBrand)
     {
@@ -38,7 +24,6 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listCreate select new BrandValidateDTO().ValidateCreate(i.InputCreateBrand, i.ListRepeatedInputCreateBrand, i.OriginalBrandDTO)).ToList();
-        await ValidateProcess(listBrandValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateBrand.Count)
@@ -63,7 +48,6 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listUpdate select new BrandValidateDTO().ValidateUpdate(i.InputIdentityUpdateBrand, i.ListRepeatedInputIdentityUpdateBrand, i.OriginalBrandDTO)).ToList();
-        await ValidateProcess(listBrandValidateDTO, EnumValidateProcessGeneric.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateBrand.Count)
@@ -88,7 +72,6 @@ public class BrandService(IBrandRepository repository, ITranslationService trans
                           }).ToList();
 
         List<BrandValidateDTO> listBrandValidateDTO = (from i in listDelete select new BrandValidateDTO().ValidateDelete(i.InputIdentityDeleteBrand, i.ListRepeatedInputIdentityDeleteBrand, i.OriginalBrandDTO)).ToList();
-        await ValidateProcess(listBrandValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteBrand.Count)

@@ -5,67 +5,67 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class UserValidateDTO : UserPropertyValidateDTO
 {
-    public InputCreateUser? InputCreateUser { get; private set; }
-    public InputIdentityUpdateUser? InputIdentityUpdateUser { get; private set; }
-    public InputIdentityDeleteUser? InputIdentityDeleteUser { get; private set; }
-    public InputAuthenticateUser? InputAuthenticateUser { get; private set; }
-    public InputRefreshTokenUser? InputRefreshTokenUser { get; private set; }
-    public InputSendEmailForgotPasswordUser? InputSendEmailForgotPasswordUser { get; private set; }
-    public InputRedefinePasswordForgotPasswordUser? InputRedefinePasswordForgotPasswordUser { get; private set; }
-    public InputRedefinePasswordUser? InputRedefinePasswordUser { get; private set; }
+    public InputCreateUser? InputCreate { get; private set; }
+    public InputIdentityUpdateUser? InputIdentityUpdate { get; private set; }
+    public InputIdentityDeleteUser? InputIdentityDelete { get; private set; }
+    public InputAuthenticateUser? InputAuthenticate { get; private set; }
+    public InputRefreshTokenUser? InputRefreshToken { get; private set; }
+    public InputSendEmailForgotPasswordUser? InputSendEmailForgotPassword { get; private set; }
+    public InputRedefinePasswordForgotPasswordUser? InputRedefinePasswordForgotPassword { get; private set; }
+    public InputRedefinePasswordUser? InputRedefinePassword { get; private set; }
 
-    public UserValidateDTO ValidateCreate(InputCreateUser? inputCreateUser, List<InputCreateUser>? listRepeatedInputCreateUser, UserDTO originalUserDTO)
+    public UserValidateDTO ValidateCreate(InputCreateUser? inputCreate, List<InputCreateUser>? listRepeatedInputCreate, UserDTO originalUserDTO)
     {
-        InputCreateUser = inputCreateUser;
-        ValidateCreate(listRepeatedInputCreateUser, originalUserDTO);
+        InputCreate = inputCreate;
+        ValidateCreate(listRepeatedInputCreate, originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateUpdate(InputIdentityUpdateUser? inputIdentityUpdateUser, List<InputIdentityUpdateUser>? listRepeatedInputIdentityUpdateUser, UserDTO originalUserDTO)
+    public UserValidateDTO ValidateUpdate(InputIdentityUpdateUser? inputIdentityUpdate, List<InputIdentityUpdateUser>? listRepeatedInputIdentityUpdate, UserDTO originalUserDTO)
     {
-        InputIdentityUpdateUser = inputIdentityUpdateUser;
-        ValidateUpdate(listRepeatedInputIdentityUpdateUser, originalUserDTO);
+        InputIdentityUpdate = inputIdentityUpdate;
+        ValidateUpdate(listRepeatedInputIdentityUpdate, originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateDelete(InputIdentityDeleteUser? inputIdentityDeleteUser, List<InputIdentityDeleteUser>? listRepeatedInputIdentityDeleteUser, UserDTO originalUserDTO)
+    public UserValidateDTO ValidateDelete(InputIdentityDeleteUser? inputIdentityDelete, List<InputIdentityDeleteUser>? listRepeatedInputIdentityDelete, UserDTO originalUserDTO)
     {
-        InputIdentityDeleteUser = inputIdentityDeleteUser;
-        ValidateDelete(listRepeatedInputIdentityDeleteUser, originalUserDTO);
+        InputIdentityDelete = inputIdentityDelete;
+        ValidateDelete(listRepeatedInputIdentityDelete, originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateAuthenticate(InputAuthenticateUser? inputAuthenticateUser, UserDTO? originalUserDTO)
+    public UserValidateDTO ValidateAuthenticate(InputAuthenticateUser? inputAuthenticate, UserDTO? originalUserDTO)
     {
-        InputAuthenticateUser = inputAuthenticateUser;
+        InputAuthenticate = inputAuthenticate;
         ValidateAuthenticate(originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateRefreshToken(InputRefreshTokenUser? inputRefreshTokenUser, UserDTO? originalUserDTO)
+    public UserValidateDTO ValidateRefreshToken(InputRefreshTokenUser? inputRefreshToken, UserDTO? originalUserDTO)
     {
-        InputRefreshTokenUser = inputRefreshTokenUser;
+        InputRefreshToken = inputRefreshToken;
         ValidateRefreshToken(originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateSendEmailForgotPassword(InputSendEmailForgotPasswordUser? inputSendEmailForgotPasswordUser, UserDTO? originalUserDTO)
+    public UserValidateDTO ValidateSendEmailForgotPassword(InputSendEmailForgotPasswordUser? inputSendEmailForgotPassword, UserDTO? originalUserDTO)
     {
-        InputSendEmailForgotPasswordUser = inputSendEmailForgotPasswordUser;
+        InputSendEmailForgotPassword = inputSendEmailForgotPassword;
         ValidateSendEmailForgotPassword(originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateRedefinePasswordForgotPassword(InputRedefinePasswordForgotPasswordUser? inputRedefinePasswordForgotPasswordUser, UserDTO? originalUserDTO)
+    public UserValidateDTO ValidateRedefinePasswordForgotPassword(InputRedefinePasswordForgotPasswordUser? inputRedefinePasswordForgotPassword, UserDTO? originalUserDTO)
     {
-        InputRedefinePasswordForgotPasswordUser = inputRedefinePasswordForgotPasswordUser;
+        InputRedefinePasswordForgotPassword = inputRedefinePasswordForgotPassword;
         ValidateRedefinePasswordForgotPassword(originalUserDTO);
         return this;
     }
 
-    public UserValidateDTO ValidateRedefinePassword(InputRedefinePasswordUser? inputRedefinePasswordUser, UserDTO? originalUserDTO)
+    public UserValidateDTO ValidateRedefinePassword(InputRedefinePasswordUser? inputRedefinePassword, UserDTO? originalUserDTO)
     {
-        InputRedefinePasswordUser = inputRedefinePasswordUser;
+        InputRedefinePassword = inputRedefinePassword;
         ValidateRedefinePassword(originalUserDTO);
         return this;
     }

@@ -5,29 +5,28 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class UserPropertyValidateDTO : BaseValidateDTO
 {
-    public List<InputCreateUser>? ListRepeatedInputCreateUser { get; private set; }
-    public List<InputIdentityUpdateUser>? ListRepeatedInputIdentityUpdateUser { get; private set; }
-    public List<InputIdentityDeleteUser>? ListRepeatedInputIdentityDeleteUser { get; private set; }
+    public List<InputCreateUser>? ListRepeatedInputCreate { get; private set; }
+    public List<InputIdentityUpdateUser>? ListRepeatedInputIdentityUpdate { get; private set; }
+    public List<InputIdentityDeleteUser>? ListRepeatedInputIdentityDelete { get; private set; }
     public UserDTO? OriginalUserDTO { get; private set; }
 
     public UserPropertyValidateDTO ValidateCreate(List<InputCreateUser>? listRepeatedInputCreateUser, UserDTO? originalUserDTO)
     {
-        ListRepeatedInputCreateUser = listRepeatedInputCreateUser;
+        ListRepeatedInputCreate = listRepeatedInputCreateUser;
         OriginalUserDTO = originalUserDTO;
         return this;
     }
 
     public UserPropertyValidateDTO ValidateUpdate(List<InputIdentityUpdateUser>? listRepeatedInputIdentityUpdateUser, UserDTO originalUserDTO)
     {
-        ListRepeatedInputIdentityUpdateUser = listRepeatedInputIdentityUpdateUser;
+        ListRepeatedInputIdentityUpdate = listRepeatedInputIdentityUpdateUser;
         OriginalUserDTO = originalUserDTO;
         return this;
     }
 
-
     public UserPropertyValidateDTO ValidateDelete(List<InputIdentityDeleteUser>? listRepeatedInputIdentityDeleteUser, UserDTO originalUserDTO)
     {
-        ListRepeatedInputIdentityDeleteUser = listRepeatedInputIdentityDeleteUser;
+        ListRepeatedInputIdentityDelete = listRepeatedInputIdentityDeleteUser;
         OriginalUserDTO = originalUserDTO;
         return this;
     }

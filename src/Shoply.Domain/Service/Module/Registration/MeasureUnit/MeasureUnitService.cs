@@ -1,6 +1,5 @@
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -9,21 +8,8 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO, EnumValidateProcessGeneric>(repository, translationService), IMeasureUnitService
+public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationService translationService) : BaseService<IMeasureUnitRepository, InputCreateMeasureUnit, InputUpdateMeasureUnit, InputIdentityUpdateMeasureUnit, InputIdentityDeleteMeasureUnit, InputIdentifierMeasureUnit, OutputMeasureUnit, MeasureUnitValidateDTO, MeasureUnitDTO, InternalPropertiesMeasureUnitDTO, ExternalPropertiesMeasureUnitDTO, AuxiliaryPropertiesMeasureUnitDTO>(repository, translationService), IMeasureUnitService
 {
-    internal override async Task ValidateProcess(List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO, EnumValidateProcessGeneric processType)
-    {
-        switch (processType)
-        {
-            case EnumValidateProcessGeneric.Create:
-                break;
-            case EnumValidateProcessGeneric.Update:
-                break;
-            case EnumValidateProcessGeneric.Delete:
-                break;
-        }
-    }
-
     #region Create
     public override async Task<BaseResult<List<OutputMeasureUnit?>>> Create(List<InputCreateMeasureUnit> listInputCreateMeasureUnit)
     {
@@ -38,7 +24,6 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listCreate select new MeasureUnitValidateDTO().ValidateCreate(i.InputCreateMeasureUnit, i.ListRepeatedInputCreateMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
-        await ValidateProcess(listMeasureUnitValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateMeasureUnit.Count)
@@ -63,7 +48,6 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listUpdate select new MeasureUnitValidateDTO().ValidateUpdate(i.InputIdentityUpdateMeasureUnit, i.ListRepeatedInputIdentityUpdateMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
-        await ValidateProcess(listMeasureUnitValidateDTO, EnumValidateProcessGeneric.Update);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateMeasureUnit.Count)
@@ -88,7 +72,6 @@ public class MeasureUnitService(IMeasureUnitRepository repository, ITranslationS
                           }).ToList();
 
         List<MeasureUnitValidateDTO> listMeasureUnitValidateDTO = (from i in listDelete select new MeasureUnitValidateDTO().ValidateDelete(i.InputIdentityDeleteMeasureUnit, i.ListRepeatedInputIdentityDeleteMeasureUnit, i.OriginalMeasureUnitDTO)).ToList();
-        await ValidateProcess(listMeasureUnitValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteMeasureUnit.Count)

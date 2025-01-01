@@ -1,6 +1,5 @@
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Base;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -9,19 +8,8 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductImageService(IProductImageRepository repository, ITranslationService translationService) : BaseService<IProductImageRepository, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO, EnumValidateProcessGeneric>(repository, translationService), IProductImageService
+public class ProductImageService(IProductImageRepository repository, ITranslationService translationService) : BaseService<IProductImageRepository, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>(repository, translationService), IProductImageService
 {
-    internal override async Task ValidateProcess(List<ProductImageValidateDTO> listProductImageValidateDTO, EnumValidateProcessGeneric processType)
-    {
-        switch (processType)
-        {
-            case EnumValidateProcessGeneric.Create:
-                break;
-            case EnumValidateProcessGeneric.Delete:
-                break;
-        }
-    }
-
     #region Create
     public override async Task<BaseResult<List<OutputProductImage?>>> Create(List<InputCreateProductImage> listInputCreateProductImage)
     {
@@ -36,7 +24,6 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
                           }).ToList();
 
         List<ProductImageValidateDTO> listProductImageValidateDTO = (from i in listCreate select new ProductImageValidateDTO().ValidateCreate(i.InputCreateProductImage, i.ListRepeatedInputCreateProductImage, i.OriginalProductImageDTO)).ToList();
-        await ValidateProcess(listProductImageValidateDTO, EnumValidateProcessGeneric.Create);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProductImage.Count)
@@ -61,7 +48,6 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
                           }).ToList();
 
         List<ProductImageValidateDTO> listProductImageValidateDTO = (from i in listDelete select new ProductImageValidateDTO().ValidateDelete(i.InputIdentityDeleteProductImage, i.ListRepeatedInputIdentityDeleteProductImage, i.OriginalProductImageDTO)).ToList();
-        await ValidateProcess(listProductImageValidateDTO, EnumValidateProcessGeneric.Delete);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProductImage.Count)

@@ -5,7 +5,6 @@ using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Arguments.Argument.Module.Registration;
-using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -18,31 +17,8 @@ using System.Security.Cryptography;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository, ITranslationService translationService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO, EnumValidateProcessUser>(repository, translationService), IUserService
+public class UserService(IUserRepository repository, ITranslationService translationService, IUserValidateService userValidateService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository, translationService), IUserService
 {
-    internal override async Task ValidateProcess(List<UserValidateDTO> listUserValidateDTO, EnumValidateProcessUser processType)
-    {
-        switch (processType)
-        {
-            case EnumValidateProcessUser.Create:
-                break;
-            case EnumValidateProcessUser.Update:
-                break;
-            case EnumValidateProcessUser.Delete:
-                break;
-            case EnumValidateProcessUser.Authenticate:
-                break;
-            case EnumValidateProcessUser.RefreshToken:
-                break;
-            case EnumValidateProcessUser.SendEmailForgotPassword:
-                break;
-            case EnumValidateProcessUser.RedefinePasswordForgotPassword:
-                break;
-            case EnumValidateProcessUser.RedefinePassword:
-                break;
-        }
-    }
-
     #region Create
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreateUser)
     {
@@ -57,13 +33,13 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
-        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Create);
+        userValidateService.ValidateCreate(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreateUser!.SetProperty(nameof(i.InputCreateUser.Password), EncryptService.Encrypt(i.InputCreateUser.Password)))).ToList();
+        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreate!.SetProperty(nameof(i.InputCreate.Password), EncryptService.Encrypt(i.InputCreate.Password)))).ToList();
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -82,13 +58,13 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO)).ToList();
-        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Update);
+        userValidateService.ValidateUpdate(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listUpdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO!.Update(i.InputIdentityUpdateUser!.InputUpdate!)).ToList();
+        List<UserDTO> listUpdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateUserDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -107,7 +83,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO)).ToList();
-        await ValidateProcess(listUserValidateDTO, EnumValidateProcessUser.Delete);
+        userValidateService.ValidateDelete(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteUser.Count)
@@ -124,10 +100,10 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateAuthenticate(inputAuthenticateUser, originalUserDTO);
-        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.Authenticate);
+        userValidateService.ValidateAuthenticate(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
-        if (errors.Count > 0)
+        if (userValidateDTO.Invalid)
             return BaseResult<OutputAuthenticateUser>.Failure(errors);
 
         string refreshToken = await jwtService.GenerateRefreshToken();
@@ -150,10 +126,10 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO originalUserDTO = await _repository.Get(userId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRefreshToken(inputRefreshTokenUser, originalUserDTO);
-        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RefreshToken);
+        userValidateService.ValidateRefreshToken(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
-        if (errors.Count > 0)
+        if (userValidateDTO.Invalid)
             return BaseResult<OutputAuthenticateUser>.Failure(errors);
 
         string token = await jwtService.GenerateJwtToken(principal!.Value!.Claims.ToList());
@@ -172,10 +148,10 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputSendEmailForgotPasswordUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateSendEmailForgotPassword(inputSendEmailForgotPasswordUser, originalUserDTO);
-        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.SendEmailForgotPassword);
+        userValidateService.ValidateSendEmailForgotPassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
-        if (errors.Count > 0)
+        if (userValidateDTO.Invalid)
             return BaseResult<bool>.Failure(errors);
 
         byte[] randomBytes = new byte[4];
@@ -203,10 +179,10 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByPasswordRecoveryCode(inputRedefinePasswordForgotPasswordUser.PasswordRecoveryCode);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePasswordForgotPassword(inputRedefinePasswordForgotPasswordUser, originalUserDTO);
-        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePasswordForgotPassword);
+        userValidateService.ValidateRedefinePasswordForgotPassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
-        if (errors.Count > 0)
+        if (userValidateDTO.Invalid)
             return BaseResult<bool>.Failure(errors);
 
         originalUserDTO!.ExternalPropertiesDTO.SetProperty(nameof(originalUserDTO.ExternalPropertiesDTO.Password), EncryptService.Encrypt(inputRedefinePasswordForgotPasswordUser.NewPassword));
@@ -223,10 +199,10 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.Get(loggedUserId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePassword(inputRedefinePasswordUser, originalUserDTO);
-        await ValidateProcess([userValidateDTO], EnumValidateProcessUser.RedefinePassword);
+        userValidateService.ValidateRedefinePassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
-        if (errors.Count > 0)
+        if (userValidateDTO.Invalid)
             return BaseResult<bool>.Failure(errors);
 
         originalUserDTO.ExternalPropertiesDTO.SetProperty(nameof(originalUserDTO.ExternalPropertiesDTO.Password), EncryptService.Encrypt(inputRedefinePasswordUser.NewPassword));

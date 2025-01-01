@@ -5,7 +5,7 @@ namespace Shoply.Translation.Interface.Service;
 
 public interface ITranslationService
 {
-    Task<string> TranslateAsync(string key, EnumLanguage language, params object[] args);
-    Task UpdateTranslationAsync(string key, EnumLanguage language, string newTranslation);
-    Task InsertTranslationAsync(List<OutputTranslation> listTranslation);
+    string Translate(string key, EnumLanguage language, params object[] args);
+    void UpdateTranslation(string key, EnumLanguage language, string newTranslation);
+    void InsertTranslation(List<OutputTranslation> listTranslation);
 }

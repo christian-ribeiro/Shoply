@@ -5,7 +5,7 @@ namespace Shoply.Arguments.Argument.General.Session;
 
 public class SessionData
 {
-    public static ConcurrentDictionary<Guid, SessionDataRequest> ListSessionDataRequest { get; private set; } = new();
+    public static ConcurrentDictionary<Guid, SessionDataRequest> ListSessionDataRequest { get; private set; } = [];
     public static CustomMapper? Mapper { get; private set; }
 
     public static Guid Initialize()
