@@ -28,7 +28,6 @@ public class BrandMap : IEntityTypeConfiguration<Brand>
 
         builder.Property(x => x.ChangeUserId).HasColumnName("id_usuario_alteracao");
 
-
         builder.Property(x => x.Code).HasColumnName("codigo");
         builder.Property(x => x.Code).HasMaxLength(6);
         builder.Property(x => x.Code).IsRequired();
@@ -36,6 +35,5 @@ public class BrandMap : IEntityTypeConfiguration<Brand>
         builder.Property(x => x.Description).HasColumnName("descricao");
         builder.Property(x => x.Description).HasMaxLength(100);
         builder.Property(x => x.Description).IsRequired();
-
     }
 }

@@ -17,8 +17,6 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
         {
             case EnumValidateProcessGeneric.Create:
                 break;
-            case EnumValidateProcessGeneric.Update:
-                break;
             case EnumValidateProcessGeneric.Delete:
                 break;
         }

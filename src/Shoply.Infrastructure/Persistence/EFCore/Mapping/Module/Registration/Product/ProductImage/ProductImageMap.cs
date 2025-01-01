@@ -35,6 +35,5 @@ public class ProductImageMap : IEntityTypeConfiguration<ProductImage>
 
         builder.Property(x => x.ProductId).HasColumnName("id_produto");
         builder.Property(x => x.ProductId).IsRequired();
-
     }
 }
