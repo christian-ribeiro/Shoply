@@ -14,6 +14,7 @@ Projeto feito para ser utilizado como portfólio. O sistema contará com recurso
 - Cadastro de Usuários
 - Cadastro de Clientes
 - Cadastro de Produtos e categorização
+- Limite de 1 acesso por usuário, impedindo que mais de uma pessoa utilize o mesmo usuário simultâneamente. 
 
 ### Recurso de consulta dinâmica
 - O sistema conta com suporte a queries dinâmicas para consulta, permitindo que o usuário escolha quais as propriedades ele queira no retorno a partir do objeto pré configurado. Dando mais liberdade para o usuário e reduzindo a necessidade de manutenções esporádicas para  customizações por parte do desenvolvimento. O recurso já está disponível para todos os endpoints de consulta.
