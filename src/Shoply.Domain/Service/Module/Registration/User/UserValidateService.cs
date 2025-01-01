@@ -59,23 +59,23 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.InputIdentityUpdate?.InputUpdate == null
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.OriginalUserDTO == null
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.ListRepeatedInputIdentityUpdate?.Count > 0
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              let resultInvalidLength = InvalidLength(i.InputIdentityUpdate!.InputUpdate!.Name, 1, 150)
              where resultInvalidLength != EnumValidateType.Valid
              let setInvalid = i.SetInvalid()
-             select true).ToList();
+             select InvalidLength(i.OriginalUserDTO!.ExternalPropertiesDTO.Email, i.InputIdentityUpdate!.InputUpdate!.Name, 1, 150, resultInvalidLength, nameof(i.InputIdentityUpdate.InputUpdate.Name))).ToList();
 
         _ = (from i in RemoveInvalid(listUserValidateDTO)
              select AddSuccessMessage(i.OriginalUserDTO!.ExternalPropertiesDTO.Email, GetMessage(NotificationMessages.SuccessfullyUpdatedKey, "Usuário"))).ToList();
@@ -86,17 +86,17 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.ListRepeatedInputIdentityDelete == null
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.OriginalUserDTO == null
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
              where i.ListRepeatedInputIdentityDelete?.Count > 0
              let setIgnore = i.SetIgnore()
-             select true).ToList();
+             select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveInvalid(listUserValidateDTO)
              select AddSuccessMessage(i.OriginalUserDTO!.ExternalPropertiesDTO.Email, GetMessage(NotificationMessages.SuccessfullyDeletedKey, "Usuário"))).ToList();
@@ -138,22 +138,23 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         if (!userValidateDTO.Ignore && userValidateDTO.InputRefreshToken == null)
         {
             userValidateDTO.SetIgnore();
+            ManualNotification(0, GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
         }
 
         if (!userValidateDTO.Ignore && userValidateDTO.OriginalUserDTO == null)
         {
             userValidateDTO.SetIgnore();
+            ManualNotification(0, GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
         }
 
         if (!userValidateDTO.Ignore && string.IsNullOrEmpty(userValidateDTO.InputRefreshToken!.RefreshToken))
-        {
             userValidateDTO.SetInvalid();
-        }
 
         if (!userValidateDTO.Ignore && userValidateDTO.InputRefreshToken!.RefreshToken != userValidateDTO.OriginalUserDTO!.InternalPropertiesDTO.RefreshToken)
-        {
             userValidateDTO.SetInvalid();
-        }
+
+        if (!userValidateDTO.Ignore && userValidateDTO.Invalid)
+            ManualNotification(userValidateDTO.InputAuthenticate?.Email ?? "", GetMessage(NotificationMessages.InvalidUserPasswordKey), EnumValidateType.Invalid);
     }
 
     public void ValidateSendEmailForgotPassword(UserValidateDTO userValidateDTO)
@@ -161,25 +162,28 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         if (!userValidateDTO.Ignore && userValidateDTO.InputSendEmailForgotPassword == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore && userValidateDTO.OriginalUserDTO == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore)
         {
             var resultInvalidEmail = InvalidEmail(userValidateDTO.InputSendEmailForgotPassword!.Email);
 
-            if (resultInvalidEmail == EnumValidateType.Invalid)
+            if (resultInvalidEmail != EnumValidateType.Valid)
             {
-                userValidateDTO.SetInvalid();
-            }
+                if (resultInvalidEmail == EnumValidateType.Invalid)
+                    userValidateDTO.SetInvalid();
 
-            if (resultInvalidEmail == EnumValidateType.NonInformed)
-            {
-                userValidateDTO.SetIgnore();
+                if (resultInvalidEmail == EnumValidateType.NonInformed)
+                    userValidateDTO.SetIgnore();
+
+                InvalidGeneric(0, userValidateDTO.InputSendEmailForgotPassword!.Email, nameof(userValidateDTO.InputSendEmailForgotPassword.Email), resultInvalidEmail);
             }
         }
     }
@@ -189,11 +193,13 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         if (!userValidateDTO.Ignore && userValidateDTO.InputRedefinePasswordForgotPassword == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore && userValidateDTO.OriginalUserDTO == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore)
@@ -202,6 +208,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
             if (resultInvalidMatch != EnumValidateType.Valid)
             {
                 userValidateDTO.SetInvalid();
+                InvalidMatch(userValidateDTO.OriginalUserDTO!.ExternalPropertiesDTO.Email, resultInvalidMatch, nameof(userValidateDTO.InputRedefinePasswordForgotPassword.NewPassword), nameof(userValidateDTO.InputRedefinePasswordForgotPassword.ConfirmNewPassword));
             }
         }
     }
@@ -211,21 +218,25 @@ public class UserValidateService(ITranslationService translationService) : BaseV
         if (!userValidateDTO.Ignore && userValidateDTO.InputRedefinePassword == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore && userValidateDTO.OriginalUserDTO == null)
         {
             userValidateDTO.SetIgnore();
+            Invalid(0);
         }
 
         if (!userValidateDTO.Ignore && string.IsNullOrEmpty(userValidateDTO.InputRedefinePassword!.CurrentPassword))
         {
             userValidateDTO.SetInvalid();
+            InvalidGeneric(userValidateDTO.OriginalUserDTO!.ExternalPropertiesDTO.Email, userValidateDTO.InputRedefinePassword.CurrentPassword, nameof(userValidateDTO.InputRedefinePassword.CurrentPassword), EnumValidateType.NonInformed); ;
         }
 
         if (!userValidateDTO.Ignore && !string.IsNullOrEmpty(userValidateDTO.InputRedefinePassword!.CurrentPassword) && !userValidateDTO.InputRedefinePassword!.CurrentPassword.CompareHash(userValidateDTO.OriginalUserDTO!.ExternalPropertiesDTO.Password))
         {
             userValidateDTO.SetInvalid();
+            InvalidGeneric(userValidateDTO.OriginalUserDTO!.ExternalPropertiesDTO.Email, userValidateDTO.InputRedefinePassword.CurrentPassword, nameof(userValidateDTO.InputRedefinePassword.CurrentPassword), EnumValidateType.Invalid); ;
         }
 
         if (!userValidateDTO.Ignore)
@@ -234,6 +245,7 @@ public class UserValidateService(ITranslationService translationService) : BaseV
             if (resultInvalidMatch != EnumValidateType.Invalid)
             {
                 userValidateDTO.SetInvalid();
+                InvalidMatch(userValidateDTO.OriginalUserDTO!.ExternalPropertiesDTO.Email, resultInvalidMatch, nameof(userValidateDTO.InputRedefinePassword.NewPassword), nameof(userValidateDTO.InputRedefinePassword.ConfirmNewPassword));
             }
         }
     }
