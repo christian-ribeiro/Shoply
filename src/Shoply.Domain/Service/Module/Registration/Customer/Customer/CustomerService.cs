@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class CustomerService(ICustomerRepository repository, ITranslationService translationService, ICustomerValidateService customerValidate) : BaseService<ICustomerRepository, InputCreateCustomer, InputUpdateCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, InputIdentifierCustomer, OutputCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO>(repository, translationService), ICustomerService
+public class CustomerService(ICustomerRepository repository, ITranslationService translationService, ICustomerValidateService customerValidateService) : BaseService<ICustomerRepository, ICustomerValidateService, InputCreateCustomer, InputUpdateCustomer, InputIdentityUpdateCustomer, InputIdentityDeleteCustomer, InputIdentifierCustomer, OutputCustomer, CustomerValidateDTO, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO>(repository, customerValidateService, translationService), ICustomerService
 {
     #region Create
     public override async Task<BaseResult<List<OutputCustomer?>>> Create(List<InputCreateCustomer> listInputCreateCustomer)
@@ -24,7 +24,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listCreate select new CustomerValidateDTO().ValidateCreate(i.InputCreateCustomer, i.ListRepeatedInputCreateCustomer, i.OriginalCustomerDTO)).ToList();
-        customerValidate.Create(listCustomerValidateDTO);
+        _validate.Create(listCustomerValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateCustomer.Count)
@@ -49,7 +49,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listUpdate select new CustomerValidateDTO().ValidateUpdate(i.InputIdentityUpdateCustomer, i.ListRepeatedInputIdentityUpdateCustomer, i.OriginalCustomerDTO)).ToList();
-        customerValidate.Update(listCustomerValidateDTO);
+        _validate.Update(listCustomerValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateCustomer.Count)
@@ -74,7 +74,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
                           }).ToList();
 
         List<CustomerValidateDTO> listCustomerValidateDTO = (from i in listDelete select new CustomerValidateDTO().ValidateDelete(i.InputIdentityDeleteCustomer, i.ListRepeatedInputIdentityDeleteCustomer, i.OriginalCustomerDTO)).ToList();
-        customerValidate.Delete(listCustomerValidateDTO);
+        _validate.Delete(listCustomerValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteCustomer.Count)

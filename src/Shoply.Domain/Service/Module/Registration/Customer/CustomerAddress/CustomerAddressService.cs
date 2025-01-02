@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class CustomerAddressService(ICustomerAddressRepository repository, ITranslationService translationService, ICustomerAddressValidateService customerAddressValidate, ICustomerRepository customerRepository) : BaseService<ICustomerAddressRepository, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, CustomerAddressValidateDTO, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO>(repository, translationService), ICustomerAddressService
+public class CustomerAddressService(ICustomerAddressRepository repository, ITranslationService translationService, ICustomerAddressValidateService customerAddressValidateService, ICustomerRepository customerRepository) : BaseService<ICustomerAddressRepository, ICustomerAddressValidateService, InputCreateCustomerAddress, InputUpdateCustomerAddress, InputIdentityUpdateCustomerAddress, InputIdentityDeleteCustomerAddress, InputIdentifierCustomerAddress, OutputCustomerAddress, CustomerAddressValidateDTO, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO>(repository, customerAddressValidateService, translationService), ICustomerAddressService
 {
     #region Create
     public override async Task<BaseResult<List<OutputCustomerAddress?>>> Create(List<InputCreateCustomerAddress> listInputCreateCustomerAddress)
@@ -23,7 +23,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listCreate select new CustomerAddressValidateDTO().ValidateCreate(i.InputCreateCustomerAddress, i.RelatedCustomerDTO)).ToList();
-        customerAddressValidate.Create(listCustomerAddressValidateDTO);
+        _validate.Create(listCustomerAddressValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateCustomerAddress.Count)
@@ -48,7 +48,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listUpdate select new CustomerAddressValidateDTO().ValidateUpdate(i.InputIdentityUpdateCustomerAddress, i.ListRepeatedInputIdentityUpdateCustomerAddress, i.OriginalCustomerAddressDTO)).ToList();
-        customerAddressValidate.Update(listCustomerAddressValidateDTO);
+        _validate.Update(listCustomerAddressValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateCustomerAddress.Count)
@@ -73,7 +73,7 @@ public class CustomerAddressService(ICustomerAddressRepository repository, ITran
                           }).ToList();
 
         List<CustomerAddressValidateDTO> listCustomerAddressValidateDTO = (from i in listDelete select new CustomerAddressValidateDTO().ValidateDelete(i.InputIdentityDeleteCustomerAddress, i.ListRepeatedInputIdentityDeleteCustomerAddress, i.OriginalCustomerAddressDTO)).ToList();
-        customerAddressValidate.Delete(listCustomerAddressValidateDTO);
+        _validate.Delete(listCustomerAddressValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteCustomerAddress.Count)

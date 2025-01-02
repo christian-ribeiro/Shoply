@@ -17,7 +17,7 @@ using System.Security.Cryptography;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class UserService(IUserRepository repository, ITranslationService translationService, IUserValidateService userValidateService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository, translationService), IUserService
+public class UserService(IUserRepository repository, ITranslationService translationService, IUserValidateService userValidateService, IJwtService jwtService, ISendEmailService sendEmailService) : BaseService<IUserRepository, IUserValidateService, InputCreateUser, InputUpdateUser, InputIdentityUpdateUser, InputIdentityDeleteUser, InputIdentifierUser, OutputUser, UserValidateDTO, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>(repository, userValidateService, translationService), IUserService
 {
     #region Create
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreateUser)
@@ -33,7 +33,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
-        userValidateService.Create(listUserValidateDTO);
+        _validate.Create(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateUser.Count)
@@ -58,7 +58,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO)).ToList();
-        userValidateService.Update(listUserValidateDTO);
+        _validate.Update(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateUser.Count)
@@ -83,7 +83,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
                           }).ToList();
 
         List<UserValidateDTO> listUserValidateDTO = (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO)).ToList();
-        userValidateService.Delete(listUserValidateDTO);
+        _validate.Delete(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteUser.Count)
@@ -100,7 +100,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputAuthenticateUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateAuthenticate(inputAuthenticateUser, originalUserDTO);
-        userValidateService.Authenticate(userValidateDTO);
+        _validate.Authenticate(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
         if (userValidateDTO.Invalid)
@@ -126,7 +126,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO originalUserDTO = await _repository.Get(userId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRefreshToken(inputRefreshTokenUser, originalUserDTO);
-        userValidateService.RefreshToken(userValidateDTO);
+        _validate.RefreshToken(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
         if (userValidateDTO.Invalid)
@@ -148,7 +148,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByIdentifier(new InputIdentifierUser(inputSendEmailForgotPasswordUser.Email));
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateSendEmailForgotPassword(inputSendEmailForgotPasswordUser, originalUserDTO);
-        userValidateService.SendEmailForgotPassword(userValidateDTO);
+        _validate.SendEmailForgotPassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
         if (userValidateDTO.Invalid)
@@ -179,7 +179,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.GetByPasswordRecoveryCode(inputRedefinePasswordForgotPasswordUser.PasswordRecoveryCode);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePasswordForgotPassword(inputRedefinePasswordForgotPasswordUser, originalUserDTO);
-        userValidateService.RedefinePasswordForgotPassword(userValidateDTO);
+        _validate.RedefinePasswordForgotPassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
         if (userValidateDTO.Invalid)
@@ -199,7 +199,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         UserDTO? originalUserDTO = await _repository.Get(loggedUserId);
 
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePassword(inputRedefinePasswordUser, originalUserDTO);
-        userValidateService.RedefinePassword(userValidateDTO);
+        _validate.RedefinePassword(userValidateDTO);
 
         var (_, errors) = GetValidationResults();
         if (userValidateDTO.Invalid)

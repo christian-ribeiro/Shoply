@@ -8,7 +8,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductService(IProductRepository repository, ITranslationService translationService, IProductValidateService productValidateService) : BaseService<IProductRepository, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, translationService), IProductService
+public class ProductService(IProductRepository repository, ITranslationService translationService, IProductValidateService productValidateService) : BaseService<IProductRepository, IProductValidateService, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, productValidateService, translationService), IProductService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProduct?>>> Create(List<InputCreateProduct> listInputCreateProduct)
@@ -24,7 +24,7 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listCreate select new ProductValidateDTO().ValidateCreate(i.InputCreateProduct, i.ListRepeatedInputCreateProduct, i.OriginalProductDTO)).ToList();
-        productValidateService.Create(listProductValidateDTO);
+        _validate.Create(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateProduct.Count)
@@ -49,7 +49,7 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listUpdate select new ProductValidateDTO().ValidateUpdate(i.InputIdentityUpdateProduct, i.ListRepeatedInputIdentityUpdateProduct, i.OriginalProductDTO)).ToList();
-        productValidateService.Update(listProductValidateDTO);
+        _validate.Update(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateProduct.Count)
@@ -74,7 +74,7 @@ public class ProductService(IProductRepository repository, ITranslationService t
                           }).ToList();
 
         List<ProductValidateDTO> listProductValidateDTO = (from i in listDelete select new ProductValidateDTO().ValidateDelete(i.InputIdentityDeleteProduct, i.ListRepeatedInputIdentityDeleteProduct, i.OriginalProductDTO)).ToList();
-        productValidateService.Delete(listProductValidateDTO);
+        _validate.Delete(listProductValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteProduct.Count)
