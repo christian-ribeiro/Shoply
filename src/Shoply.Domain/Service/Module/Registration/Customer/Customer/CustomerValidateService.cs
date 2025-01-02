@@ -63,11 +63,11 @@ public class CustomerValidateService(ITranslationService translationService) : B
         switch (customerValidateDTO.InputCreate!.PersonType)
         {
             case EnumPersonType.Natural:
-                var resultInvalidCFP = InvalidCPF(customerValidateDTO.InputCreate.Document);
-                if (resultInvalidCFP != EnumValidateType.Valid)
+                var resultInvalidCPF = InvalidCPF(customerValidateDTO.InputCreate.Document);
+                if (resultInvalidCPF != EnumValidateType.Valid)
                 {
                     customerValidateDTO.SetInvalid();
-                    InvalidGeneric(customerValidateDTO.InputCreate.Code, customerValidateDTO.InputCreate.Document, "CPF", resultInvalidCFP);
+                    InvalidGeneric(customerValidateDTO.InputCreate.Code, customerValidateDTO.InputCreate.Document, "CPF", resultInvalidCPF);
                 }
 
                 var resultInvalidBirthDate = InvalidBirthDate(customerValidateDTO.InputCreate.BirthDate, 18, false);
@@ -76,6 +76,7 @@ public class CustomerValidateService(ITranslationService translationService) : B
                     customerValidateDTO.SetInvalid();
                     InvalidBirthDate(customerValidateDTO.InputCreate.Code, 18, resultInvalidBirthDate, nameof(customerValidateDTO.InputCreate.BirthDate));
                 }
+
                 break;
             case EnumPersonType.Legal:
                 var resultInvalidCNPJ = InvalidCNPJ(customerValidateDTO.InputCreate.Document);
@@ -90,6 +91,7 @@ public class CustomerValidateService(ITranslationService translationService) : B
                     customerValidateDTO.SetInvalid();
                     ManualNotification(customerValidateDTO.InputCreate.Code, "Pessoa jurídica não possui data de nascimento", EnumValidateType.Invalid);
                 }
+
                 break;
             default:
                 customerValidateDTO.SetInvalid();

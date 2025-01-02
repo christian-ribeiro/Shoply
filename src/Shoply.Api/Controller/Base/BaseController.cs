@@ -251,7 +251,7 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
         {
             if (loginKey != loggedUser.LoginKey)
             {
-                var action = Unauthorized(new BaseResponse<string> { ListNotification = [new(loggedUser.Email, ["Tem alguém te deslogando pra te zoar, dá um tiro nele"], EnumNotificationType.Error)] });
+                var action = Unauthorized(new BaseResponse<string> { ListNotification = [new(loggedUser.Email, ["Houve outro acesso com este usuário. Realize o login novamente"], EnumNotificationType.Error)] });
                 return (true, action);
             }
 
