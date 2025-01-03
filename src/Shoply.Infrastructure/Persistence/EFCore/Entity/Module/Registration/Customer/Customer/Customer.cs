@@ -2,6 +2,7 @@
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Mapper;
+using Shoply.Domain.Utils;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
@@ -36,13 +37,13 @@ public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCus
         {
             InternalPropertiesDTO = new InternalPropertiesCustomerDTO().SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesCustomerDTO(entity.Code, entity.FirstName, entity.LastName, entity.BirthDate, entity.Document, entity.PersonType),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerDTO((from i in entity.ListCustomerAddress ?? new List<CustomerAddress>() select (CustomerAddressDTO)(dynamic)i).ToList()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerDTO(entity.ListCustomerAddress.Cast<CustomerAddressDTO>()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
         };
     }
 
     public Customer GetEntity(CustomerDTO dto)
     {
-        return new Customer(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.FirstName, dto.ExternalPropertiesDTO.LastName, dto.ExternalPropertiesDTO.BirthDate, dto.ExternalPropertiesDTO.Document, dto.ExternalPropertiesDTO.PersonType, (from i in dto.AuxiliaryPropertiesDTO.ListCustomerAddress ?? new List<CustomerAddressDTO>() select (CustomerAddress)(dynamic)i).ToList())
+        return new Customer(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.FirstName, dto.ExternalPropertiesDTO.LastName, dto.ExternalPropertiesDTO.BirthDate, dto.ExternalPropertiesDTO.Document, dto.ExternalPropertiesDTO.PersonType, dto.AuxiliaryPropertiesDTO.ListCustomerAddress.Cast<CustomerAddress>())
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 

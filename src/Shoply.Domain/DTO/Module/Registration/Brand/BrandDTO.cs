@@ -1,6 +1,7 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.DTO.Base;
 using Shoply.Domain.Interface.Mapper;
+using Shoply.Domain.Utils;
 
 namespace Shoply.Domain.DTO.Module.Registration;
 
@@ -12,13 +13,13 @@ public class BrandDTO : BaseDTO<InputCreateBrand, InputUpdateBrand, OutputBrand,
         {
             InternalPropertiesDTO = new InternalPropertiesBrandDTO().SetInternalData(output.Id, output.CreationDate, output.ChangeDate, output.CreationUserId, output.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesBrandDTO(output.Code, output.Description),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesBrandDTO().SetInternalData(output.CreationUser!, output.ChangeUser!)
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesBrandDTO(output.ListProduct.Cast<ProductDTO>()).SetInternalData(output.CreationUser!, output.ChangeUser!)
         };
     }
 
     public OutputBrand GetOutput(BrandDTO dto)
     {
-        return new OutputBrand(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, [.. (from i in dto.AuxiliaryPropertiesDTO.ListProduct select (OutputProduct)(dynamic)i)])
+        return new OutputBrand(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, dto.AuxiliaryPropertiesDTO.ListProduct.Cast<OutputProduct>())
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 

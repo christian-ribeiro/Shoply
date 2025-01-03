@@ -2,6 +2,7 @@ using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Mapper;
+using Shoply.Domain.Utils;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
@@ -50,13 +51,13 @@ public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduc
         {
             InternalPropertiesDTO = new InternalPropertiesProductDTO(entity.Markup).SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesProductDTO(entity.Code, entity.Description, entity.BarCode, entity.CostValue, entity.SaleValue, entity.Status, entity.ProductCategoryId, entity.MeasureUnitId, entity.BrandId),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(entity.ProductCategory!, entity.MeasureUnit!, entity.Brand!, (from i in entity.ListProductImage ?? new List<ProductImage>() select (ProductImageDTO)(dynamic)i).ToList()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(entity.ProductCategory!, entity.MeasureUnit!, entity.Brand!, entity.ListProductImage.Cast<ProductImageDTO>()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
         };
     }
 
     public Product GetEntity(ProductDTO dto)
     {
-        return new Product(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, dto.ExternalPropertiesDTO.BarCode, dto.ExternalPropertiesDTO.CostValue, dto.ExternalPropertiesDTO.SaleValue, dto.ExternalPropertiesDTO.Status, dto.ExternalPropertiesDTO.ProductCategoryId, dto.ExternalPropertiesDTO.MeasureUnitId, dto.ExternalPropertiesDTO.BrandId, dto.InternalPropertiesDTO.Markup, dto.AuxiliaryPropertiesDTO.ProductCategory!, dto.AuxiliaryPropertiesDTO.MeasureUnit!, dto.AuxiliaryPropertiesDTO.Brand!, (from i in dto.AuxiliaryPropertiesDTO.ListProductImage ?? new List<ProductImageDTO>() select (ProductImage)(dynamic)i).ToList())
+        return new Product(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, dto.ExternalPropertiesDTO.BarCode, dto.ExternalPropertiesDTO.CostValue, dto.ExternalPropertiesDTO.SaleValue, dto.ExternalPropertiesDTO.Status, dto.ExternalPropertiesDTO.ProductCategoryId, dto.ExternalPropertiesDTO.MeasureUnitId, dto.ExternalPropertiesDTO.BrandId, dto.InternalPropertiesDTO.Markup, dto.AuxiliaryPropertiesDTO.ProductCategory!, dto.AuxiliaryPropertiesDTO.MeasureUnit!, dto.AuxiliaryPropertiesDTO.Brand!, dto.AuxiliaryPropertiesDTO.ListProductImage.Cast<ProductImage>())
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 

@@ -1,49 +1,48 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using System.Collections.Concurrent;
 
-namespace Shoply.Domain.Utils
+namespace Shoply.Domain.Utils;
+
+public static class NotificationHelper
 {
-    public static class NotificationHelper
+    public static ConcurrentDictionary<Guid, ConcurrentDictionary<string, List<DetailedNotification>>> ListNotification { get; private set; } = [];
+
+    public static void Add(Guid guidSessionDataRequest, string key, DetailedNotification detailedNotification)
     {
-        public static ConcurrentDictionary<Guid, ConcurrentDictionary<string, List<DetailedNotification>>> ListNotification { get; private set; } = [];
+        ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value);
 
-        public static void Add(Guid guidSessionDataRequest, string key, DetailedNotification detailedNotification)
+        value ??= [];
+
+        var existingNotification = value.GetOrAdd(key, _ => [new(key, [], detailedNotification.NotificationType)]);
+        var notification = existingNotification.FirstOrDefault();
+        if (notification != null)
         {
-            ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value);
-
-            value ??= [];
-
-            var existingNotification = value.GetOrAdd(key, _ => [new(key, [], detailedNotification.NotificationType)]);
-            var notification = existingNotification.FirstOrDefault();
-            if (notification != null)
-            {
-                notification.ListMessage ??= [];
-                notification.ListMessage.AddRange(detailedNotification.ListMessage ?? []);
-            }
-
-            ListNotification[guidSessionDataRequest] = value!;
+            notification.ListMessage ??= [];
+            notification.ListMessage.AddRange(detailedNotification.ListMessage ?? []);
         }
 
-        public static List<DetailedNotification>? Get(Guid guidSessionDataRequest, string key)
-        {
-            if (ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value))
-                if (value != null && value.TryGetValue(key, out List<DetailedNotification>? notification))
-                    return notification;
+        ListNotification[guidSessionDataRequest] = value!;
+    }
 
-            return default;
-        }
+    public static List<DetailedNotification>? Get(Guid guidSessionDataRequest, string key)
+    {
+        if (ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value))
+            if (value != null && value.TryGetValue(key, out List<DetailedNotification>? notification))
+                return notification;
 
-        public static List<DetailedNotification> Get(Guid guidSessionDataRequest)
-        {
-            if (ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value))
-                return [.. (from i in value ?? [] from j in i.Value ?? [] select j)];
+        return default;
+    }
 
-            return [];
-        }
+    public static List<DetailedNotification> Get(Guid guidSessionDataRequest)
+    {
+        if (ListNotification.TryGetValue(guidSessionDataRequest, out ConcurrentDictionary<string, List<DetailedNotification>>? value))
+            return [.. (from i in value ?? [] from j in i.Value ?? [] select j)];
 
-        public static void Remove(Guid guidSessionDataRequest)
-        {
-            ListNotification.TryRemove(guidSessionDataRequest, out _);
-        }
+        return [];
+    }
+
+    public static void Remove(Guid guidSessionDataRequest)
+    {
+        ListNotification.TryRemove(guidSessionDataRequest, out _);
     }
 }

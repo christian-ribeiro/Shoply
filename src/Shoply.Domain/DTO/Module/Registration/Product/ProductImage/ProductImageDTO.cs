@@ -6,7 +6,7 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class ProductImageDTO : BaseDTO<InputCreateProductImage, OutputProductImage, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>, IBaseDTO<ProductImageDTO, OutputProductImage>
 {
-    public ProductImageDTO? GetDTO(OutputProductImage output)
+    public ProductImageDTO GetDTO(OutputProductImage output)
     {
         return new ProductImageDTO
         {
@@ -16,7 +16,7 @@ public class ProductImageDTO : BaseDTO<InputCreateProductImage, OutputProductIma
         };
     }
 
-    public OutputProductImage? GetOutput(ProductImageDTO dto)
+    public OutputProductImage GetOutput(ProductImageDTO dto)
     {
         return new OutputProductImage(dto.ExternalPropertiesDTO.FileName, dto.ExternalPropertiesDTO.FileLength, dto.ExternalPropertiesDTO.ImageUrl, dto.ExternalPropertiesDTO.ProductId, dto.AuxiliaryPropertiesDTO.Product!)
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);

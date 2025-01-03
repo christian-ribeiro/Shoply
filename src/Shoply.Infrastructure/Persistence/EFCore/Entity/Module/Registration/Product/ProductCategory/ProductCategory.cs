@@ -1,6 +1,7 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Mapper;
+using Shoply.Domain.Utils;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
@@ -27,13 +28,13 @@ public class ProductCategory : BaseEntity<ProductCategory, InputCreateProductCat
         {
             InternalPropertiesDTO = new InternalPropertiesProductCategoryDTO().SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesProductCategoryDTO(entity.Code, entity.Description),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductCategoryDTO((from i in entity.ListProduct ?? new List<Product>() select (ProductDTO)(dynamic)i).ToList()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductCategoryDTO(entity.ListProduct.Cast<ProductDTO>()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
         };
     }
 
     public ProductCategory GetEntity(ProductCategoryDTO dto)
     {
-        return new ProductCategory(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, (from i in dto.AuxiliaryPropertiesDTO.ListProduct ?? new List<ProductDTO>() select (Product)(dynamic)i).ToList())
+        return new ProductCategory(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, dto.AuxiliaryPropertiesDTO.ListProduct.Cast<Product>())
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 

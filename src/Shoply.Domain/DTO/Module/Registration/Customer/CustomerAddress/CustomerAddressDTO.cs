@@ -6,7 +6,7 @@ namespace Shoply.Domain.DTO.Module.Registration;
 
 public class CustomerAddressDTO : BaseDTO<InputCreateCustomerAddress, InputUpdateCustomerAddress, OutputCustomerAddress, CustomerAddressDTO, InternalPropertiesCustomerAddressDTO, ExternalPropertiesCustomerAddressDTO, AuxiliaryPropertiesCustomerAddressDTO>, IBaseDTO<CustomerAddressDTO, OutputCustomerAddress>
 {
-    public CustomerAddressDTO? GetDTO(OutputCustomerAddress output)
+    public CustomerAddressDTO GetDTO(OutputCustomerAddress output)
     {
         return new CustomerAddressDTO
         {
@@ -15,7 +15,7 @@ public class CustomerAddressDTO : BaseDTO<InputCreateCustomerAddress, InputUpdat
             AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerAddressDTO(output.Customer!).SetInternalData(output.CreationUser!, output.ChangeUser!)
         };
     }
-    public OutputCustomerAddress? GetOutput(CustomerAddressDTO dto)
+    public OutputCustomerAddress GetOutput(CustomerAddressDTO dto)
     {
         return new OutputCustomerAddress(dto.ExternalPropertiesDTO.CustomerId, dto.ExternalPropertiesDTO.AddressType, dto.ExternalPropertiesDTO.PublicPlace, dto.ExternalPropertiesDTO.Number, dto.ExternalPropertiesDTO.Complement, dto.ExternalPropertiesDTO.Neighborhood, dto.ExternalPropertiesDTO.PostalCode, dto.ExternalPropertiesDTO.Reference, dto.ExternalPropertiesDTO.Observation, dto.AuxiliaryPropertiesDTO.Customer!)
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
