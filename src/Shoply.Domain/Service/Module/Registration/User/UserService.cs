@@ -39,7 +39,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         if (errors.Count == listInputCreateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreate!.SetProperty(nameof(i.InputCreate.Password), EncryptService.Encrypt(i.InputCreate.Password)))).ToList();
+        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreate!.SetProperty(x => x.Password, EncryptService.Encrypt(i.InputCreate.Password)))).ToList();
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -108,8 +108,8 @@ public class UserService(IUserRepository repository, ITranslationService transla
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 
-        originalUserDTO!.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.RefreshToken), refreshToken);
-        originalUserDTO!.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.LoginKey), Guid.NewGuid());
+        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.RefreshToken, refreshToken);
+        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.LoginKey, Guid.NewGuid());
 
         await _repository.Update(originalUserDTO);
 
@@ -135,8 +135,8 @@ public class UserService(IUserRepository repository, ITranslationService transla
         string token = await jwtService.GenerateJwtToken(principal!.Value!.Claims.ToList());
         string refreshToken = await jwtService.GenerateRefreshToken();
 
-        originalUserDTO.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.RefreshToken), refreshToken);
-        originalUserDTO.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.LoginKey), Guid.NewGuid());
+        originalUserDTO.InternalPropertiesDTO.SetProperty(x => x.RefreshToken, refreshToken);
+        originalUserDTO.InternalPropertiesDTO.SetProperty(x => x.LoginKey, Guid.NewGuid());
 
         await _repository.Update(originalUserDTO);
 
@@ -158,7 +158,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         RandomNumberGenerator.Fill(randomBytes);
         string recoveryCode = (Math.Abs(BitConverter.ToInt32(randomBytes, 0)) % 1000000).ToString("D6");
 
-        originalUserDTO!.InternalPropertiesDTO.SetProperty(nameof(originalUserDTO.InternalPropertiesDTO.PasswordRecoveryCode), recoveryCode);
+        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.PasswordRecoveryCode, recoveryCode);
         await _repository.Update(originalUserDTO);
 
         string htmlProto = File.ReadAllText("wwwroot/html-template/recovery-password.html");
@@ -185,8 +185,8 @@ public class UserService(IUserRepository repository, ITranslationService transla
         if (userValidateDTO.Invalid)
             return BaseResult<bool>.Failure(errors);
 
-        originalUserDTO!.ExternalPropertiesDTO.SetProperty(nameof(originalUserDTO.ExternalPropertiesDTO.Password), EncryptService.Encrypt(inputRedefinePasswordForgotPasswordUser.NewPassword));
-        originalUserDTO!.InternalPropertiesDTO.SetProperty<string>(nameof(originalUserDTO.InternalPropertiesDTO.PasswordRecoveryCode), null);
+        originalUserDTO!.ExternalPropertiesDTO.SetProperty(x => x.Password, EncryptService.Encrypt(inputRedefinePasswordForgotPasswordUser.NewPassword));
+        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.PasswordRecoveryCode, null);
         await _repository.Update(originalUserDTO);
 
         return BaseResult<bool>.Success(true);
@@ -205,7 +205,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
         if (userValidateDTO.Invalid)
             return BaseResult<bool>.Failure(errors);
 
-        originalUserDTO.ExternalPropertiesDTO.SetProperty(nameof(originalUserDTO.ExternalPropertiesDTO.Password), EncryptService.Encrypt(inputRedefinePasswordUser.NewPassword));
+        originalUserDTO.ExternalPropertiesDTO.SetProperty(x => x.Password, EncryptService.Encrypt(inputRedefinePasswordUser.NewPassword));
         await _repository.Update(originalUserDTO);
 
         return BaseResult<bool>.Success(true);

@@ -30,7 +30,7 @@ public class CustomerService(ICustomerRepository repository, ITranslationService
         if (errors.Count == listInputCreateCustomer.Count)
             return BaseResult<List<OutputCustomer?>>.Failure(errors);
 
-        List<CustomerDTO> listCreateCustomerDTO = (from i in RemoveInvalid(listCustomerValidateDTO) select new CustomerDTO().Create(i.InputCreate!.SetProperty(nameof(i.InputCreate.Document), new string(i.InputCreate.Document.Where(char.IsDigit).ToArray())))).ToList();
+        List<CustomerDTO> listCreateCustomerDTO = (from i in RemoveInvalid(listCustomerValidateDTO) select new CustomerDTO().Create(i.InputCreate!.SetProperty(x => x.Document, new string(i.InputCreate.Document.Where(char.IsDigit).ToArray())))).ToList();
         return BaseResult<List<OutputCustomer?>>.Success(FromDTOToOutput(await _repository.Create(listCreateCustomerDTO))!, [.. successes, .. errors]);
     }
     #endregion

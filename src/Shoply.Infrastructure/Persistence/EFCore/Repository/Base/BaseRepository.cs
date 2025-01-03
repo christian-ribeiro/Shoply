@@ -115,8 +115,8 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
 
         _ = (from i in listDTO
              select i.InternalPropertiesDTO
-             .SetProperty(nameof(i.InternalPropertiesDTO.CreationDate), creationDate)
-             .SetProperty(nameof(i.InternalPropertiesDTO.CreationUserId), creationUserId)
+             .SetProperty(x => x.CreationDate, creationDate)
+             .SetProperty(x => x.CreationUserId, creationUserId)
              ).ToList();
 
         return listDTO;
@@ -144,8 +144,8 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
 
         _ = (from i in listDTO
              select i.InternalPropertiesDTO
-             .SetProperty(nameof(i.InternalPropertiesDTO.ChangeDate), changeDate)
-             .SetProperty(nameof(i.InternalPropertiesDTO.ChangeUserId), changeUserId)
+             .SetProperty(x => x.ChangeDate, changeDate)
+             .SetProperty(x => x.ChangeUserId, changeUserId)
              ).ToList();
 
         return listDTO;
