@@ -12,14 +12,14 @@ public class BrandDTO : BaseDTO<InputCreateBrand, InputUpdateBrand, OutputBrand,
         {
             InternalPropertiesDTO = new InternalPropertiesBrandDTO().SetInternalData(output.Id, output.CreationDate, output.ChangeDate, output.CreationUserId, output.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesBrandDTO(output.Code, output.Description),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesBrandDTO()
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesBrandDTO().SetInternalData(output.CreationUser!, output.ChangeUser!)
         };
     }
 
     public OutputBrand GetOutput(BrandDTO dto)
     {
         return new OutputBrand(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, [.. (from i in dto.AuxiliaryPropertiesDTO.ListProduct select (OutputProduct)(dynamic)i)])
-            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 
     public static implicit operator BrandDTO?(OutputBrand output)

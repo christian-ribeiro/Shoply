@@ -19,7 +19,7 @@ public class UserDTO : BaseDTO<InputCreateUser, InputUpdateUser, OutputUser, Use
     public OutputUser GetOutput(UserDTO dto)
     {
         return new OutputUser(dto.ExternalPropertiesDTO.Name, dto.ExternalPropertiesDTO.Email, dto.ExternalPropertiesDTO.Password, dto.ExternalPropertiesDTO.Language, dto.InternalPropertiesDTO.RefreshToken, dto.InternalPropertiesDTO.LoginKey, dto.InternalPropertiesDTO.PasswordRecoveryCode)
-            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 
     public static implicit operator UserDTO?(OutputUser output)

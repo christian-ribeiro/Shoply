@@ -76,7 +76,7 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
         {
             InternalPropertiesDTO = new InternalPropertiesUserDTO(entity.RefreshToken, entity.LoginKey, entity.PasswordRecoveryCode).SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
             ExternalPropertiesDTO = new ExternalPropertiesUserDTO(entity.Name, entity.Email, entity.Password, entity.Language),
-            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesUserDTO()
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesUserDTO().SetInternalData(entity.CreationUser!, entity.ChangeUser!)
         };
     }
 
@@ -86,9 +86,9 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
             .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
     }
 
-    public static implicit operator UserDTO?(User output)
+    public static implicit operator UserDTO?(User entity)
     {
-        return output == null ? default : new User().GetDTO(output);
+        return entity == null ? default : new User().GetDTO(entity);
     }
 
     public static implicit operator User?(UserDTO dto)

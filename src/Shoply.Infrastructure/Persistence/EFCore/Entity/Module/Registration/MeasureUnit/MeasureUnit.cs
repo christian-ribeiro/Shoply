@@ -23,11 +23,27 @@ public class MeasureUnit : BaseEntity<MeasureUnit, InputCreateMeasureUnit, Input
 
     public MeasureUnitDTO GetDTO(MeasureUnit entity)
     {
-        throw new NotImplementedException();
+        return new MeasureUnitDTO
+        {
+            InternalPropertiesDTO = new InternalPropertiesMeasureUnitDTO().SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
+            ExternalPropertiesDTO = new ExternalPropertiesMeasureUnitDTO(entity.Code, entity.Description),
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesMeasureUnitDTO((from i in entity.ListProduct ?? new List<Product>() select (ProductDTO)(dynamic)i).ToList()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+        };
     }
 
     public MeasureUnit GetEntity(MeasureUnitDTO dto)
     {
-        throw new NotImplementedException();
+        return new MeasureUnit(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, (from i in dto.AuxiliaryPropertiesDTO.ListProduct ?? new List<ProductDTO>() select (Product)(dynamic)i).ToList())
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+    }
+
+    public static implicit operator MeasureUnitDTO?(MeasureUnit entity)
+    {
+        return entity == null ? default : new MeasureUnit().GetDTO(entity);
+    }
+
+    public static implicit operator MeasureUnit?(MeasureUnitDTO dto)
+    {
+        return dto == null ? default : new MeasureUnit().GetEntity(dto);
     }
 }

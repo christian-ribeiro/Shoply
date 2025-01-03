@@ -46,11 +46,27 @@ public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduc
 
     public ProductDTO GetDTO(Product entity)
     {
-        throw new NotImplementedException();
+        return new ProductDTO
+        {
+            InternalPropertiesDTO = new InternalPropertiesProductDTO(entity.Markup).SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
+            ExternalPropertiesDTO = new ExternalPropertiesProductDTO(entity.Code, entity.Description, entity.BarCode, entity.CostValue, entity.SaleValue, entity.Status, entity.ProductCategoryId, entity.MeasureUnitId, entity.BrandId),
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductDTO(entity.ProductCategory!, entity.MeasureUnit!, entity.Brand!, (from i in entity.ListProductImage ?? new List<ProductImage>() select (ProductImageDTO)(dynamic)i).ToList()).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+        };
     }
 
     public Product GetEntity(ProductDTO dto)
     {
-        throw new NotImplementedException();
+        return new Product(dto.ExternalPropertiesDTO.Code, dto.ExternalPropertiesDTO.Description, dto.ExternalPropertiesDTO.BarCode, dto.ExternalPropertiesDTO.CostValue, dto.ExternalPropertiesDTO.SaleValue, dto.ExternalPropertiesDTO.Status, dto.ExternalPropertiesDTO.ProductCategoryId, dto.ExternalPropertiesDTO.MeasureUnitId, dto.ExternalPropertiesDTO.BrandId, dto.InternalPropertiesDTO.Markup, dto.AuxiliaryPropertiesDTO.ProductCategory!, dto.AuxiliaryPropertiesDTO.MeasureUnit!, dto.AuxiliaryPropertiesDTO.Brand!, (from i in dto.AuxiliaryPropertiesDTO.ListProductImage ?? new List<ProductImageDTO>() select (ProductImage)(dynamic)i).ToList())
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+    }
+
+    public static implicit operator ProductDTO?(Product entity)
+    {
+        return entity == null ? default : new Product().GetDTO(entity);
+    }
+
+    public static implicit operator Product?(ProductDTO dto)
+    {
+        return dto == null ? default : new Product().GetEntity(dto);
     }
 }

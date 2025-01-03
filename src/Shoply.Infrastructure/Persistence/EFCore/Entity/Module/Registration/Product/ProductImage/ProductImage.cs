@@ -35,11 +35,27 @@ public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, Ou
 
     public ProductImageDTO GetDTO(ProductImage entity)
     {
-        throw new NotImplementedException();
+        return new ProductImageDTO
+        {
+            InternalPropertiesDTO = new InternalPropertiesProductImageDTO().SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
+            ExternalPropertiesDTO = new ExternalPropertiesProductImageDTO(entity.FileName, entity.FileLength, entity.ImageUrl, entity.ProductId),
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesProductImageDTO(entity.Product!).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+        };
     }
 
     public ProductImage GetEntity(ProductImageDTO dto)
     {
-        throw new NotImplementedException();
+        return new ProductImage(dto.ExternalPropertiesDTO.FileName, dto.ExternalPropertiesDTO.FileLength, dto.ExternalPropertiesDTO.ImageUrl, dto.ExternalPropertiesDTO.ProductId, dto.AuxiliaryPropertiesDTO.Product!)
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+    }
+
+    public static implicit operator ProductImageDTO?(ProductImage entity)
+    {
+        return entity == null ? default : new ProductImage().GetDTO(entity);
+    }
+
+    public static implicit operator ProductImage?(ProductImageDTO dto)
+    {
+        return dto == null ? default : new ProductImage().GetEntity(dto);
     }
 }

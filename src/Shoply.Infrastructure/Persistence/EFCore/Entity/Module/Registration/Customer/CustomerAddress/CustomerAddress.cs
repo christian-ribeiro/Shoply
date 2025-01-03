@@ -38,11 +38,27 @@ public class CustomerAddress : BaseEntity<CustomerAddress, InputCreateCustomerAd
 
     public CustomerAddressDTO GetDTO(CustomerAddress entity)
     {
-        throw new NotImplementedException();
+        return new CustomerAddressDTO
+        {
+            InternalPropertiesDTO = new InternalPropertiesCustomerAddressDTO().SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
+            ExternalPropertiesDTO = new ExternalPropertiesCustomerAddressDTO(entity.CustomerId, entity.AddressType, entity.PublicPlace, entity.Number, entity.Complement, entity.Neighborhood, entity.PostalCode, entity.Reference, entity.Observation),
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesCustomerAddressDTO(entity.Customer!).SetInternalData(entity.CreationUser!, entity.ChangeUser!)
+        };
     }
 
     public CustomerAddress GetEntity(CustomerAddressDTO dto)
     {
-        throw new NotImplementedException();
+        return new CustomerAddress(dto.ExternalPropertiesDTO.CustomerId, dto.ExternalPropertiesDTO.AddressType, dto.ExternalPropertiesDTO.PublicPlace, dto.ExternalPropertiesDTO.Number, dto.ExternalPropertiesDTO.Complement, dto.ExternalPropertiesDTO.Neighborhood, dto.ExternalPropertiesDTO.PostalCode, dto.ExternalPropertiesDTO.Reference, dto.ExternalPropertiesDTO.Observation, dto.AuxiliaryPropertiesDTO.Customer!)
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+    }
+
+    public static implicit operator CustomerAddressDTO?(CustomerAddress entity)
+    {
+        return entity == null ? default : new CustomerAddress().GetDTO(entity);
+    }
+
+    public static implicit operator CustomerAddress?(CustomerAddressDTO dto)
+    {
+        return dto == null ? default : new CustomerAddress().GetEntity(dto);
     }
 }
