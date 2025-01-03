@@ -1,10 +1,11 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
-public class ProductCategory : BaseEntity<ProductCategory, InputCreateProductCategory, InputUpdateProductCategory, OutputProductCategory, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO>
+public class ProductCategory : BaseEntity<ProductCategory, InputCreateProductCategory, InputUpdateProductCategory, OutputProductCategory, ProductCategoryDTO, InternalPropertiesProductCategoryDTO, ExternalPropertiesProductCategoryDTO, AuxiliaryPropertiesProductCategoryDTO>, IBaseEntity<ProductCategory, ProductCategoryDTO>
 {
     public string Code { get; private set; }
     public string Description { get; private set; }
@@ -18,5 +19,15 @@ public class ProductCategory : BaseEntity<ProductCategory, InputCreateProductCat
         Code = code;
         Description = description;
         ListProduct = listProduct;
+    }
+
+    public ProductCategoryDTO GetDTO(ProductCategory entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ProductCategory GetEntity(ProductCategoryDTO dto)
+    {
+        throw new NotImplementedException();
     }
 }

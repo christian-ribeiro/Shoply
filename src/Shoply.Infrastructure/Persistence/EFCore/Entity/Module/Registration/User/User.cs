@@ -1,11 +1,12 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
-public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>
+public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUser, UserDTO, InternalPropertiesUserDTO, ExternalPropertiesUserDTO, AuxiliaryPropertiesUserDTO>, IBaseEntity<User, UserDTO>
 {
     public string Name { get; private set; } = String.Empty;
     public string Email { get; private set; } = String.Empty;
@@ -67,5 +68,31 @@ public class User : BaseEntity<User, InputCreateUser, InputUpdateUser, OutputUse
         RefreshToken = refreshToken;
         LoginKey = loginKey;
         PasswordRecoveryCode = passwordRecoveryCode;
+    }
+
+    public UserDTO GetDTO(User entity)
+    {
+        return new UserDTO
+        {
+            InternalPropertiesDTO = new InternalPropertiesUserDTO(entity.RefreshToken, entity.LoginKey, entity.PasswordRecoveryCode).SetInternalData(entity.Id, entity.CreationDate, entity.ChangeDate, entity.CreationUserId, entity.ChangeUserId),
+            ExternalPropertiesDTO = new ExternalPropertiesUserDTO(entity.Name, entity.Email, entity.Password, entity.Language),
+            AuxiliaryPropertiesDTO = new AuxiliaryPropertiesUserDTO()
+        };
+    }
+
+    public User GetEntity(UserDTO dto)
+    {
+        return new User(dto.ExternalPropertiesDTO.Name, dto.ExternalPropertiesDTO.Email, dto.ExternalPropertiesDTO.Password, dto.ExternalPropertiesDTO.Language, dto.InternalPropertiesDTO.RefreshToken, dto.InternalPropertiesDTO.LoginKey, dto.InternalPropertiesDTO.PasswordRecoveryCode)
+            .SetInternalData(dto.InternalPropertiesDTO.Id, dto.InternalPropertiesDTO.CreationDate, dto.InternalPropertiesDTO.CreationUserId, dto.InternalPropertiesDTO.ChangeDate, dto.InternalPropertiesDTO.ChangeUserId, dto.AuxiliaryPropertiesDTO.CreationUser!, dto.AuxiliaryPropertiesDTO.ChangeUser!);
+    }
+
+    public static implicit operator UserDTO?(User output)
+    {
+        return output == null ? default : new User().GetDTO(output);
+    }
+
+    public static implicit operator User?(UserDTO dto)
+    {
+        return dto == null ? default : new User().GetEntity(dto);
     }
 }

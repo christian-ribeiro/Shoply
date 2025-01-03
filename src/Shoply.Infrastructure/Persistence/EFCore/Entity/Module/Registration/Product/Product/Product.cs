@@ -1,11 +1,12 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
-public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduct, OutputProduct, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>
+public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduct, OutputProduct, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>, IBaseEntity<Product, ProductDTO>
 {
     public string Code { get; private set; }
     public string Description { get; private set; }
@@ -41,5 +42,15 @@ public class Product : BaseEntity<Product, InputCreateProduct, InputUpdateProduc
         MeasureUnit = measureUnit;
         Brand = brand;
         ListProductImage = listProductImage;
+    }
+
+    public ProductDTO GetDTO(Product entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Product GetEntity(ProductDTO dto)
+    {
+        throw new NotImplementedException();
     }
 }

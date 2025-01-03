@@ -1,11 +1,12 @@
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Entity.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
-public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, OutputProductImage, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>
+public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, OutputProductImage, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>, IBaseEntity<ProductImage, ProductImageDTO>
 {
     public string FileName { get; private set; }
     public decimal FileLength { get; private set; }
@@ -30,5 +31,15 @@ public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, Ou
         ImageUrl = imageUrl;
         ProductId = productId;
         Product = product;
+    }
+
+    public ProductImageDTO GetDTO(ProductImage entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ProductImage GetEntity(ProductImageDTO dto)
+    {
+        throw new NotImplementedException();
     }
 }

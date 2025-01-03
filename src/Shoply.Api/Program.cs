@@ -8,7 +8,6 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureAuthentication();
 builder.Services.ConfigureSwagger();
 builder.Services.ConfigureController();
-builder.Services.ConfigureMapper();
 
 builder.Host.ConfigureDependencyInjection();
 

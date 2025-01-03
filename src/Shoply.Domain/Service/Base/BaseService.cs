@@ -1,6 +1,7 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Domain.Interface.Service.Base;
 using Shoply.Translation.Interface.Service;
@@ -17,7 +18,7 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
         where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
         where TOutput : BaseOutput<TOutput>
         where TValidateDTO : BaseValidateDTO
-        where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+        where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
         where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
         where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
         where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -101,14 +102,14 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
     #endregion
 
     #region Custom
-    internal static TOutput FromDTOToOutput(TDTO? dto)
+    internal static TOutput FromDTOToOutput(TDTO dto)
     {
-        return SessionData.Mapper!.MapperDTOOutput.Map<TDTO, TOutput>(dto!);
+        return (TOutput)(dynamic)dto;
     }
 
     internal static List<TOutput> FromDTOToOutput(List<TDTO> listDTO)
     {
-        return SessionData.Mapper!.MapperDTOOutput.Map<List<TDTO>, List<TOutput>>(listDTO)!;
+        return [.. (from i in listDTO select (TOutput)(dynamic)i)];
     }
     #endregion
 }
@@ -121,7 +122,7 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
         where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
         where TOutput : BaseOutput<TOutput>
         where TValidateDTO : BaseValidateDTO
-        where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+        where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
         where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
         where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
         where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()

@@ -1,12 +1,10 @@
-﻿using Shoply.Arguments.Argument.General.Mapper;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace Shoply.Arguments.Argument.General.Session;
 
 public class SessionData
 {
     public static ConcurrentDictionary<Guid, SessionDataRequest> ListSessionDataRequest { get; private set; } = [];
-    public static CustomMapper? Mapper { get; private set; }
 
     public static Guid Initialize()
     {
@@ -22,11 +20,6 @@ public class SessionData
     public static void RemoveSessionDataRequest(Guid guidSessionDataRequest)
     {
         ListSessionDataRequest.TryRemove(guidSessionDataRequest, out _);
-    }
-
-    public static void SetMapper(CustomMapper mapper)
-    {
-        Mapper = mapper;
     }
 
     public static void SetLoggedUser(Guid guidSessionDataRequest, LoggedUser loggedUser)

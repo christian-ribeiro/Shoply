@@ -1,5 +1,6 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Persistence.EFCore.Entity.Base;
 using Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,11 +9,11 @@ using System.Reflection;
 namespace Shoply.Infrastructure.Entity.Base;
 
 public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseEntity<TEntity, TDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -39,33 +40,34 @@ public abstract class BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, T
         MethodReturnPropertyDictionary.TryGetValue((methodName, callAlias), out CustomReturnPropertyDictionary? dictionary);
         if (dictionary == null || dictionary.ListProperty.Count == 0)
         {
-            return (from i in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            return [.. (from i in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     where !i.IsDefined(typeof(NotMappedAttribute)) &&
                     (i.PropertyType.IsPrimitive || i.PropertyType.IsValueType || i.PropertyType == typeof(string))
-                    select i.Name).ToList();
+                    select i.Name)];
         }
 
-        return (from i in dictionary.ListProperty
-                select i.PropertyName).ToList(); ;
+        return [.. (from i in dictionary.ListProperty select i.PropertyName)]; ;
     }
 
-    public TEntity SetInternalData(long id, DateTime? creationDate, long? creationUserId, DateTime? changeDate, long? changeUserId)
+    public TEntity SetInternalData(long id, DateTime? creationDate, long? creationUserId, DateTime? changeDate, long? changeUserId, User? creationUser, User? changeUser)
     {
         Id = id;
         CreationDate = creationDate;
         CreationUserId = creationUserId;
         ChangeDate = changeDate;
         ChangeUserId = changeUserId;
+        CreationUser = creationUser;
+        ChangeUser = changeUser;
 
         return (TEntity)this;
     }
 }
 
 public abstract class BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO> : BaseEntity<TEntity, TInputCreate, BaseInputUpdate_0, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
-    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseEntity<TEntity, TDTO>
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()

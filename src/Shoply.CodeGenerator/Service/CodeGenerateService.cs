@@ -34,6 +34,5 @@ public static class CodeGenerateService
         ServiceGenerator.Generate(inputGenerate);
         InfrastructureGenerator.Generate(inputGenerate);
         ContextGenerator.Generate(inputGenerate);
-        MapperGenerator.Generate(inputGenerate);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Enum.Module.Registration;
 using Shoply.Domain.DTO.Module.Registration;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Infrastructure.Entity.Base;
 
 namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 
-public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCustomer, OutputCustomer, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO>
+public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCustomer, OutputCustomer, CustomerDTO, InternalPropertiesCustomerDTO, ExternalPropertiesCustomerDTO, AuxiliaryPropertiesCustomerDTO>, IBaseEntity<Customer, CustomerDTO>
 {
     public string Code { get; private set; } = String.Empty;
     public string FirstName { get; private set; } = String.Empty;
@@ -27,5 +28,15 @@ public class Customer : BaseEntity<Customer, InputCreateCustomer, InputUpdateCus
         Document = document;
         PersonType = personType;
         ListCustomerAddress = listCustomerAddress;
+    }
+
+    public CustomerDTO GetDTO(Customer entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Customer GetEntity(CustomerDTO dto)
+    {
+        throw new NotImplementedException();
     }
 }

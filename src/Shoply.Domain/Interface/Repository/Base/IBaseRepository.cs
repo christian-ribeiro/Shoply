@@ -1,5 +1,6 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using Shoply.Domain.Interface.Mapper;
 
 namespace Shoply.Domain.Interface.Repository.Base;
 
@@ -8,7 +9,7 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -32,7 +33,7 @@ public interface IBaseRepository<TInputCreate, TInputIdentifier, TOutput, TDTO, 
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()

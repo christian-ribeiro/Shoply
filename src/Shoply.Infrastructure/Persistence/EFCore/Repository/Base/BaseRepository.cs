@@ -2,6 +2,7 @@
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
+using Shoply.Domain.Interface.Mapper;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Infrastructure.Entity.Base;
 using System.Linq.Expressions;
@@ -10,12 +11,12 @@ namespace Shoply.Infrastructure.Persistence.EFCore.Repository.Base;
 
 public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TContext : DbContext
-    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, new()
+    where TEntity : BaseEntity<TEntity, TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseEntity<TEntity, TDTO>, new()
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputUpdate : BaseInputUpdate<TInputUpdate>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TInputUpdate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()
@@ -204,22 +205,22 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
 
     internal static TEntity FromDTOToEntity(TDTO dto)
     {
-        return SessionData.Mapper!.MapperEntityDTO.Map<TDTO, TEntity>(dto);
+        return (TEntity)(dynamic)dto;
     }
 
-    internal static TDTO FromEntityToDTO(TEntity? entity)
+    internal static TDTO FromEntityToDTO(TEntity entity)
     {
-        return SessionData.Mapper!.MapperEntityDTO.Map<TEntity, TDTO>(entity!);
+        return (TDTO)(dynamic)entity;
     }
 
     internal static List<TEntity> FromDTOToEntity(List<TDTO> listDTO)
     {
-        return SessionData.Mapper!.MapperEntityDTO.Map<List<TDTO>, List<TEntity>>(listDTO);
+        return [.. (from i in listDTO select (TEntity)(dynamic)i)];
     }
 
     internal static List<TDTO> FromEntityToDTO(List<TEntity> listEntity)
     {
-        return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
+        return [.. (from i in listEntity select (TDTO)(dynamic)i)];
     }
 
     protected async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string? callAlias, bool useCustomReturnProperty)
@@ -238,11 +239,11 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
 
 public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TContext context) : BaseRepository<TContext, TEntity, TInputCreate, BaseInputUpdate_0, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(context), IBaseRepository<TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
     where TContext : DbContext
-    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, new()
+    where TEntity : BaseEntity<TEntity, TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseEntity<TEntity, TDTO>, new()
     where TInputCreate : BaseInputCreate<TInputCreate>
     where TInputIdentifier : BaseInputIdentifier<TInputIdentifier>
     where TOutput : BaseOutput<TOutput>
-    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
+    where TDTO : BaseDTO<TInputCreate, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>, IBaseDTO<TDTO, TOutput>
     where TInternalPropertiesDTO : BaseInternalPropertiesDTO<TInternalPropertiesDTO>, new()
     where TExternalPropertiesDTO : BaseExternalPropertiesDTO<TExternalPropertiesDTO>, new()
     where TAuxiliaryPropertiesDTO : BaseAuxiliaryPropertiesDTO<TAuxiliaryPropertiesDTO>, new()

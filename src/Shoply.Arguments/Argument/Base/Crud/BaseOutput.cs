@@ -11,4 +11,17 @@ public class BaseOutput<TOutput> where TOutput : BaseOutput<TOutput>
     public virtual long? ChangeUserId { get; set; }
     public virtual OutputUser? CreationUser { get; set; }
     public virtual OutputUser? ChangeUser { get; set; }
+
+    public TOutput SetInternalData(long id, DateTime? creationDate, DateTime? changeDate, long? creationUserId, long? changeUserId, OutputUser? creationUser, OutputUser? changeUser)
+    {
+        Id = id;
+        CreationDate = creationDate;
+        CreationUserId = creationUserId;
+        ChangeDate = changeDate;
+        ChangeUserId = changeUserId;
+        CreationUser = creationUser;
+        ChangeUser = changeUser;
+
+        return (TOutput)this;
+    }
 }
