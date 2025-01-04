@@ -5,6 +5,7 @@ using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.General.Authenticate;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Arguments.Argument.Module.Registration;
+using Shoply.Arguments.Extensions;
 using Shoply.Domain.DTO.Module.Registration;
 using Shoply.Domain.Interface.Repository.Module.Registration;
 using Shoply.Domain.Interface.Service.Module.Registration;
@@ -22,24 +23,24 @@ public class UserService(IUserRepository repository, ITranslationService transla
     #region Create
     public override async Task<BaseResult<List<OutputUser?>>> Create(List<InputCreateUser> listInputCreateUser)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier((from i in listInputCreateUser select new InputIdentifierUser(i.Email)).ToList());
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListIdentifier([.. (from i in listInputCreateUser select new InputIdentifierUser(i.Email))]);
 
         var listCreate = (from i in listInputCreateUser
                           select new
                           {
                               InputCreateUser = i,
-                              ListRepeatedInputCreateUser = (from j in listInputCreateUser where listInputCreateUser.Count(x => x.Email == i.Email) > 1 select j).ToList(),
+                              ListRepeatedInputCreateUser = listInputCreateUser.GetDuplicateItem(i, x => new { x.Email }).ToList(),
                               OriginalUserDTO = (from j in listOriginalUserDTO where j.ExternalPropertiesDTO.Email == i.Email select j).FirstOrDefault(),
                           }).ToList();
 
-        List<UserValidateDTO> listUserValidateDTO = (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO)).ToList();
+        List<UserValidateDTO> listUserValidateDTO = [.. (from i in listCreate select new UserValidateDTO().ValidateCreate(i.InputCreateUser, i.ListRepeatedInputCreateUser, i.OriginalUserDTO))];
         _validate.Create(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputCreateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listCreateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreate!.SetProperty(x => x.Password, EncryptService.Encrypt(i.InputCreate.Password)))).ToList();
+        List<UserDTO> listCreateUserDTO = [.. (from i in RemoveInvalid(listUserValidateDTO) select new UserDTO().Create(i.InputCreate!.SetProperty(x => x.Password, EncryptService.Encrypt(i.InputCreate.Password))))];
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Create(listCreateUserDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -47,24 +48,24 @@ public class UserService(IUserRepository repository, ITranslationService transla
     #region Update
     public override async Task<BaseResult<List<OutputUser?>>> Update(List<InputIdentityUpdateUser> listInputIdentityUpdateUser)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityUpdateUser select i.Id).ToList());
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId([.. (from i in listInputIdentityUpdateUser select i.Id)]);
 
         var listUpdate = (from i in listInputIdentityUpdateUser
                           select new
                           {
                               InputIdentityUpdateUser = i,
-                              ListRepeatedInputIdentityUpdateUser = (from j in listInputIdentityUpdateUser where listInputIdentityUpdateUser.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              ListRepeatedInputIdentityUpdateUser = listInputIdentityUpdateUser.GetDuplicateItem(i, x => new { x.Id }).ToList(),
                               OriginalUserDTO = (from j in listOriginalUserDTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
                           }).ToList();
 
-        List<UserValidateDTO> listUserValidateDTO = (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO)).ToList();
+        List<UserValidateDTO> listUserValidateDTO = [.. (from i in listUpdate select new UserValidateDTO().ValidateUpdate(i.InputIdentityUpdateUser, i.ListRepeatedInputIdentityUpdateUser, i.OriginalUserDTO))];
         _validate.Update(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityUpdateUser.Count)
             return BaseResult<List<OutputUser?>>.Failure(errors);
 
-        List<UserDTO> listUpdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO!.Update(i.InputIdentityUpdate!.InputUpdate!)).ToList();
+        List<UserDTO> listUpdateUserDTO = [.. (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO!.Update(i.InputIdentityUpdate!.InputUpdate!))];
         return BaseResult<List<OutputUser?>>.Success(FromDTOToOutput(await _repository.Update(listUpdateUserDTO))!, [.. successes, .. errors]);
     }
     #endregion
@@ -72,24 +73,24 @@ public class UserService(IUserRepository repository, ITranslationService transla
     #region Delete
     public override async Task<BaseResult<bool>> Delete(List<InputIdentityDeleteUser> listInputIdentityDeleteUser)
     {
-        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId((from i in listInputIdentityDeleteUser select i.Id).ToList());
+        List<UserDTO> listOriginalUserDTO = await _repository.GetListByListId([.. (from i in listInputIdentityDeleteUser select i.Id)]);
 
         var listDelete = (from i in listInputIdentityDeleteUser
                           select new
                           {
                               InputIdentityDeleteUser = i,
-                              ListRepeatedInputIdentityDeleteUser = (from j in listInputIdentityDeleteUser where listInputIdentityDeleteUser.Count(x => x.Id == i.Id) > 1 select j).ToList(),
+                              ListRepeatedInputIdentityDeleteUser = listInputIdentityDeleteUser.GetDuplicateItem(i, x => new { x.Id }),
                               OriginalUserDTO = (from j in listOriginalUserDTO where j.InternalPropertiesDTO.Id == i.Id select j).FirstOrDefault(),
                           }).ToList();
 
-        List<UserValidateDTO> listUserValidateDTO = (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO)).ToList();
+        List<UserValidateDTO> listUserValidateDTO = [.. (from i in listDelete select new UserValidateDTO().ValidateDelete(i.InputIdentityDeleteUser, i.ListRepeatedInputIdentityDeleteUser, i.OriginalUserDTO))];
         _validate.Delete(listUserValidateDTO);
 
         var (successes, errors) = GetValidationResults();
         if (errors.Count == listInputIdentityDeleteUser.Count)
             return BaseResult<bool>.Failure(errors);
 
-        List<UserDTO> listDeletepdateUserDTO = (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO).ToList();
+        List<UserDTO> listDeletepdateUserDTO = [.. (from i in RemoveInvalid(listUserValidateDTO) select i.OriginalUserDTO)];
         return BaseResult<bool>.Success(await _repository.Delete(listDeletepdateUserDTO), [.. successes, .. errors]);
     }
     #endregion

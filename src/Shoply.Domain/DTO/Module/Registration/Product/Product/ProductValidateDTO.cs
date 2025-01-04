@@ -8,17 +8,17 @@ public class ProductValidateDTO : ProductPropertyValidateDTO
     public InputIdentityUpdateProduct? InputIdentityUpdate { get; private set; }
     public InputIdentityDeleteProduct? InputIdentityDelete { get; private set; }
 
-    public ProductValidateDTO ValidateCreate(InputCreateProduct? inputCreate, List<InputCreateProduct>? listRepeatedInputCreate, ProductDTO originalProductDTO)
+    public ProductValidateDTO ValidateCreate(InputCreateProduct? inputCreate, List<InputCreateProduct>? listRepeatedInputCreate, ProductDTO originalProductDTO, ProductCategoryDTO relatedProductCategoryDTO, MeasureUnitDTO relatedMeasureUnitDTO, BrandDTO relatedBrandDTO)
     {
         InputCreate = inputCreate;
-        ValidateCreate(listRepeatedInputCreate, originalProductDTO);
+        ValidateCreate(listRepeatedInputCreate, originalProductDTO, relatedProductCategoryDTO, relatedMeasureUnitDTO, relatedBrandDTO);
         return this;
     }
 
-    public ProductValidateDTO ValidateUpdate(InputIdentityUpdateProduct? inputIdentityUpdate, List<InputIdentityUpdateProduct>? listRepeatedInputIdentityUpdate, ProductDTO originalProductDTO)
+    public ProductValidateDTO ValidateUpdate(InputIdentityUpdateProduct? inputIdentityUpdate, List<InputIdentityUpdateProduct>? listRepeatedInputIdentityUpdate, ProductDTO originalProductDTO, ProductCategoryDTO relatedProductCategoryDTO, MeasureUnitDTO relatedMeasureUnitDTO, BrandDTO relatedBrandDTO)
     {
         InputIdentityUpdate = inputIdentityUpdate;
-        ValidateUpdate(listRepeatedInputIdentityUpdate, originalProductDTO);
+        ValidateUpdate(listRepeatedInputIdentityUpdate, originalProductDTO, relatedProductCategoryDTO, relatedMeasureUnitDTO, relatedBrandDTO);
         return this;
     }
 
