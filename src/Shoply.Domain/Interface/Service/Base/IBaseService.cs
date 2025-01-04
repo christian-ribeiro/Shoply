@@ -1,4 +1,5 @@
 ﻿using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Argument.General.Filter;
 
 namespace Shoply.Domain.Interface.Service.Base;
 
@@ -14,6 +15,8 @@ public interface IBaseService<TInputCreate, TInputUpdate, TInputIdentityUpdate, 
     Task<TOutput?> Get(long id);
     Task<List<TOutput>> GetListByListId(List<long> listId);
     Task<List<TOutput>> GetAll();
+    Task<TOutput> GetByFilter(List<FilterCriteria> filter);
+    Task<List<TOutput>> GetListByFilter(List<FilterCriteria> filter);
     Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier);
     Task<List<TOutput>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier);
     Task<BaseResult<TOutput?>> Create(TInputCreate inputCreate);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Shoply.Application.Extensions;
 using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Argument.General.Filter;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.DataAnnotation;
@@ -101,6 +102,36 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
         try
         {
             return await ResponseAsync(PrepareReturn(await _service!.GetListByListIdentifier(listInputIdentifier)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [HttpPost("GetByFilter")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public virtual async Task<ActionResult<TOutput>> GetByFilter([FromBody] List<FilterCriteria> filter)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service!.GetByFilter(filter)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [HttpPost("GetListByFilter")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
+    public virtual async Task<ActionResult<TOutput>> GetListByFilter([FromBody] List<FilterCriteria> filter)
+    {
+        try
+        {
+            return await ResponseAsync(PrepareReturn(await _service!.GetListByFilter(filter)));
         }
         catch (Exception ex)
         {

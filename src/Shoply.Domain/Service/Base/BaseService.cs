@@ -1,8 +1,10 @@
 ﻿using Shoply.Arguments.Argument.Base;
+using Shoply.Arguments.Argument.General.Filter;
 using Shoply.Arguments.Argument.General.Session;
 using Shoply.Domain.DTO.Base;
 using Shoply.Domain.Interface.Repository.Base;
 using Shoply.Domain.Interface.Service.Base;
+using Shoply.Domain.Utils;
 using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Base;
@@ -45,6 +47,18 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
     public async Task<TOutput?> GetByIdentifier(TInputIdentifier inputIdentifier)
     {
         return FromDTOToOutput(await _repository.GetByIdentifier(inputIdentifier, true));
+    }
+
+    public async Task<TOutput> GetByFilter(List<FilterCriteria> filter)
+    {
+        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(filter);
+        return FromDTOToOutput(await _repository.GetByFilter(predicate));
+    }
+
+    public async Task<List<TOutput>> GetListByFilter(List<FilterCriteria> filter)
+    {
+        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(filter);
+        return FromDTOToOutput(await _repository.GetListByFilter(predicate));
     }
 
     public async Task<List<TOutput>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier)
@@ -113,7 +127,7 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
     #endregion
 }
 
-public abstract class BaseService<TRepository, TValidateService, TInputCreate, TInputIdentifier, TOutput, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TRepository repository, TValidateService validate, ITranslationService translationService) : BaseService<TRepository, TValidateService, TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(repository, validate, translationService), IBaseService<TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput>
+public abstract class BaseService<TRepository, TValidateService, TInputCreate, TInputIdentifier, TOutput, TInputIdentityDelete, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(TRepository repository, TValidateService validate, ITranslationService translationService) : BaseService<TRepository, TValidateService, TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput, TValidateDTO, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>(repository, validate, translationService)
         where TRepository : IBaseRepository<TInputCreate, TInputIdentifier, TOutput, TDTO, TInternalPropertiesDTO, TExternalPropertiesDTO, TAuxiliaryPropertiesDTO>
         where TValidateService : IBaseValidateService
         where TInputCreate : BaseInputCreate<TInputCreate>
