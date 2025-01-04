@@ -9,7 +9,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductService(IProductRepository repository, ITranslationService translationService, IProductValidateService productValidateService, IProductCategoryRepository productCategoryRepository, IMeasureUnitRepository measureUnitRepository, IBrandRepository brandRepository) : BaseService<IProductRepository, IProductValidateService, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, productValidateService, translationService), IProductService
+public class ProductService(IProductRepository repository, ITranslationService translationService, IProductValidateService productValidateService, IProductCategoryRepository productCategoryRepository, IMeasureUnitRepository measureUnitRepository, IBrandRepository brandRepository, IProductImageRepository productImageRepository) : BaseService<IProductRepository, IProductValidateService, InputCreateProduct, InputUpdateProduct, InputIdentityUpdateProduct, InputIdentityDeleteProduct, InputIdentifierProduct, OutputProduct, ProductValidateDTO, ProductDTO, InternalPropertiesProductDTO, ExternalPropertiesProductDTO, AuxiliaryPropertiesProductDTO>(repository, productValidateService, translationService), IProductService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProduct?>>> Create(List<InputCreateProduct> listInputCreateProduct)
@@ -77,7 +77,7 @@ public class ProductService(IProductRepository repository, ITranslationService t
     public override async Task<BaseResult<bool>> Delete(List<InputIdentityDeleteProduct> listInputIdentityDeleteProduct)
     {
         List<ProductDTO> listOriginalProductDTO = await _repository.GetListByListId(listInputIdentityDeleteProduct.Select(x => x.Id).ToList());
-
+        List<ProductImageDTO> listRelatedProductImageDTO = await productImageRepository.GetListByFilter(x => listInputIdentityDeleteProduct.Select(x => x.Id).Contains(x.ProductId));
         var listDelete = (from i in listInputIdentityDeleteProduct
                           select new
                           {

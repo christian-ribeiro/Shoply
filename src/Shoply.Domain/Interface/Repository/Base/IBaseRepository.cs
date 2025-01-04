@@ -1,5 +1,6 @@
 ﻿using Shoply.Arguments.Argument.Base;
 using Shoply.Domain.DTO.Base;
+using System.Linq.Expressions;
 
 namespace Shoply.Domain.Interface.Repository.Base;
 
@@ -17,6 +18,8 @@ public interface IBaseRepository<TInputCreate, TInputUpdate, TInputIdentifier, T
     Task<TDTO> Get(long id, bool useCustomReturnProperty = false);
     Task<List<TDTO>> GetListByListId(List<long> listId, bool useCustomReturnProperty = false);
     Task<List<TDTO>> GetAll(bool useCustomReturnProperty = false);
+    Task<TDTO> GetByFilter(Expression<Func<TOutput, bool>> filter, bool useCustomReturnProperty = false);
+    Task<List<TDTO>> GetListByFilter(Expression<Func<TOutput, bool>> filter, bool useCustomReturnProperty = false);
     Task<TDTO?> GetByIdentifier(TInputIdentifier inputIdentifier, bool useCustomReturnProperty = false);
     Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier, bool useCustomReturnProperty = false);
     Task<List<TDTO>> GetDynamic(string[] fields, bool useCustomReturnProperty = false);

@@ -109,8 +109,9 @@ public class UserService(IUserRepository repository, ITranslationService transla
 
         string refreshToken = await jwtService.GenerateRefreshToken();
 
-        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.RefreshToken, refreshToken);
-        originalUserDTO!.InternalPropertiesDTO.SetProperty(x => x.LoginKey, Guid.NewGuid());
+        originalUserDTO!.InternalPropertiesDTO
+            .SetProperty(x => x.RefreshToken, refreshToken)
+            .SetProperty(x => x.LoginKey, Guid.NewGuid());
 
         await _repository.Update(originalUserDTO);
 
@@ -136,8 +137,9 @@ public class UserService(IUserRepository repository, ITranslationService transla
         string token = await jwtService.GenerateJwtToken(principal!.Value!.Claims.ToList());
         string refreshToken = await jwtService.GenerateRefreshToken();
 
-        originalUserDTO.InternalPropertiesDTO.SetProperty(x => x.RefreshToken, refreshToken);
-        originalUserDTO.InternalPropertiesDTO.SetProperty(x => x.LoginKey, Guid.NewGuid());
+        originalUserDTO.InternalPropertiesDTO
+            .SetProperty(x => x.RefreshToken, refreshToken)
+            .SetProperty(x => x.LoginKey, Guid.NewGuid());
 
         await _repository.Update(originalUserDTO);
 
@@ -177,8 +179,7 @@ public class UserService(IUserRepository repository, ITranslationService transla
 
     public async Task<BaseResult<bool>> RedefinePasswordForgotPassword(InputRedefinePasswordForgotPasswordUser inputRedefinePasswordForgotPasswordUser)
     {
-        UserDTO? originalUserDTO = await _repository.GetByPasswordRecoveryCode(inputRedefinePasswordForgotPasswordUser.PasswordRecoveryCode);
-
+        UserDTO? originalUserDTO = await _repository.GetByFilter(x => x.PasswordRecoveryCode == inputRedefinePasswordForgotPasswordUser.PasswordRecoveryCode);
         UserValidateDTO userValidateDTO = new UserValidateDTO().ValidateRedefinePasswordForgotPassword(inputRedefinePasswordForgotPasswordUser, originalUserDTO);
         _validate.RedefinePasswordForgotPassword(userValidateDTO);
 

@@ -27,19 +27,31 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #region Read
     public async Task<TDTO> Get(long id, bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.Where(x => x.Id == id), nameof(Get), "", useCustomReturnProperty);
+        var query = GetDynamicQuery(_dbSet.Where(x => x.Id == id), nameof(Get), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.FirstOrDefaultAsync());
     }
 
     public async Task<List<TDTO>> GetListByListId(List<long> listId, bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.Where(x => listId.Contains(x.Id)), nameof(GetListByListId), "", useCustomReturnProperty);
+        var query = GetDynamicQuery(_dbSet.Where(x => listId.Contains(x.Id)), nameof(GetListByListId), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
     public async Task<List<TDTO>> GetAll(bool useCustomReturnProperty = false)
     {
-        var query = await GetDynamicQuery(_dbSet.AsQueryable(), nameof(GetAll), "", useCustomReturnProperty);
+        var query = GetDynamicQuery(_dbSet.AsQueryable(), nameof(GetAll), "", useCustomReturnProperty);
+        return FromEntityToDTO(await query.ToListAsync());
+    }
+
+    public async Task<TDTO> GetByFilter(Expression<Func<TOutput, bool>> filter, bool useCustomReturnProperty = false)
+    {
+        var query = GetDynamicQuery(_dbSet.AsQueryable().Where(ConvertExpression(filter)), nameof(GetAll), "", useCustomReturnProperty);
+        return FromEntityToDTO(await query.FirstOrDefaultAsync());
+    }
+
+    public async Task<List<TDTO>> GetListByFilter(Expression<Func<TOutput, bool>> filter, bool useCustomReturnProperty = false)
+    {
+        var query = GetDynamicQuery(_dbSet.AsQueryable().Where(ConvertExpression(filter)), nameof(GetAll), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
@@ -52,7 +64,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     public async Task<List<TDTO>> GetListByListIdentifier(List<TInputIdentifier> listInputIdentifier, bool useCustomReturnProperty = false)
     {
         if (listInputIdentifier == null || listInputIdentifier.Count == 0)
-            return new List<TDTO>();
+            return [];
 
         Expression<Func<TEntity, bool>>? combinedExpression = null;
 
@@ -83,7 +95,7 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
                 : CombineExpressions(combinedExpression, individualExpression!, Expression.OrElse)!;
         }
 
-        var query = await GetDynamicQuery(_dbSet.Where(combinedExpression!), nameof(GetListByListIdentifier), "", useCustomReturnProperty);
+        var query = GetDynamicQuery(_dbSet.Where(combinedExpression!), nameof(GetListByListIdentifier), "", useCustomReturnProperty);
         return FromEntityToDTO(await query.ToListAsync());
     }
 
@@ -113,13 +125,9 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         DateTime creationDate = DateTime.UtcNow;
         long? creationUserId = SessionData.GetLoggedUser(_guidSessionDataRequest)?.Id;
 
-        _ = (from i in listDTO
-             select i.InternalPropertiesDTO
-             .SetProperty(x => x.CreationDate, creationDate)
-             .SetProperty(x => x.CreationUserId, creationUserId)
-             ).ToList();
-
-        return listDTO;
+        return (from i in listDTO
+                let setInternalData = i.InternalPropertiesDTO.SetProperty(x => x.CreationDate, creationDate).SetProperty(x => x.CreationUserId, creationUserId)
+                select i).ToList();
     }
     #endregion
 
@@ -142,13 +150,9 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         DateTime changeDate = DateTime.UtcNow;
         long? changeUserId = SessionData.GetLoggedUser(_guidSessionDataRequest)?.Id;
 
-        _ = (from i in listDTO
-             select i.InternalPropertiesDTO
-             .SetProperty(x => x.ChangeDate, changeDate)
-             .SetProperty(x => x.ChangeUserId, changeUserId)
-             ).ToList();
-
-        return listDTO;
+        return (from i in listDTO
+                let setInternalData = i.InternalPropertiesDTO.SetProperty(x => x.ChangeDate, changeDate).SetProperty(x => x.ChangeUserId, changeUserId)
+                select i).ToList();
     }
     #endregion
 
@@ -167,10 +171,19 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
     #endregion
 
     #region Internal
-    private static Expression<Func<T, bool>> CombineExpressions<T>(
-    Expression<Func<T, bool>> expr1,
-    Expression<Func<T, bool>> expr2,
-    Func<Expression, Expression, BinaryExpression>? combiner = null)
+    protected IQueryable<TEntity> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string? callAlias, bool useCustomReturnProperty)
+    {
+        List<string> properties;
+        var returnProperty = useCustomReturnProperty ? SessionData.GetReturnProperty(_guidSessionDataRequest) : [];
+        if (returnProperty == null || returnProperty.Count == 0)
+            properties = new TEntity().GetProperties(methodName, callAlias);
+        else
+            properties = returnProperty;
+
+        return query.GetDynamic(properties);
+    }
+
+    private static Expression<Func<T, bool>> CombineExpressions<T>(Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2, Func<Expression, Expression, BinaryExpression>? combiner = null)
     {
         combiner = combiner ?? Expression.AndAlso;
 
@@ -222,16 +235,25 @@ public abstract class BaseRepository<TContext, TEntity, TInputCreate, TInputUpda
         return SessionData.Mapper!.MapperEntityDTO.Map<List<TEntity>, List<TDTO>>(listEntity);
     }
 
-    protected async Task<IQueryable<TEntity>> GetDynamicQuery(IQueryable<TEntity> query, string? methodName, string? callAlias, bool useCustomReturnProperty)
+    internal static Expression<Func<TEntity, bool>> ConvertExpression(Expression<Func<TOutput, bool>> dtoExpression)
     {
-        List<string> properties;
-        var returnProperty = useCustomReturnProperty ? SessionData.GetReturnProperty(_guidSessionDataRequest) : [];
-        if (returnProperty == null || returnProperty.Count == 0)
-            properties = new TEntity().GetProperties(methodName, callAlias);
-        else
-            properties = returnProperty;
+        var parameter = Expression.Parameter(typeof(TEntity), "entity");
+        var body = new ExpressionConverter(parameter).Visit(dtoExpression.Body);
+        return Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+    }
 
-        return await Task.FromResult(query.GetDynamic(properties));
+    internal class ExpressionConverter(ParameterExpression parameter) : ExpressionVisitor
+    {
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return parameter;
+        }
+
+        protected override Expression VisitMember(MemberExpression node)
+        {
+            var member = typeof(TEntity).GetMember(node.Member.Name).FirstOrDefault();
+            return Expression.MakeMemberAccess(Visit(node.Expression), member!);
+        }
     }
     #endregion
 }
