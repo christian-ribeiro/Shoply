@@ -23,85 +23,72 @@ public static class FilterBuilderHelper
         return Expression.Lambda<Func<TOutput, bool>>(body ?? Expression.Constant(true), parameter);
     }
 
-    public static Expression<Func<TOutput, bool>> BuildPredicate<TOutput>(InputFilter inputFilter, EnumFilterCondition filterCondition)
-    {
-        var parameter = Expression.Parameter(typeof(TOutput), "x");
-        Expression? body = null;
-
-        foreach (var filter in inputFilter.ListFilterItem)
-        {
-            var filterExpression = BuildFilterExpression<TOutput>(parameter, filter, filterCondition);
-
-            if (filterExpression != null)
-                body = body = body == null ? filterExpression : ApplyFilterCondition(body, filterExpression, filterCondition);
-        }
-
-        return Expression.Lambda<Func<TOutput, bool>>(body ?? Expression.Constant(true), parameter);
-    }
-
-    private static Expression? BuildFilterExpression<TOutput>(ParameterExpression parameter, FilterItem filter, EnumFilterCondition filterCondition)
+    private static Expression? BuildFilterExpression<TOutput>(ParameterExpression parameter, FilterItem filter, EnumFilterCondition parentFilterCondition)
     {
         var property = Expression.Property(parameter, filter.PropertyName);
-        var propertyType = property.Type;
+        var comparison = CreateComparison(property, filter);
 
-        if (!IsValidForFilterType(propertyType, filter))
+        if (!IsValidForFilterType(property.Type, filter))
             return null;
-
-        Expression? comparison = null;
-
-        if (propertyType.IsEnum)
-        {
-            var convertedProperty = Expression.Convert(property, typeof(int));
-            propertyType = typeof(int);
-
-            comparison = filter.SearchType switch
-            {
-                EnumFilterSearchType.Equals => Expression.Equal(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.NotEquals => Expression.NotEqual(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.GreaterThan => Expression.GreaterThan(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.LessThan => Expression.LessThan(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.LessThanOrEqual => Expression.LessThanOrEqual(convertedProperty, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.IsNull => Expression.Equal(convertedProperty, Expression.Constant(null)),
-                EnumFilterSearchType.IsNotNull => Expression.NotEqual(convertedProperty, Expression.Constant(null)),
-                EnumFilterSearchType.Between => HandleBetween(property, filter),
-                EnumFilterSearchType.ListContains => HandleListContains(property, filter),
-                EnumFilterSearchType.ListNotContains => HandleListNotContains(property, filter),
-                _ => null
-            };
-        }
-        else
-        {
-            comparison = filter.SearchType switch
-            {
-                EnumFilterSearchType.Equals => Expression.Equal(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.NotEquals => Expression.NotEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.GreaterThan => Expression.GreaterThan(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.LessThan => Expression.LessThan(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.LessThanOrEqual => Expression.LessThanOrEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
-                EnumFilterSearchType.Contains => Expression.Call(property, typeof(string).GetMethod("Contains", [typeof(string)])!, Expression.Constant(filter.Value)),
-                EnumFilterSearchType.StartsWith => Expression.Call(property, typeof(string).GetMethod("StartsWith", [typeof(string)])!, Expression.Constant(filter.Value)),
-                EnumFilterSearchType.EndsWith => Expression.Call(property, typeof(string).GetMethod("EndsWith", [typeof(string)])!, Expression.Constant(filter.Value)),
-                EnumFilterSearchType.IsNull => Expression.Equal(property, Expression.Constant(null)),
-                EnumFilterSearchType.IsNotNull => Expression.NotEqual(property, Expression.Constant(null)),
-                EnumFilterSearchType.Between => HandleBetween(property, filter),
-                EnumFilterSearchType.ListContains => HandleListContains(property, filter),
-                EnumFilterSearchType.ListNotContains => HandleListNotContains(property, filter),
-                _ => null
-            };
-        }
 
         if (filter.ListFilterItem?.Count > 0)
         {
-            var subFilterExpression = BuildPredicate<TOutput>(new InputFilter(filter.FilterCondition ?? EnumFilterCondition.And, filter.ListFilterItem), filter.FilterCondition ?? EnumFilterCondition.And);
-            comparison = ApplyFilterCondition(comparison, subFilterExpression.Body, filterCondition);
+            var subFilterExpression = BuildSubFilterExpression<TOutput>(parameter, filter.ListFilterItem, filter.FilterCondition ?? EnumFilterCondition.And);
+            comparison = ApplyFilterCondition(comparison, subFilterExpression, parentFilterCondition);
         }
 
         return comparison;
     }
 
-    private static Expression ApplyFilterCondition(Expression? currentComparison, Expression subFilterExpression, EnumFilterCondition? filterCondition)
+    private static Expression? CreateComparison(Expression property, FilterItem filter)
+    {
+        var propertyType = property.Type;
+
+        if (propertyType.IsEnum)
+        {
+            property = Expression.Convert(property, typeof(int));
+            propertyType = typeof(int);
+        }
+
+        return filter.SearchType switch
+        {
+            EnumFilterSearchType.Equals => Expression.Equal(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.NotEquals => Expression.NotEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.GreaterThan => Expression.GreaterThan(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.LessThan => Expression.LessThan(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.LessThanOrEqual => Expression.LessThanOrEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.Contains => Expression.Call(property, typeof(string).GetMethod("Contains", [typeof(string)])!, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.StartsWith => Expression.Call(property, typeof(string).GetMethod("StartsWith", [typeof(string)])!, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.EndsWith => Expression.Call(property, typeof(string).GetMethod("EndsWith", [typeof(string)])!, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
+            EnumFilterSearchType.IsNull => Expression.Equal(property, Expression.Constant(null)),
+            EnumFilterSearchType.IsNotNull => Expression.NotEqual(property, Expression.Constant(null)),
+            EnumFilterSearchType.Between => HandleBetween(property, filter),
+            EnumFilterSearchType.ListContains => HandleListContains(property, filter),
+            EnumFilterSearchType.ListNotContains => HandleListNotContains(property, filter),
+            _ => null
+        };
+    }
+
+    private static Expression BuildSubFilterExpression<TOutput>(ParameterExpression parameter, List<FilterItem> subFilters, EnumFilterCondition filterCondition)
+    {
+        Expression? subFilterExpression = null;
+
+        foreach (var subFilter in subFilters)
+        {
+            var subFilterItemExpression = BuildFilterExpression<TOutput>(parameter, subFilter, filterCondition);
+            if (subFilterItemExpression != null)
+            {
+                subFilterExpression = subFilterExpression == null
+                    ? subFilterItemExpression
+                    : ApplyFilterCondition(subFilterExpression, subFilterItemExpression, filterCondition);
+            }
+        }
+
+        return subFilterExpression ?? Expression.Constant(true);
+    }
+
+    private static Expression ApplyFilterCondition(Expression? currentComparison, Expression subFilterExpression, EnumFilterCondition filterCondition)
     {
         if (currentComparison == null)
             return subFilterExpression;
@@ -114,55 +101,41 @@ public static class FilterBuilderHelper
         };
     }
 
-    private static bool IsCompatibleType(Type propertyType, object value)
+    private static bool IsCompatibleType(Type propertyType, string value)
     {
         if (value == null)
             return !propertyType.IsValueType || Nullable.GetUnderlyingType(propertyType) != null;
 
-        if (propertyType.IsEnum)
-            return true;
-
         if (Nullable.GetUnderlyingType(propertyType) != null)
             propertyType = Nullable.GetUnderlyingType(propertyType)!;
 
-        return true; // propertyType.IsAssignableFrom(value.GetType());
+        var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyType);
+        if (typeConverter != null && typeConverter.CanConvertFrom(value.GetType()))
+            return typeConverter.IsValid(value);
+
+        if (propertyType == typeof(int) && int.TryParse(value, out _)) return true;
+        if (propertyType == typeof(float) && float.TryParse(value, out _)) return true;
+        if (propertyType == typeof(double) && double.TryParse(value, out _)) return true;
+        if (propertyType == typeof(bool) && bool.TryParse(value, out _)) return true;
+        if (propertyType == typeof(DateTime) && DateTime.TryParse(value, out _)) return true;
+        if (propertyType == typeof(Guid) && Guid.TryParse(value, out _)) return true;
+
+        return false;
     }
 
     private static object? ConvertValue(Type propertyType, string value)
     {
         if (value == null) return null;
-
-        if (propertyType.IsEnum)
-        {
-            if (int.TryParse(value, out int result))
-                return result;
-            else
-                return 0;
-        }
-
         return Convert.ChangeType(value, Nullable.GetUnderlyingType(propertyType) ?? propertyType);
     }
 
-    private static BinaryExpression? HandleBetween(MemberExpression property, FilterItem filter)
+    private static BinaryExpression? HandleBetween(Expression property, FilterItem filter)
     {
         if (!IsCompatibleType(property.Type, filter.MinValue!) || !IsCompatibleType(property.Type, filter.MaxValue!))
             return null;
 
         var minValue = ConvertValue(property.Type, filter.MinValue!);
         var maxValue = ConvertValue(property.Type, filter.MaxValue!);
-
-        if (property.Type.IsEnum)
-        {
-            var convertedProperty = Expression.Convert(property, typeof(int));
-
-            minValue = Convert.ToInt32(minValue);
-            maxValue = Convert.ToInt32(maxValue);
-
-            return Expression.AndAlso(
-                Expression.GreaterThanOrEqual(convertedProperty, Expression.Constant(minValue, typeof(int))),
-                Expression.LessThanOrEqual(convertedProperty, Expression.Constant(maxValue, typeof(int)))
-            );
-        }
 
         return Expression.AndAlso(
             Expression.GreaterThanOrEqual(property, Expression.Constant(minValue, property.Type)),
@@ -172,26 +145,25 @@ public static class FilterBuilderHelper
 
     private static MethodCallExpression HandleListContains(Expression property, FilterItem filter)
     {
-        var convertedProperty = property.Type.IsEnum
-            ? Expression.Convert(property, typeof(int))
-            : property;
-
-        var genericListType = typeof(List<>).MakeGenericType(convertedProperty.Type);
+        var genericListType = typeof(List<>).MakeGenericType(property.Type);
         var typedList = (IList)Activator.CreateInstance(genericListType)!;
 
         foreach (var item in filter.ListValue!)
         {
-            object convertedItem = ConvertValue(property.Type, item)!;
-            typedList.Add(convertedItem);
+            if (IsCompatibleType(property.Type, item))
+            {
+                object convertedItem = ConvertValue(property.Type, item)!;
+                typedList.Add(convertedItem);
+            }
         }
 
         var list = Expression.Constant(typedList);
 
         var containsMethod = typeof(Enumerable).GetMethods()
             .First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
-            .MakeGenericMethod(convertedProperty.Type);
+            .MakeGenericMethod(property.Type);
 
-        return Expression.Call(containsMethod, list, convertedProperty);
+        return Expression.Call(containsMethod, list, property);
     }
 
     private static UnaryExpression HandleListNotContains(Expression property, FilterItem filter)
@@ -201,6 +173,9 @@ public static class FilterBuilderHelper
 
     private static bool IsValidForFilterType(Type propertyType, FilterItem filter)
     {
+        if (propertyType.IsEnum)
+            propertyType = typeof(int);
+
         var listFilterIgnoreType = new HashSet<EnumFilterSearchType>
         {
             EnumFilterSearchType.Between,
