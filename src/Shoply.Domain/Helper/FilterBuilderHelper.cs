@@ -189,7 +189,6 @@ public static class FilterBuilderHelper
         return true;
     }
 
-
     private static bool IsValidSearchTypeForType(Type propertyType, EnumFilterSearchType searchType)
     {
         var listNumberAndDateSearchType = new HashSet<EnumFilterSearchType>
