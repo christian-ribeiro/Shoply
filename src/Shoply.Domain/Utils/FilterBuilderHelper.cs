@@ -1,5 +1,6 @@
 ﻿using Shoply.Arguments.Argument.General.Filter;
 using Shoply.Arguments.Enum.General.Filter;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Shoply.Domain.Utils;
@@ -16,10 +17,10 @@ public static class FilterBuilderHelper
             var property = Expression.Property(parameter, filter.PropertyName);
             var propertyType = property.Type;
 
-            if (!IsValidOperatorForType(propertyType, filter.Operator) || (filter.Operator != EnumFilterOperator.Between && filter.Operator != EnumFilterOperator.ListContains && filter.Operator != EnumFilterOperator.ListNotContains && !IsCompatibleType(propertyType, filter.Value!)))
+            if (!IsValidForFilterType(propertyType, filter))
                 continue;
 
-            Expression comparison = filter.Operator switch
+            Expression? comparison = filter.Operator switch
             {
                 EnumFilterOperator.Equals => Expression.Equal(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
                 EnumFilterOperator.NotEquals => Expression.NotEqual(property, Expression.Constant(ConvertValue(propertyType, filter.Value!), propertyType)),
@@ -32,13 +33,14 @@ public static class FilterBuilderHelper
                 EnumFilterOperator.EndsWith => Expression.Call(property, typeof(string).GetMethod("EndsWith", [typeof(string)])!, Expression.Constant(filter.Value)),
                 EnumFilterOperator.IsNull => Expression.Equal(property, Expression.Constant(null)),
                 EnumFilterOperator.IsNotNull => Expression.NotEqual(property, Expression.Constant(null)),
-                EnumFilterOperator.Between => HandleBetweenOperator(property, propertyType, filter),
-                EnumFilterOperator.ListContains => HandleListContainsOperator(property, propertyType, filter),
-                EnumFilterOperator.ListNotContains => HandleListNotContainsOperator(property, propertyType, filter),
-                _ => throw new InvalidOperationException($"Operator {filter.Operator} not supported")
+                EnumFilterOperator.Between => HandleBetweenOperator(property, filter),
+                EnumFilterOperator.ListContains => HandleListContainsOperator(property, filter),
+                EnumFilterOperator.ListNotContains => HandleListNotContainsOperator(property, filter),
+                _ => null
             };
 
-            body = body == null ? comparison : Expression.AndAlso(body, comparison);
+            if (comparison != null)
+                body = body == null ? comparison : Expression.AndAlso(body, comparison);
         }
 
         return Expression.Lambda<Func<TOutput, bool>>(body!, parameter);
@@ -46,76 +48,102 @@ public static class FilterBuilderHelper
 
     private static bool IsCompatibleType(Type propertyType, object value)
     {
-        if (value == null) return !propertyType.IsValueType || Nullable.GetUnderlyingType(propertyType) != null;
-
-        var valueType = value.GetType();
+        if (value == null)
+            return !propertyType.IsValueType || Nullable.GetUnderlyingType(propertyType) != null;
 
         if (propertyType.IsEnum)
-        {
-            if (valueType == typeof(int))
-            {
-                return Enum.IsDefined(propertyType, value);
-            }
-
-            try
-            {
-                var enumValue = Convert.ToInt32(value);
-                Enum.ToObject(propertyType, enumValue);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            return true;
 
         if (Nullable.GetUnderlyingType(propertyType) != null)
             propertyType = Nullable.GetUnderlyingType(propertyType)!;
 
-        return propertyType.IsAssignableFrom(valueType);
+        return propertyType.IsAssignableFrom(value.GetType());
     }
 
-    private static object? ConvertValue(Type propertyType, object value)
+    private static object? ConvertValue(Type propertyType, string value)
     {
         if (value == null) return null;
+
         if (propertyType.IsEnum)
         {
-            var enumValue = Convert.ToInt32(value);
-            return Enum.ToObject(propertyType, enumValue);
+            if (int.TryParse(value, out int result))
+                return result;
+            else
+                return 0;
         }
+
         return Convert.ChangeType(value, Nullable.GetUnderlyingType(propertyType) ?? propertyType);
     }
 
-    private static BinaryExpression HandleBetweenOperator(MemberExpression property, Type propertyType, FilterCriteria filter)
+    private static BinaryExpression? HandleBetweenOperator(MemberExpression property, FilterCriteria filter)
     {
-        if (!IsCompatibleType(propertyType, filter.MinValue!) || !IsCompatibleType(propertyType, filter.MaxValue!))
-            throw new InvalidOperationException($"Values {filter.MinValue} and {filter.MaxValue} are not compatible with property {property.Member.Name} of type {propertyType.Name}");
+        if (!IsCompatibleType(property.Type, filter.MinValue!) || !IsCompatibleType(property.Type, filter.MaxValue!))
+            return null;
 
-        var minValue = ConvertValue(propertyType, filter.MinValue!);
-        var maxValue = ConvertValue(propertyType, filter.MaxValue!);
+        var minValue = ConvertValue(property.Type, filter.MinValue!);
+        var maxValue = ConvertValue(property.Type, filter.MaxValue!);
+
+        if (property.Type.IsEnum)
+        {
+            var convertedProperty = Expression.Convert(property, typeof(int));
+
+            minValue = Convert.ToInt32(minValue);
+            maxValue = Convert.ToInt32(maxValue);
+
+            return Expression.AndAlso(
+                Expression.GreaterThanOrEqual(convertedProperty, Expression.Constant(minValue, typeof(int))),
+                Expression.LessThanOrEqual(convertedProperty, Expression.Constant(maxValue, typeof(int)))
+            );
+        }
 
         return Expression.AndAlso(
-            Expression.GreaterThanOrEqual(property, Expression.Constant(minValue, propertyType)),
-            Expression.LessThanOrEqual(property, Expression.Constant(maxValue, propertyType))
+            Expression.GreaterThanOrEqual(property, Expression.Constant(minValue, property.Type)),
+            Expression.LessThanOrEqual(property, Expression.Constant(maxValue, property.Type))
         );
     }
 
-    private static MethodCallExpression HandleListContainsOperator(Expression property, Type propertyType, FilterCriteria filter)
+    private static MethodCallExpression HandleListContainsOperator(Expression property, FilterCriteria filter)
     {
-        var listType = typeof(List<>).MakeGenericType(propertyType);
-        var list = Expression.Constant(filter.ListValue);
-        var containsMethod = listType.GetMethod("Contains", [propertyType]);
-        return Expression.Call(list, containsMethod!, property);
+        var typedList = filter.ListValue!
+            .Select(value => property.Type.IsEnum
+                ? Convert.ToInt32(value)
+                : Convert.ChangeType(value, property.Type))
+            .Cast<int>()
+            .ToList();
+
+        var convertedProperty = property.Type.IsEnum
+            ? Expression.Convert(property, typeof(int))
+            : property;
+
+        var list = Expression.Constant(typedList);
+
+        var containsMethod = typeof(Enumerable).GetMethods()
+            .First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
+            .MakeGenericMethod(typeof(int));
+
+        return Expression.Call(containsMethod, list, convertedProperty);
     }
 
-    private static UnaryExpression HandleListNotContainsOperator(Expression property, Type propertyType, FilterCriteria filter)
+    private static UnaryExpression HandleListNotContainsOperator(Expression property, FilterCriteria filter)
     {
-        var listType = typeof(List<>).MakeGenericType(propertyType);
-        var list = Expression.Constant(filter.ListValue);
-        var containsMethod = listType.GetMethod("Contains", [propertyType]);
-        var containsExpression = Expression.Call(list, containsMethod!, property);
-        return Expression.Not(containsExpression);
+        return Expression.Not(HandleListContainsOperator(property, filter));
     }
+
+    private static bool IsValidForFilterType(Type propertyType, FilterCriteria filter)
+    {
+        var listFilterIgnoreType = new HashSet<EnumFilterOperator>
+        {
+            EnumFilterOperator.Between,
+            EnumFilterOperator.ListContains,
+            EnumFilterOperator.ListNotContains
+        };
+
+        if (!IsValidOperatorForType(propertyType, filter.Operator) || (!listFilterIgnoreType.Contains(filter.Operator) && !IsCompatibleType(propertyType, filter.Value!)))
+            return false;
+
+        return true;
+    }
+
 
     private static bool IsValidOperatorForType(Type propertyType, EnumFilterOperator operatorType)
     {
