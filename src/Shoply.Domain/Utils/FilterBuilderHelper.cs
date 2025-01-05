@@ -1,7 +1,8 @@
 ﻿using Shoply.Arguments.Argument.General.Filter;
 using Shoply.Arguments.Enum.General.Filter;
-using System.Linq;
+using System.Collections;
 using System.Linq.Expressions;
+
 
 namespace Shoply.Domain.Utils;
 
@@ -104,22 +105,24 @@ public static class FilterBuilderHelper
 
     private static MethodCallExpression HandleListContainsOperator(Expression property, FilterCriteria filter)
     {
-        var typedList = filter.ListValue!
-            .Select(value => property.Type.IsEnum
-                ? Convert.ToInt32(value)
-                : Convert.ChangeType(value, property.Type))
-            .Cast<int>()
-            .ToList();
-
         var convertedProperty = property.Type.IsEnum
             ? Expression.Convert(property, typeof(int))
             : property;
+
+        var genericListType = typeof(List<>).MakeGenericType(convertedProperty.Type);
+        var typedList = (IList)Activator.CreateInstance(genericListType)!;
+
+        foreach (var item in filter.ListValue!)
+        {
+            object convertedItem = ConvertValue(property.Type, item)!;
+            typedList.Add(convertedItem);
+        }
 
         var list = Expression.Constant(typedList);
 
         var containsMethod = typeof(Enumerable).GetMethods()
             .First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
-            .MakeGenericMethod(typeof(int));
+            .MakeGenericMethod(convertedProperty.Type);
 
         return Expression.Call(containsMethod, list, convertedProperty);
     }
