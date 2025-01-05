@@ -112,11 +112,11 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
     [HttpPost("GetByFilter")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
-    public virtual async Task<ActionResult<TOutput>> GetByFilter([FromBody] List<FilterCriteria> filter)
+    public virtual async Task<ActionResult<TOutput>> GetByFilter([FromBody] InputFilter inputFilter)
     {
         try
         {
-            return await ResponseAsync(PrepareReturn(await _service!.GetByFilter(filter)));
+            return await ResponseAsync(PrepareReturn(await _service!.GetByFilter(inputFilter)));
         }
         catch (Exception ex)
         {
@@ -127,11 +127,11 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
     [HttpPost("GetListByFilter")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<BaseResponseError>(StatusCodes.Status400BadRequest)]
-    public virtual async Task<ActionResult<TOutput>> GetListByFilter([FromBody] List<FilterCriteria> filter)
+    public virtual async Task<ActionResult<TOutput>> GetListByFilter([FromBody] InputFilter inputFilter)
     {
         try
         {
-            return await ResponseAsync(PrepareReturn(await _service!.GetListByFilter(filter)));
+            return await ResponseAsync(PrepareReturn(await _service!.GetListByFilter(inputFilter)));
         }
         catch (Exception ex)
         {

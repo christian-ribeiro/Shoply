@@ -49,15 +49,15 @@ public abstract class BaseService<TRepository, TValidateService, TInputCreate, T
         return FromDTOToOutput(await _repository.GetByIdentifier(inputIdentifier, true));
     }
 
-    public async Task<TOutput> GetByFilter(List<FilterCriteria> filter)
+    public async Task<TOutput> GetByFilter(InputFilter inputFilter)
     {
-        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(filter);
+        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(inputFilter);
         return FromDTOToOutput(await _repository.GetByFilter(predicate));
     }
 
-    public async Task<List<TOutput>> GetListByFilter(List<FilterCriteria> filter)
+    public async Task<List<TOutput>> GetListByFilter(InputFilter inputFilter)
     {
-        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(filter);
+        var predicate = FilterBuilderHelper.BuildPredicate<TOutput>(inputFilter);
         return FromDTOToOutput(await _repository.GetListByFilter(predicate));
     }
 

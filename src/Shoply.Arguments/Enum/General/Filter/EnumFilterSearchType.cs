@@ -1,6 +1,6 @@
 ﻿namespace Shoply.Arguments.Enum.General.Filter;
 
-public enum EnumFilterOperator
+public enum EnumFilterSearchType
 {
     Equals,
     NotEquals,
