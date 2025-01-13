@@ -1,7 +1,0 @@
-using Shoply.Arguments.Argument.Module.{{Module}};
-using Shoply.Domain.DTO.Module.{{Module}};
-using Shoply.Domain.Interface.Repository.Base;
-
-namespace Shoply.Domain.Interface.Repository.Module.{{Module}};
-
-public interface I{{EntityName}}Repository : IBaseRepository<InputCreate{{EntityName}}, InputUpdate{{EntityName}}, InputIdentifier{{EntityName}}, Output{{EntityName}}, {{EntityName}}DTO, InternalProperties{{EntityName}}DTO, ExternalProperties{{EntityName}}DTO, AuxiliaryProperties{{EntityName}}DTO> { }

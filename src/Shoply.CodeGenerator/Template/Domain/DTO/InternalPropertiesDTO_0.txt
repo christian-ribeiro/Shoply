@@ -1,5 +1,0 @@
-using Shoply.Domain.DTO.Base;
-
-namespace Shoply.Domain.DTO.Module.{{Module}};
-
-public class InternalProperties{{EntityName}}DTO : BaseInternalPropertiesDTO<InternalProperties{{EntityName}}DTO> { }

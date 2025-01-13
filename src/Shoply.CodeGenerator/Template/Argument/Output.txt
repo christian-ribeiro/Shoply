@@ -1,8 +1,0 @@
-using Shoply.Arguments.Argument.Base;
-
-namespace Shoply.Arguments.Argument.Module.{{Module}};
-
-public class Output{{EntityName}}({{Constructor}}) : BaseOutput<Output{{EntityName}}>
-{
-{{Properties}}
-}

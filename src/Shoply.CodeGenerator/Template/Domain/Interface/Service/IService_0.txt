@@ -1,6 +1,0 @@
-using Shoply.Arguments.Argument.Module.{{Module}};
-using Shoply.Domain.Interface.Service.Base;
-
-namespace Shoply.Domain.Interface.Service.Module.{{Module}};
-
-public interface I{{EntityName}}Service : IBaseService<InputCreate{{EntityName}}, InputUpdate{{EntityName}}, InputIdentifier{{EntityName}}, Output{{EntityName}}, InputIdentityUpdate{{EntityName}}, InputIdentityDelete{{EntityName}}> { }
