@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.411.6" />
+    <PackageReference Include="MimeMapping" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Shoply.Application\Shoply.Application.csproj" />
     <ProjectReference Include="..\Shoply.Arguments\Shoply.Arguments.csproj" />
     <ProjectReference Include="..\Shoply.Security\Shoply.Security.csproj" />

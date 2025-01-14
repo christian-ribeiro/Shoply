@@ -53,6 +53,12 @@ namespace Shoply.Api.Extensions
                     return [actionDescriptor!.ControllerName];
                 });
 
+                options.MapType<IFormFile>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
+                });
+
                 options.OperationFilter<HeaderParameterFilter>();
             });
 

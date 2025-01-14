@@ -1,3 +1,7 @@
+using Amazon;
+using Amazon.S3;
+using Amazon.S3.Model;
+using MimeMapping;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Extensions;
@@ -14,15 +18,15 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
     #region Create
     public override async Task<BaseResult<List<OutputProductImage?>>> Create(List<InputCreateProductImage> listInputCreateProductImage)
     {
-        List<ProductImageDTO> listOriginalProductImageDTO = await _repository.GetListByListIdentifier(listInputCreateProductImage.Select(x => new InputIdentifierProductImage(x.FileName)).ToList());
+        List<ProductImageDTO> listOriginalProductImageDTO = await _repository.GetListByListIdentifier(listInputCreateProductImage.Select(x => new InputIdentifierProductImage(x.File.FileName)).ToList());
         List<ProductDTO> listRelatedProductDTO = await productRepository.GetListByListId(listInputCreateProductImage.Select(x => x.ProductId).ToList());
 
         var listCreate = (from i in listInputCreateProductImage
                           select new
                           {
                               InputCreateProductImage = i,
-                              ListRepeatedInputCreateProductImage = listInputCreateProductImage.GetDuplicateItem(i, x => new { x.FileName }),
-                              OriginalProductImageDTO = listOriginalProductImageDTO.FirstOrDefault(x => x.ExternalPropertiesDTO.FileName == i.FileName),
+                              ListRepeatedInputCreateProductImage = listInputCreateProductImage.GetDuplicateItem(i, x => new { x.File.FileName }),
+                              OriginalProductImageDTO = listOriginalProductImageDTO.FirstOrDefault(x => x.ExternalPropertiesDTO.FileName == i.File.FileName),
                               RelatedProductDTO = listRelatedProductDTO.FirstOrDefault(x => x.InternalPropertiesDTO.Id == i.ProductId),
                           }).ToList();
 
@@ -33,8 +37,30 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
         if (errors.Count == listInputCreateProductImage.Count)
             return BaseResult<List<OutputProductImage?>>.Failure(errors);
 
-        List<ProductImageDTO> listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO) select new ProductImageDTO().Create(i.InputCreate!)).ToList();
-        return BaseResult<List<OutputProductImage?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductImageDTO))!, [.. successes, .. errors]);
+        var s3Client = new AmazonS3Client("", "", RegionEndpoint.USEast2);
+
+        var listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO)
+                                         let putRequest = new PutObjectRequest
+                                         {
+                                             BucketName = "development-shoply",
+                                             Key = i.InputCreate!.File.FileName,
+                                             InputStream = i.InputCreate.File.OpenReadStream(),
+                                             ContentType = i.InputCreate!.File.ContentType
+                                         }
+                                         select new
+                                         {
+                                             PutRequest = putRequest,
+                                             ProductImageDTO = new ProductImageDTO().Create(new ExternalPropertiesProductImageDTO(i.InputCreate!.File.FileName, i.InputCreate!.File.Length, i.InputCreate.ProductId))
+                                         }).ToList();
+
+        var tasks = listCreateProductImageDTO.Select(i =>
+        {
+            return s3Client.PutObjectAsync(i.PutRequest);
+        }).ToList();
+
+        await Task.WhenAll(tasks);
+
+        return BaseResult<List<OutputProductImage?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductImageDTO.Select(x => x.ProductImageDTO).ToList()))!, [.. successes, .. errors]);
     }
     #endregion
 
