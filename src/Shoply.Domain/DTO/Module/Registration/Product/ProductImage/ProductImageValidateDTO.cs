@@ -7,10 +7,10 @@ public class ProductImageValidateDTO : ProductImagePropertyValidateDTO
     public InputCreateProductImage? InputCreate { get; private set; }
     public InputIdentityDeleteProductImage? InputIdentityDelete { get; private set; }
 
-    public ProductImageValidateDTO ValidateCreate(InputCreateProductImage? inputCreate, List<InputCreateProductImage>? listRepeatedInputCreate, ProductImageDTO originalProductImageDTO)
+    public ProductImageValidateDTO ValidateCreate(InputCreateProductImage? inputCreate, List<InputCreateProductImage>? listRepeatedInputCreate, ProductImageDTO originalProductImageDTO, ProductDTO? relatedProductDTO)
     {
         InputCreate = inputCreate;
-        ValidateCreate(listRepeatedInputCreate, originalProductImageDTO);
+        ValidateCreate(listRepeatedInputCreate, originalProductImageDTO, relatedProductDTO);
         return this;
     }
 

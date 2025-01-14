@@ -138,12 +138,12 @@ public class CustomerValidateService(ITranslationService translationService) : B
     public void Delete(List<CustomerValidateDTO> listCustomerValidateDTO)
     {
         _ = (from i in RemoveIgnore(listCustomerValidateDTO)
-             where i.ListRepeatedInputIdentityDelete == null
+             where i.OriginalCustomerDTO == null
              let setIgnore = i.SetIgnore()
              select Invalid(listCustomerValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listCustomerValidateDTO)
-             where i.OriginalCustomerDTO == null
+             where i.InputIdentityDelete == null
              let setIgnore = i.SetIgnore()
              select Invalid(listCustomerValidateDTO.IndexOf(i))).ToList();
 

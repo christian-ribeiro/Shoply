@@ -84,12 +84,12 @@ public class UserValidateService(ITranslationService translationService) : BaseV
     public void Delete(List<UserValidateDTO> listUserValidateDTO)
     {
         _ = (from i in RemoveIgnore(listUserValidateDTO)
-             where i.ListRepeatedInputIdentityDelete == null
+             where i.OriginalUserDTO == null
              let setIgnore = i.SetIgnore()
              select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listUserValidateDTO)
-             where i.OriginalUserDTO == null
+             where i.InputIdentityDelete == null
              let setIgnore = i.SetIgnore()
              select Invalid(listUserValidateDTO.IndexOf(i))).ToList();
 

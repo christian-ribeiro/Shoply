@@ -16,15 +16,17 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
     {
         List<ProductImageDTO> listOriginalProductImageDTO = await _repository.GetListByListIdentifier(listInputCreateProductImage.Select(x => new InputIdentifierProductImage(x.FileName)).ToList());
         List<ProductDTO> listRelatedProductDTO = await productRepository.GetListByListId(listInputCreateProductImage.Select(x => x.ProductId).ToList());
+
         var listCreate = (from i in listInputCreateProductImage
                           select new
                           {
                               InputCreateProductImage = i,
                               ListRepeatedInputCreateProductImage = listInputCreateProductImage.GetDuplicateItem(i, x => new { x.FileName }),
                               OriginalProductImageDTO = listOriginalProductImageDTO.FirstOrDefault(x => x.ExternalPropertiesDTO.FileName == i.FileName),
+                              RelatedProductDTO = listRelatedProductDTO.FirstOrDefault(x => x.InternalPropertiesDTO.Id == i.ProductId),
                           }).ToList();
 
-        List<ProductImageValidateDTO> listProductImageValidateDTO = listCreate.Select(x => new ProductImageValidateDTO().ValidateCreate(x.InputCreateProductImage, x.ListRepeatedInputCreateProductImage, x.OriginalProductImageDTO)).ToList();
+        List<ProductImageValidateDTO> listProductImageValidateDTO = listCreate.Select(x => new ProductImageValidateDTO().ValidateCreate(x.InputCreateProductImage, x.ListRepeatedInputCreateProductImage, x.OriginalProductImageDTO, x.RelatedProductDTO)).ToList();
         _validate.Create(listProductImageValidateDTO);
 
         var (successes, errors) = GetValidationResults();
