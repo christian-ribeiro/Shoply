@@ -141,7 +141,7 @@ public class BaseValidate<TValidateDTO>(ITranslationService translationService)
         return EnumValidateType.Valid;
     }
 
-    public EnumValidateType InvalidRelatedProperty(object? value, object? relatedProperty)
+    public EnumValidateType InvalidRelatedProperty(object? relatedProperty, object? value)
     {
         if (value == null)
             return EnumValidateType.Valid;
