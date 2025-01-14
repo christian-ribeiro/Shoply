@@ -8,12 +8,12 @@ namespace Shoply.Api.Controller.Module.Registration;
 
 public class ProductImageController(IProductImageService service, IShoplyUnitOfWork unitOfWork, IUserService userService) : BaseController<IProductImageService, IShoplyUnitOfWork, InputCreateProductImage, InputIdentityDeleteProductImage, InputIdentifierProductImage, OutputProductImage>(service, unitOfWork, userService)
 {
-    [HttpPost("Create")]
-    public override async Task<ActionResult<OutputProductImage>> Create([FromForm] InputCreateProductImage inputCreate)
+    [HttpPost("Create/{productId}")]
+    public async Task<ActionResult<OutputProductImage>> Create(IFormFile file, [FromRoute] long productId)
     {
         try
         {
-            return await ResponseAsync(PrepareReturn(await _service!.Create(inputCreate)));
+            return await ResponseAsync(PrepareReturn(await _service!.Create(new InputCreateProductImage(file.FileName, file.ContentType, file.Length, ConvertFileToByteArray(file), productId))));
         }
         catch (Exception ex)
         {
@@ -21,9 +21,30 @@ public class ProductImageController(IProductImageService service, IShoplyUnitOfW
         }
     }
 
-    [HttpPost("Create/Multiple")]
-    public override Task<ActionResult<OutputProductImage>> Create([FromForm] List<InputCreateProductImage> listInputCreate)
+    [HttpPost("Create/Multiple/{productId}")]
+    public async Task<ActionResult<OutputProductImage>> Create(List<IFormFile> listFile, [FromRoute] long productId)
     {
-        return base.Create(listInputCreate);
+        try
+        {
+            var listInputCreateProductImage = (from i in listFile select new InputCreateProductImage(i.FileName, i.ContentType, i.Length, ConvertFileToByteArray(i), productId)).ToList();
+
+            return await ResponseAsync(PrepareReturn(await _service!.Create(listInputCreateProductImage)));
+        }
+        catch (Exception ex)
+        {
+            return await ResponseExceptionAsync(ex);
+        }
+    }
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<ActionResult<OutputProductImage>> Create([FromBody] InputCreateProductImage inputCreate)
+    {
+        throw new NotImplementedException();
+    }
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public override Task<ActionResult<OutputProductImage>> Create([FromBody] List<InputCreateProductImage> listInputCreate)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,20 +1,14 @@
-using Microsoft.AspNetCore.Http;
 using Shoply.Arguments.Argument.Base;
 using System.Text.Json.Serialization;
 
 namespace Shoply.Arguments.Argument.Module.Registration;
 
-public class InputCreateProductImage : BaseInputCreate<InputCreateProductImage>
+[method: JsonConstructor]
+public class InputCreateProductImage(string fileName, string contentType, long fileLength, byte[] file, long productId) : BaseInputCreate<InputCreateProductImage>
 {
-    public IFormFile File { get; private set; }
-    public long ProductId { get; private set; }
-
-    public InputCreateProductImage() { }
-
-    [JsonConstructor]
-    public InputCreateProductImage(IFormFile file, long productId)
-    {
-        File = file;
-        ProductId = productId;
-    }
+    public string FileName { get; private set; } = fileName;
+    public string ContentType { get; private set; } = contentType;
+    public long FileLength { get; set; } = fileLength;
+    public byte[] File { get; private set; } = file;
+    public long ProductId { get; private set; } = productId;
 }

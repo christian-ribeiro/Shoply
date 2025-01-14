@@ -360,6 +360,14 @@ public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInput
     {
         return PrepareResponse.PrepareReturn(_guidSessionDataRequest, input);
     }
+
+    protected static byte[] ConvertFileToByteArray(IFormFile file)
+    {
+        using var memoryStream = new MemoryStream();
+
+        file.CopyTo(memoryStream);
+        return memoryStream.ToArray();
+    }
 }
 
 public abstract class BaseController<TService, TUnitOfWork, TInputCreate, TInputIdentityDelete, TInputIdentifier, TOutput>(TService service, TUnitOfWork unitOfWork, IUserService userService) : BaseController<TService, TUnitOfWork, TInputCreate, BaseInputUpdate_0, BaseInputIdentityUpdate_0, TInputIdentityDelete, TInputIdentifier, TOutput>(service, unitOfWork, userService)

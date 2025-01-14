@@ -26,7 +26,7 @@ public class ProductImageValidateService(ITranslationService translationService)
              select Invalid(listProductImageValidateDTO.IndexOf(i))).ToList();
 
         _ = (from i in RemoveIgnore(listProductImageValidateDTO)
-             where string.IsNullOrEmpty(i.InputCreate!.File.FileName)
+             where string.IsNullOrEmpty(i.InputCreate!.FileName)
              let setInvalid = i.SetIgnore()
              select Invalid(listProductImageValidateDTO.IndexOf(i))).ToList();
 
@@ -34,10 +34,10 @@ public class ProductImageValidateService(ITranslationService translationService)
              let resultInvalidRelatedProperty = InvalidRelatedProperty(i.RelatedProductDTO, i.InputCreate!.ProductId)
              where resultInvalidRelatedProperty != EnumValidateType.Valid
              let setInvalid = i.SetInvalid()
-             select InvalidRelatedProperty(i.InputCreate!.File.FileName, i.InputCreate.ProductId, nameof(i.InputCreate.ProductId), resultInvalidRelatedProperty)).ToList();
+             select InvalidRelatedProperty(i.InputCreate!.FileName, i.InputCreate.ProductId, nameof(i.InputCreate.ProductId), resultInvalidRelatedProperty)).ToList();
 
         _ = (from i in RemoveInvalid(listProductImageValidateDTO)
-             select AddSuccessMessage(i.InputCreate!.File.FileName, GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Imagem Produto"))).ToList();
+             select AddSuccessMessage(i.InputCreate!.FileName, GetMessage(NotificationMessages.SuccessfullyRegisteredKey, "Imagem Produto"))).ToList();
     }
 
     public void Delete(List<ProductImageValidateDTO> listProductImageValidateDTO)

@@ -8,7 +8,7 @@ namespace Shoply.Infrastructure.Persistence.EFCore.Entity.Module.Registration;
 public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, OutputProductImage, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>
 {
     public string FileName { get; private set; }
-    public decimal FileLength { get; private set; }
+    public long FileLength { get; private set; }
     public string ImageUrl { get; private set; }
     public long ProductId { get; private set; }
 
@@ -23,7 +23,7 @@ public class ProductImage : BaseEntity<ProductImage, InputCreateProductImage, Ou
 
     public ProductImage() { }
 
-    public ProductImage(string fileName, decimal fileLength, string imageUrl, long productId, Product? product)
+    public ProductImage(string fileName, long fileLength, string imageUrl, long productId, Product? product)
     {
         FileName = fileName;
         FileLength = fileLength;
