@@ -1,6 +1,5 @@
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
+using Shoply.Application.Argument.AWS.S3;
+using Shoply.Application.Interface.Service.AWS.S3;
 using Shoply.Arguments.Argument.Base;
 using Shoply.Arguments.Argument.Module.Registration;
 using Shoply.Arguments.Extensions;
@@ -12,7 +11,7 @@ using Shoply.Translation.Interface.Service;
 
 namespace Shoply.Domain.Service.Module.Registration;
 
-public class ProductImageService(IProductImageRepository repository, ITranslationService translationService, IProductImageValidateService productImageValidateService, IProductRepository productRepository) : BaseService<IProductImageRepository, IProductImageValidateService, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>(repository, productImageValidateService, translationService), IProductImageService
+public class ProductImageService(IProductImageRepository repository, ITranslationService translationService, IProductImageValidateService productImageValidateService, IProductRepository productRepository, IS3Service s3Service) : BaseService<IProductImageRepository, IProductImageValidateService, InputCreateProductImage, InputIdentifierProductImage, OutputProductImage, InputIdentityDeleteProductImage, ProductImageValidateDTO, ProductImageDTO, InternalPropertiesProductImageDTO, ExternalPropertiesProductImageDTO, AuxiliaryPropertiesProductImageDTO>(repository, productImageValidateService, translationService), IProductImageService
 {
     #region Create
     public override async Task<BaseResult<List<OutputProductImage?>>> Create(List<InputCreateProductImage> listInputCreateProductImage)
@@ -36,30 +35,15 @@ public class ProductImageService(IProductImageRepository repository, ITranslatio
         if (errors.Count == listInputCreateProductImage.Count)
             return BaseResult<List<OutputProductImage?>>.Failure(errors);
 
-        var s3Client = new AmazonS3Client("", "", RegionEndpoint.USEast2);
+        var listOutputUploadFileS3 = await s3Service.UploadFiles(RemoveInvalid(listProductImageValidateDTO).Select(x => new InputUploadFileS3(x.InputCreate!.FileName, x.InputCreate!.ContentType, x.InputCreate!.File)).ToList());
 
-        var listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO)
-                                         let putRequest = new PutObjectRequest
-                                         {
-                                             BucketName = "development-shoply",
-                                             Key = i.InputCreate!.FileName,
-                                             InputStream = new MemoryStream(i.InputCreate.File),
-                                             ContentType = i.InputCreate!.ContentType
-                                         }
-                                         select new
-                                         {
-                                             PutRequest = putRequest,
-                                             ProductImageDTO = new ProductImageDTO().Create(new ExternalPropertiesProductImageDTO(i.InputCreate!.FileName, i.InputCreate!.FileLength, i.InputCreate.ProductId), new InternalPropertiesProductImageDTO(""))
-                                         }).ToList();
+        List<ProductImageDTO> listCreateProductImageDTO = (from i in RemoveInvalid(listProductImageValidateDTO)
+                                                           let outputUploadFileS3 = listOutputUploadFileS3.FirstOrDefault(x => x.Key == i.InputCreate!.FileName)
+                                                           where outputUploadFileS3 != null
+                                                           select new ProductImageDTO().Create(new ExternalPropertiesProductImageDTO(i.InputCreate!.FileName, i.InputCreate!.FileLength, i.InputCreate.ProductId), new InternalPropertiesProductImageDTO(outputUploadFileS3.Url))).ToList();
 
-        var tasks = listCreateProductImageDTO.Select(i =>
-        {
-            return s3Client.PutObjectAsync(i.PutRequest);
-        }).ToList();
 
-        await Task.WhenAll(tasks);
-
-        return BaseResult<List<OutputProductImage?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductImageDTO.Select(x => x.ProductImageDTO).ToList()))!, [.. successes, .. errors]);
+        return BaseResult<List<OutputProductImage?>>.Success(FromDTOToOutput(await _repository.Create(listCreateProductImageDTO))!, [.. successes, .. errors]);
     }
     #endregion
 
