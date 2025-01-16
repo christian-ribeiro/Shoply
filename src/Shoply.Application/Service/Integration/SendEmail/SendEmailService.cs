@@ -26,19 +26,15 @@ public class SendEmailService(IOptions<SmtpConfiguration> options) : ISendEmailS
             .Handle<Exception>()
             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
-        try
-        {
-            await retryPolicy.ExecuteAsync(async () =>
+        return await Policy<bool>
+            .Handle<Exception>()
+            .FallbackAsync(false)
+            .WrapAsync(retryPolicy)
+            .ExecuteAsync(async () =>
             {
                 await smtpClient.SendMailAsync(mailMessage);
+                return true;
             });
-
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
     }
 
     private static MailMessage CreateMailMessage(string toEmail, string subject, string body, bool isBodyHtml, SmtpConfiguration smtpConfiguration)
